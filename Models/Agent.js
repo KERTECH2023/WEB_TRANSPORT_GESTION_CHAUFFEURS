@@ -6,7 +6,7 @@ const AgentSchema = new mongoose.Schema(
     {
        
         Nom: {
-            type: String,
+            
             trim: true,
             maxlength: [20, 'FName must be less or equal then 20 characters.']
         },
