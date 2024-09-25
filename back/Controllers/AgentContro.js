@@ -90,8 +90,8 @@ const register = async (req, res) => {
     let transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'mahdikaroui383@gmail.com', // Replace with your email
-      pass: 'doyr zflv xvcu rumh',
+        user: 'noreplytunisieuber@gmail.com', // Replace with your email
+      pass: 'jspi ogjl jhqg mpln',
       }
     });
   
@@ -107,7 +107,7 @@ const register = async (req, res) => {
 
   
     const mailOptions = {
-      from: 'TunisieUber<mahdikaroui383@gmail.com>',
+      from: 'TunisieUber<noreplytunisieuber@gmail.com>',
       to: Email,
       subject: 'TunisieUber Account For Agent ',
 
@@ -446,8 +446,8 @@ async function sendpassword(Email ,Password , agentName) {
   let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'mahdikaroui383@gmail.com', // Replace with your email
-      pass: 'doyr zflv xvcu rumh',
+      user: 'noreplytunisieuber@gmail.com', // Replace with your email
+      pass: 'jspi ogjl jhqg mpln',
     }
   });
 
@@ -463,7 +463,7 @@ async function sendpassword(Email ,Password , agentName) {
 
 
   const mailOptions = {
-    from: 'TunisieUber <mahdikaroui383@gmail.com>',
+    from: 'TunisieUber <noreplytunisieuber@gmail.com>',
     to: Email,
     subject: 'TunisieUber Nouveau Mot De Passe Admin',
     html: `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

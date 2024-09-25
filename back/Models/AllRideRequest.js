@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const Facture = require('./Facture');
+const Chauffeur = require("./Chauffeur");
 
 const rideRequestSchema = new mongoose.Schema({
   
@@ -63,4 +65,8 @@ const rideRequestSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('RideRequest', rideRequestSchema);
+
+
+const RideRequest = mongoose.model('RideRequest', rideRequestSchema);
+
+module.exports = RideRequest;

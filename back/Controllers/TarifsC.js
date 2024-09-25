@@ -91,6 +91,38 @@ exports.addTarifAndUpdateChauffeurs = async (req, res, next) => {
         
     });
 }
-  
+exports.updateTarifAndMajoration = async (req, res, next) => {
+  const { tarifId, newTarif, newTarifMaj } = req.body;
+
+  try {
+    console.log(tarifId)
+    // Step 1: Find the tariff by its ID
+    const existingTarif = await Tarifs.findById(tarifId);
+
+    if (!existingTarif) {
+      return res.status(404).send({ message: "Tarif not found" });
+    }
+
+    // Step 2: Update both the tarif and tarifmaj fields
+    existingTarif.tarif = newTarif;
+    existingTarif.tarifmaj = newTarifMaj;
+
+    const updatedTarif = await existingTarif.save();
+
+    // Step 3: Optionally, update the Chauffeur table if needed
+    // Example: If you want to update chauffeurs with the new tarif ID
+    // const updateResult = await Chauffeur.updateMany({}, { $set: { tarif: updatedTarif._id } });
+    // console.log(`Updated ${updateResult.nModified} chauffeurs`);
+
+    return res.status(200).send({
+      message: "Tarif and Tarif Majoration updated!",
+      updatedTarif
+    });
+
+  } catch (error) {
+    return res.status(500).send({ error: error.message });
+  }
+};
+
   
   

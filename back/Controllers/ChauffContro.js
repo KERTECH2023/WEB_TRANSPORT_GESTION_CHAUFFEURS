@@ -1,19 +1,245 @@
-const Chauffeur = require("../Models/Chauffeur");
 const bcrypt = require("bcryptjs");
 const config = require("../config.json");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const { Buffer } = require("node:buffer");
-const firebaseModule = require("../services/config");
-const realtimeDB = firebaseModule.firestoreApp.database();
-const db =require("../services/config");
-const admin = require('firebase-admin');
-const Car = require('../Models/Voiture'); // Assuming the Car schema is defined in 'Car.js'
-const Facture = require('../Models/Facture'); // Assuming the Car schema is defined in 'Car.js'
-const RideRequest = require('../Models/AllRideRequest'); // Import the RideRequest Mongoose model
+const firestoreModule = require("../services/config");
+const db = require("../services/config");
+const admin = require("firebase-admin");
+const crypto = require("crypto");
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
+const realtimeDB = firestoreModule.firestoreApp.database();
+const Car = require("../Models/Voiture"); // Assuming the Car schema is defined in 'Car.js'
+const Facture = require("../Models/Facture"); // Assuming the Car schema is defined in 'Car.js'
+const RideRequest = require("../Models/AllRideRequest"); // Import the RideRequest Mongoose model
+const Chauffeur = require("../Models/Chauffeur");
+const PDFDocument = require("pdfkit");
+
+const fs = require("fs");
 
 /**--------------------Ajouter un agnet------------------------  */
 
+const generateRandomPassword = () => {
+  return crypto.randomBytes(8).toString("hex");
+};
+
+const generatePdf = async (facture) => {
+  try {
+    const chauffeur = facture.chauffeur;
+    const nomComplet = `${chauffeur.Nom} ${chauffeur.Prenom}`;
+    const nbreTrajet = facture.nbretrajet;
+    const totalFare = facture.totalFareAmount;
+    const montantTva = facture.montantTva;
+    const mois = facture.Month;
+    const dateDePaiement = new Date();
+
+    const pdfPath = `./facture_${facture.id}.pdf`;
+
+    const doc = new PDFDocument();
+    const writeStream = fs.createWriteStream(pdfPath);
+    doc.pipe(writeStream);
+
+    doc.fontSize(20).text("Facture de Paiement", { align: "center" });
+    doc.moveDown();
+    doc.fontSize(16).text(`Nom du Chauffeur: ${nomComplet}`);
+    doc.text(`Nombre de Trajets: ${nbreTrajet}`);
+    doc.text(`Montant Total (avant TVA): ${totalFare.toFixed(2)} €`);
+    doc.text(`Montant TVA: ${montantTva.toFixed(2)} €`);
+    doc.text(`Mois: ${mois}`);
+    doc.text(`Date de Paiement: ${dateDePaiement.toLocaleDateString()}`);
+    doc.end();
+
+    return new Promise((resolve, reject) => {
+      writeStream.on("finish", () => {
+        console.log("PDF généré avec succès:", pdfPath);
+        resolve(pdfPath);
+      });
+
+      writeStream.on("error", (err) => {
+        console.error("Erreur lors de la génération du PDF:", err);
+        reject(err);
+      });
+    });
+  } catch (error) {
+    console.error("Erreur lors de la génération du PDF:", error);
+    throw error;
+  }
+};
+
+const sendFactureEmail = async (req, res) => {
+  const { email, Month, id } = req.body; // Email du destinataire
+  const file = req.file; // Fichier PDF envoyé
+  const monthNumber = parseInt(Month, 10);
+  if (!email || !file) {
+    return res.status(400).send("Email ou fichier manquant.");
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "noreplytunisieuber@gmail.com", // Remplacez par votre adresse email
+      pass: "jspi ogjl jhqg mpln", // Remplacez par votre mot de passe email
+    },
+  });
+
+  let mois;
+
+  switch (monthNumber) {
+    case 1:
+      mois = "Janvier";
+      break;
+    case 2:
+      mois = "Février";
+      break;
+    case 3:
+      mois = "Mars";
+      break;
+    case 4:
+      mois = "Avril";
+      break;
+    case 5:
+      mois = "Mai";
+      break;
+    case 6:
+      mois = "Juin";
+      break;
+    case 7:
+      mois = "Juillet";
+      break;
+    case 8:
+      mois = "Août";
+      break;
+    case 9:
+      mois = "Septembre";
+      break;
+    default:
+      mois = "Mois invalide";
+      break;
+  }
+
+  const mailOptions = {
+    from: "TunisieUber <noreplytunisieuber@gmail.com>",
+    to: email,
+    subject: `Facture de ${mois}`,
+    text: "Veuillez trouver la facture en pièce jointe.",
+    attachments: [
+      {
+        filename: "facture.pdf",
+        content: file.buffer,
+        encoding: "base64",
+      },
+    ],
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+
+    await Facture.findByIdAndUpdate(id, { envoieFacture: true });
+
+    console.log("E-mail envoyé et facture mise à jour ");
+    res.status(200).send("E-mail envoyé avec succès et facture mise à jour");
+  } catch (error) {
+    console.error(
+      "Erreur lors de l'envoi de l'email ou de la mise à jour de la facture:",
+      error
+    );
+    res
+      .status(500)
+      .send(
+        "Erreur lors de l'envoi de l'e-mail ou de la mise à jour de la facture"
+      );
+  }
+};
+
+const updateF = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Vérifiez si la facture existe
+    const existingFacture = await Facture.findById(id);
+    if (!existingFacture) {
+      return res.status(404).json({ message: "Facture non trouvée" });
+    }
+
+    // Mettez à jour le champ 'enr'
+    const updatedFacture = await Facture.findByIdAndUpdate(
+      id,
+      { $set: { enrg: true } },
+      { new: true }
+    );
+
+    res.json(updatedFacture);
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de la facture:", error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+const getRideCounts = async (req, res) => {
+  const { driverPhone } = req.query;
+
+  if (!driverPhone) {
+    return res.status(400).json({ message: "Driver phone number is required" });
+  }
+
+  try {
+    // Comptez les trajets acceptés
+    const acceptedCount = await RideRequest.countDocuments({
+      driverPhone,
+      status: "accepted",
+    });
+
+    // Comptez les trajets annulés
+    const cancelledCount = await RideRequest.countDocuments({
+      driverPhone,
+      status: "cancelled",
+    });
+
+    res.status(200).json({
+      accepted: acceptedCount,
+      cancelled: cancelledCount,
+    });
+  } catch (error) {
+    console.error("Error fetching ride counts:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+// Controller function to get factures by chauffeur ID
+// const getFacturesByChauffeurId = (req, res) => {
+//   const id = req.params.chauffeurId;
+
+//   console.log("Chauffeur ID:", id);
+
+//   Facture.find({ chauffeur: id })
+//     .then(factures => {
+//       res.status(200).send(factures);
+//     })
+//     .catch(err => {
+//       console.error('Error while fetching factures:', err);
+//       res.status(500).json({ error: 'An error occurred while fetching factures' });
+//     });
+// };
+const searchFacture = async (req, res) => {
+  const id = req.params.id;
+  console.log(id);
+  try {
+    const data = await Facture.findById(id);
+
+    if (!data) {
+      return res
+        .status(404)
+        .send({ message: "Facture introuvable pour id " + id });
+    }
+
+    res.json(data);
+    console.log(data);
+  } catch (err) {
+    res
+      .status(500)
+      .send({ message: "Erreur de récupération de la facture avec id=" + id });
+  }
+};
 const register = async (req, res) => {
   const {
     Nom,
@@ -32,11 +258,11 @@ const register = async (req, res) => {
 
   // const {firebaseUrl} =req.file ? req.file : "";
 
-  const photoAvatarBuffer = req.uploadedFiles.photoAvatar || Buffer.alloc(0);
-  const photoPermisRecBuffer = req.uploadedFiles.photoPermisRec || Buffer.alloc(0);
-  const photoPermisVerBuffer = req.uploadedFiles.photoPermisVer || Buffer.alloc(0);
-  const photoVtcBuffer = req.uploadedFiles.photoVtc || Buffer.alloc(0);
-  const photoCinBuffer = req.uploadedFiles.photoCin || Buffer.alloc(0); // Check if the user already exists
+  const photoAvatarUrl = req.uploadedFiles.photoAvatar || "";
+  const photoPermisRecUrl = req.uploadedFiles.photoPermisRec || "";
+  const photoPermisVerUrl = req.uploadedFiles.photoPermisVer || "";
+  const photoVtcUrl = req.uploadedFiles.photoVtc || "";
+  const photoCinUrl = req.uploadedFiles.photoCin || "";
 
   const verifUtilisateur = await Chauffeur.findOne({ email });
   if (verifUtilisateur) {
@@ -50,20 +276,22 @@ const register = async (req, res) => {
     const preIndex = Math.floor(Math.random() * Prenom.length);
     const randomNumber = Math.floor(Math.random() * 90000);
 
-    nouveauUtilisateur.username = `${Nom[Math.floor(Math.random() * Nom.length)]
-      }${Prenom[Math.floor(Math.random() * Prenom.length)]}${Math.floor(
-        Math.random() * 90000
-      )}`;
+    nouveauUtilisateur.username = `${
+      Nom[Math.floor(Math.random() * Nom.length)]
+    }${Prenom[Math.floor(Math.random() * Prenom.length)]}${Math.floor(
+      Math.random() * 90000
+    )}`;
     nouveauUtilisateur.Nom = Nom;
     nouveauUtilisateur.Prenom = Prenom;
     nouveauUtilisateur.email = email;
     nouveauUtilisateur.phone = phone;
     nouveauUtilisateur.password = mdpEncrypted;
-    nouveauUtilisateur.photoAvatar = photoAvatarBuffer;
-    nouveauUtilisateur.photoCin = photoCinBuffer;
-    nouveauUtilisateur.photoPermisRec = photoPermisRecBuffer;
-    nouveauUtilisateur.photoPermisVer = photoPermisVerBuffer;
-    nouveauUtilisateur.photoVtc = photoVtcBuffer;
+
+    nouveauUtilisateur.photoAvatar = photoAvatarUrl;
+    nouveauUtilisateur.photoCin = photoCinUrl;
+    nouveauUtilisateur.photoPermisRec = photoPermisRecUrl;
+    nouveauUtilisateur.photoPermisVer = photoPermisVerUrl;
+    nouveauUtilisateur.photoVtc = photoVtcUrl;
     nouveauUtilisateur.gender = gender;
     nouveauUtilisateur.role = "Chauffeur";
     nouveauUtilisateur.Cstatus = "En_cours";
@@ -77,46 +305,47 @@ const register = async (req, res) => {
 
     console.log(nouveauUtilisateur);
 
-    try{
+    try {
       await nouveauUtilisateur.save();
 
-    console.log(mdpEncrypted);
-    // token creation
-    const token = jwt.sign(
-      { _id: nouveauUtilisateur._id },
-      config.token_secret,
-      {
-        expiresIn: "120000", // in Milliseconds (3600000 = 1 hour)
-      }
-    );
+      console.log(mdpEncrypted);
+      // token creation
+      const token = jwt.sign(
+        { _id: nouveauUtilisateur._id },
+        config.token_secret,
+        {
+          expiresIn: "120000", // in Milliseconds (3600000 = 1 hour)
+        }
+      );
 
-    try{
-      const response = await sendConfirmationEmail(
-      email,
-      Nom[nounIndex] + Prenom[preIndex] + randomNumber
-    );console.log('Email sent successfully:', response);
-  } catch (error) {
-    console.error('Error sending email:', error);
+      try {
+        const response = await sendConfirmationEmail(
+          email,
+          Nom[nounIndex] + Prenom[preIndex] + randomNumber
+        );
+        console.log("Email sent successfully:", response);
+      } catch (error) {
+        console.error("Error sending email:", error);
+      }
+      res.status(201).send({
+        message: "success",
+        uses: nouveauUtilisateur,
+        Token: jwt.verify(token, config.token_secret),
+      });
+    } catch (error) {
+      console.error("Error while saving user:", error);
+      res.status(500).send({ message: "Error while saving user." });
+    }
   }
-    res.status(201).send({
-      message: "success",
-      uses: nouveauUtilisateur,
-      Token: jwt.verify(token, config.token_secret),
-    });
-  } catch (error) {
-    console.error("Error while saving user:", error);
-    res.status(500).send({ message: "Error while saving user." });
-  }
-}
 };
 
-async function sendConfirmationEmail(Email, Nom) {
+async function sendConfirmationEmail(Email, Password) {
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: 'mahdikaroui383@gmail.com', // Replace with your email
-      pass: 'doyr zflv xvcu rumh', // Replace with your email password
+      user: "noreplytunisieuber@gmail.com", // Replace with your email
+      pass: "jspi ogjl jhqg mpln", // Replace with your email password
     },
   });
 
@@ -259,7 +488,7 @@ async function sendConfirmationEmail(Email, Nom) {
       Email +
       `,</h3><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Nous sommes ravis de vous accueillir sur TunisieUber ! Votre compte a été créé avec succès, et nous tenons à vous fournir les détails de connexion dont vous avez besoin pour commencer.</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Voici vos informations de compte :</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Adresse e-mail : <a href="mailto:louay.benkasdallah@esprit.tn" target="_blank" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;text-decoration:none;color:#3B8026;font-size:14px">` +
       Email +
-      `</a></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Mot de passe : [Numéro Du Télephone]</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Nous vous recommandons de garder ces informations en lieu sûr et de ne pas les partager avec d'autres personnes. Si vous avez des raisons de croire que votre compte a été compromis, veuillez nous contacter immédiatement.</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Si vous avez des questions ou rencontrez des problèmes lors de votre utilisation de notre plateforme, n'hésitez pas à nous contacter. Notre équipe d'assistance se fera un plaisir de vous aider.</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Encore une fois, merci de nous rejoindre sur TunisieUber . Nous sommes impatients de vous offrir une expérience exceptionnelle.</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Cordialement,</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">TunisieUber</p></td>
+      `</a></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Mot de passe : ${Password} </p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Nous vous recommandons de garder ces informations en lieu sûr et de ne pas les partager avec d'autres personnes. Si vous avez des raisons de croire que votre compte a été compromis, veuillez nous contacter immédiatement.</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Si vous avez des questions ou rencontrez des problèmes lors de votre utilisation de notre plateforme, n'hésitez pas à nous contacter. Notre équipe d'assistance se fera un plaisir de vous aider.</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Encore une fois, merci de nous rejoindre sur TunisieUber . Nous sommes impatients de vous offrir une expérience exceptionnelle.</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">Cordialement,</p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'Josefin Sans', helvetica, arial, sans-serif;line-height:21px;color:#38363A;font-size:14px">TunisieUber</p></td>
       </tr>
       </table></td>
       </tr>
@@ -309,7 +538,7 @@ async function sendConfirmationEmail(Email, Nom) {
       if (error) {
         reject(error);
       } else {
-        console.log('Email sent: ' + info.response);
+        console.log("Email sent: " + info.response);
         resolve(info.response);
       }
     });
@@ -392,11 +621,102 @@ const update = (req, res, next) => {
       });
     });
 };
+const transporter = nodemailer.createTransport({
+  service: "gmail", // Remplacez par votre service de messagerie
+  auth: {
+    user: "noreplytunisieuber@gmail.com", // Replace with your email
+    pass: "jspi ogjl jhqg mpln",
+  },
+});
 
+const updateFacture = async (id) => {
+  try {
+    const factureUpdated = await Facture.findByIdAndUpdate(id, {
+      $set: {
+        isPaid: true,
+      },
+    }).populate("chauffeur");
+
+    if (!factureUpdated) {
+      console.error("Facture non trouvée:", id);
+      throw new Error("Facture not found!");
+    }
+
+    return factureUpdated;
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de la facture:", error);
+    throw error;
+  }
+};
+
+const sendEmail = async (facture, pdfPath) => {
+  try {
+    const chauffeur = facture.chauffeur;
+    const nomComplet = `${chauffeur.Nom} ${chauffeur.Prenom}`;
+    const mois = facture.Month;
+
+    const mailOptions = {
+      from: "noreplytunisieuber@gmail.com",
+      to: chauffeur.email,
+      subject: "Votre Facture de Paiement",
+      text: `Bonjour ${nomComplet},\n\nVeuillez trouver ci-joint votre facture pour le mois ${mois}.\n\nCordialement,\nVotre équipe`,
+      attachments: [
+        {
+          filename: `facture_${facture.id}.pdf`,
+          path: pdfPath,
+          contentType: "application/pdf",
+        },
+      ],
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("Email envoyé avec succès!");
+
+    // Supprimer le fichier PDF après envoi de l'email
+    fs.unlink(pdfPath, (unlinkErr) => {
+      if (unlinkErr) {
+        console.error(
+          "Erreur lors de la suppression du fichier PDF:",
+          unlinkErr
+        );
+      } else {
+        console.log("Fichier PDF supprimé après envoi de l'email:", pdfPath);
+      }
+    });
+  } catch (error) {
+    console.error("Erreur lors de l'envoi de l'email:", error);
+    throw error;
+  }
+};
+
+const updateFact = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const factureUpdated = await updateFacture(id);
+    if (!factureUpdated) {
+      return res.status(404).send({ message: "Facture not found!" });
+    }
+
+    const pdfPath = await generatePdf(factureUpdated);
+    if (!pdfPath) {
+      return res.status(500).send({ error: "Failed to generate PDF" });
+    }
+
+    await sendEmail(factureUpdated, pdfPath);
+    res.status(200).send({
+      message:
+        "Facture mise à jour, PDF généré et envoyé par e-mail avec succès!",
+    });
+  } catch (error) {
+    console.error("Erreur:", error);
+    return res.status(500).send({ error: error.message });
+  }
+};
 const updatestatus = async (req, res, next) => {
   const { id } = req.params;
 
   try {
+    // Update the chauffeur's status
     const chauffeurUpdated = await Chauffeur.findByIdAndUpdate(id, {
       $set: {
         isActive: false,
@@ -404,27 +724,44 @@ const updatestatus = async (req, res, next) => {
       },
     });
 
+    // Check if the chauffeur was found and updated
     if (!chauffeurUpdated) {
       return res.status(404).send({
         message: "Chauffeur not found!",
       });
     }
 
-    const chauffeurEmail = chauffeurUpdated.email; // Assuming the email property name is 'email'
+    const chauffeurEmail = chauffeurUpdated.email;
 
-    console.log("success");
-    const userRecord = await admin.auth().getUserByEmail(chauffeurEmail);
-    console.log("Existing user:", userRecord);
-    admin.auth().deleteUser(userRecord.uid)
-      
-  
+    try {
+      // Attempt to fetch the user record by email
+      const userRecord = await admin.auth().getUserByEmail(chauffeurEmail);
+      console.log("Existing user:", userRecord);
+
+      // Delete the user record if it exists
+      await admin.auth().deleteUser(userRecord.uid);
+      console.log("User deleted successfully");
+    } catch (error) {
+      if (error.code === "auth/user-not-found") {
+        // If the user is not found, continue without throwing an error
+        console.log("No user record found for this email.");
+      } else {
+        // Handle other errors
+        throw error;
+      }
+    }
+
+    // Send a success response
     return res.status(200).send({
       message: "Chauffeur was Disabled successfully!",
     });
   } catch (error) {
-    return res.status(500).send({ error: error });
+    // Log the error and send a 500 response
+    console.log("erreur:", error);
+    return res.status(500).send({ error: error.message });
   }
 };
+
 const Comptevald = async (req, res, next) => {
   const { id } = req.params;
 
@@ -482,16 +819,30 @@ const searchuse = async (req, res) => {
     });
 };
 
-
 const recupereruse = async (req, res) => {
   try {
-    const data = await Chauffeur.find({ Cstatus: { $in: ["Validé", "En_cours"] } });
+    const data = await Chauffeur.find({
+      Cstatus: { $in: ["Validé", "En_cours"] },
+    });
 
     res.json(data);
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred");
   }
+};
+
+const mongoose = require("mongoose");
+const FactureView = mongoose.model(
+  "FactureView",
+  new mongoose.Schema({}, { collection: "factures", strict: false })
+);
+
+// Get Facture
+const recuperFact = async (req, res) => {
+  FactureView.find() // Utilisation du modèle FactureView
+    .then((invoices) => res.json(invoices))
+    .catch((err) => res.status(400).json({ error: err.message }));
 };
 
 // const recupereruse = async(req,res,data) =>{
@@ -538,6 +889,7 @@ const destroy = async (req, res) => {
       });
     });
 };
+
 const updatestatuss = async (req, res, next) => {
   const { id } = req.params;
 
@@ -557,15 +909,18 @@ const updatestatuss = async (req, res, next) => {
 
     const updatedChauffeur = await Chauffeur.findById(id);
     const chauffeurEmail = updatedChauffeur.email; // Assuming the email property name is 'email'
-    const chauffeurPassword = updatedChauffeur.phone; // Assuming the password property name is 'password'
-console.log('chauffeurPassword:' ,chauffeurPassword)
+    const chauffeurPassword = generateRandomPassword(6); // Assuming the password property name is 'password'
+    console.log("chauffeurPassword:", chauffeurPassword);
     let firebaseUser;
     let car;
     try {
       car = await Car.findOne({ chauffeur: updatedChauffeur.id });
     } catch (error) {
-      console.error(`Error finding car by chauffeur ID: ${updatedChauffeur.id}`, error);
-      r
+      console.error(
+        `Error finding car by chauffeur ID: ${updatedChauffeur.id}`,
+        error
+      );
+      r;
     }
     // Check if the user already exists with the provided email
     try {
@@ -594,54 +949,53 @@ console.log('chauffeurPassword:' ,chauffeurPassword)
       // Send email verification for new users
     }
 
-    const base64Image = chauffeurUpdated.photoAvatar.toString('base64');
-    const imageUrl = `image/jpeg;base64,${base64Image}`;
-    
     const activedriversRef = realtimeDB.ref("Drivers");
     const activeDriver = {
       name: chauffeurUpdated.Nom,
-      DateNaissance:chauffeurUpdated.DateNaissance,
-      address:chauffeurUpdated.address,
-      cnicNo:chauffeurUpdated.cnicNo,
-      gender:chauffeurUpdated.gender,
-      postalCode:chauffeurUpdated.postalCode,
+      DateNaissance: chauffeurUpdated.DateNaissance,
+      address: chauffeurUpdated.address,
+      cnicNo: chauffeurUpdated.cnicNo,
+      gender: chauffeurUpdated.gender,
+      postalCode: chauffeurUpdated.postalCode,
       email: chauffeurUpdated.email,
-      imageUrl: imageUrl,
-      phone:chauffeurUpdated.phone,
+      imageUrl: chauffeurUpdated.photoAvatar,
+      phone: chauffeurUpdated.phone,
       Cstatus: true,
-      carDetails:{
+      carDetails: {
         immatriculation: car.immatriculation,
-        modelle: car.modelle
+        modelle: car.modelle,
       },
-     
     };
 
     if (firebaseUser) {
       await activedriversRef.child(firebaseUser.uid).set(activeDriver);
-      console.log('Successfully updated data in Firebase Firestore');
+      console.log("Successfully updated data in Firebase Firestore");
     }
 
     try {
-      const reponse = await sendConfirmationEmail(chauffeurEmail);
+      const reponse = await sendConfirmationEmail(
+        chauffeurEmail,
+        chauffeurPassword
+      );
       return res.status(200).send({
         message: "Chauffeur was Disabled successfully!",
         chauffeurEmail: chauffeurEmail, // Sending the email in the response
       });
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error("Error sending email:", error);
     }
   } catch (error) {
     console.error(error);
     return res.status(500).send({ error: error });
   }
 };
-async function sendConfirmationEmail(Email, Nom) {
+async function sendConfirmationEmail(Email, chauffeurPassword) {
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: 'mahdikaroui383@gmail.com', // Replace with your email
-      pass: 'doyr zflv xvcu rumh',
+      user: "noreplytunisieuber@gmail.com", // Replace with your email
+      pass: "jspi ogjl jhqg mpln",
     },
   });
 
@@ -655,7 +1009,7 @@ async function sendConfirmationEmail(Email, Nom) {
   });
 
   const mailOptions = {
-    from: 'Tunisie Uber <mahdikaroui383@gmail.com>',
+    from: "Tunisie Uber <noreplytunisieuber@gmail.com>",
     to: Email,
     subject: "TunisieUber Compte Validé ",
     html: `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -772,6 +1126,9 @@ async function sendConfirmationEmail(Email, Nom) {
         <tr>
         <td align="center" style="padding:0;Margin:0;padding-top:40px;padding-bottom:40px"><h3 style="Margin:0;line-height:24px;mso-line-height-rule:exactly;font-family:Poppins, sans-serif;font-size:20px;font-style:normal;font-weight:bold;color:#5D541D"><br></h3><h3 style="Margin:0;line-height:24px;mso-line-height-rule:exactly;font-family:Poppins, sans-serif;font-size:20px;font-style:normal;font-weight:bold;color:#5D541D"><br></h3><h3 style="Margin:0;line-height:24px;mso-line-height-rule:exactly;font-family:Poppins, sans-serif;font-size:20px;font-style:normal;font-weight:bold;color:#5D541D">Merci de nous avoir rejoint.</h3><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:Poppins, sans-serif;line-height:27px;color:#5D541D;font-size:18px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:Poppins, sans-serif;line-height:27px;color:#5D541D;font-size:18px"><br></p></td>
         </tr>
+        <tr>
+        <td align="center" style="padding:0;Margin:0;padding-top:40px;padding-bottom:40px"><h3 style="Margin:0;line-height:24px;mso-line-height-rule:exactly;font-family:Poppins, sans-serif;font-size:20px;font-style:normal;font-weight:bold;color:#5D541D"><br></h3><h3 style="Margin:0;line-height:24px;mso-line-height-rule:exactly;font-family:Poppins, sans-serif;font-size:20px;font-style:normal;font-weight:bold;color:#5D541D"><br></h3><h3 style="Margin:0;line-height:24px;mso-line-height-rule:exactly;font-family:Poppins, sans-serif;font-size:20px;font-style:normal;font-weight:bold;color:#5D541D">votre mot de passe: ${chauffeurPassword}</h3><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:Poppins, sans-serif;line-height:27px;color:#5D541D;font-size:18px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:Poppins, sans-serif;line-height:27px;color:#5D541D;font-size:18px"><br></p></td>
+        </tr>
         </table></td>
         </tr>
         </table></td>
@@ -800,19 +1157,16 @@ async function sendConfirmationEmail(Email, Nom) {
   };
 
   return new Promise((resolve, reject) => {
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          reject(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-          resolve(info.response);
-        }
-      });
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        reject(error);
+      } else {
+        console.log("Email sent: " + info.response);
+        resolve(info.response);
+      }
     });
+  });
 }
-
-
-
 
 module.exports = {
   register,
@@ -826,5 +1180,11 @@ module.exports = {
   updatestatuss,
   Comptevald,
   recuperernewchauf,
-
+  //getFacturesByChauffeurId,
+  recuperFact,
+  searchFacture,
+  updateFact,
+  sendFactureEmail,
+  getRideCounts,
+  updateF,
 };

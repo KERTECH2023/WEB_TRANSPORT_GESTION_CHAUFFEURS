@@ -2,7 +2,7 @@ const admin = require('firebase-admin');
 
 var serviceAccount = require("../firebase-key.json");
 
-const BUCKET ="imagestor-768b5.appspot.com"
+const BUCKET ="transport-app-36443.appspot.com"
 
 
 

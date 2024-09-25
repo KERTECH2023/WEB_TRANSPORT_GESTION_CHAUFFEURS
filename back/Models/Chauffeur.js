@@ -66,25 +66,25 @@ const ChauffSchema = new mongoose.Schema(
 
       
         photoAvatar: {
-            type: Buffer,
+            type: String,
             // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
         },
         photoCin: {
-            type: Buffer,
+            type: String,
 
             // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
         },
         photoPermisRec: {
-            type: Buffer,
+            type: String,
             
             // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
         },
         photoPermisVer: {
-            type: Buffer,
+            type: String,
             // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
         },
         photoVtc: {
-            type: Buffer,
+            type: String,
             // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
         },
        
@@ -100,8 +100,8 @@ const ChauffSchema = new mongoose.Schema(
             type: String,
             trim: true,
             required: [true, "Please provide an address"],
-            maxlength: [40, "Address must be less or equal then 30 characters."],
-            minlength: [8, "Address must be more or equal then 8 characters."],
+            //maxlength: [40, "Address must be less or equal then 30 characters."],
+           // minlength: [8, "Address must be more or equal then 8 characters."],
           },
           
           ratingsAverage: {
