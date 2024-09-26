@@ -67,7 +67,7 @@ const ClientSchema = new mongoose.Schema(
         },
         photoAvatar: {
             type: String,
-          
+           // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
         },
           cnicNo: {
             type: String,

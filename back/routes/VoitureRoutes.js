@@ -4,7 +4,7 @@ const  router = express.Router()
 
 const VoitureCon  = require('../Controllers/VoitureContro')
 
-const UploadImage = require ("../services/firebase");
+const UploadImage = require ("../services/upload");
 
 
 const multer = require('multer')
@@ -16,8 +16,8 @@ const Multer = multer({
 
 
 router.post('/addvoiture/:id',Multer.fields([
-    { name: "cartegrise", maxCount: 1  },
-    { name: "assurance", maxCount: 1  },
+    { name: "photoCartegrise", maxCount: 1  },
+    { name: "photoAssurance", maxCount: 1  },
   
   ]),UploadImage,VoitureCon.addvoiture)
 

@@ -11,8 +11,7 @@ router.get('/show', Contact.getAll)
 
  
 router.post('/add',Contact.add)
-router.put('/upCon/:id', Contact.updatestatus);
-router.get('/searshcon/:id', Contact.searchcon);
+
 
 // router.get('/getrec/:agent', Reclamation.getAllbyagent);
 // router.get('/getrecF/:agent', Reclamation.recuprecF);

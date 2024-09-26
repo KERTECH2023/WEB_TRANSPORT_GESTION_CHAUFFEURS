@@ -1,0 +1,43 @@
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.button {
+    display: inline-flex;
+    padding: 10px 20px;
+    font-size: 18px;
+    text-decoration: none;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    margin-top: 150px;
+  }
+  .button .button-icon {
+    margin-right: 10px;
+    margin-top: 5px;
+  }
+  .button-text {
+    margin-left: 5px;
+  }
+  
+  .button.google-play {
+    background-color: rgb(223, 176, 22);
+    color: black;
+  }
+  
+  .button.app-store {
+    background-color: rgb(2, 2, 92);
+    color: white;
+  }
+  
+  .button.google-play:hover {
+    background-color: rgb(2, 2, 92);
+    color: white;
+  }
+  
+  .button.app-store:hover {
+    background-color:rgb(223, 176, 22);
+    color: black;
+  }
+  

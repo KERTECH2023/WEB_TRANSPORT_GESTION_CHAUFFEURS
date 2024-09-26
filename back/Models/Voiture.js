@@ -1,4 +1,4 @@
-const mongoose  =require('mongoose');
+const mongoose  =require('mongoose')
 const Schema  =mongoose.Schema
 const validator = require('validator');
 
@@ -18,7 +18,7 @@ const VoitSchema = new mongoose.Schema(
 
         cartegrise: {
             type: String,
-                       // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
+            // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
         },
         assurance: {
             type: String,
