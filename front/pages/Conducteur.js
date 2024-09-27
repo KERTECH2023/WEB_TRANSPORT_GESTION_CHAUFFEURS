@@ -22,7 +22,7 @@ const Conducteur = () => {
   const checkChauffeur = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3005/Chauff/checkchauffeur",
+        process.env.NEXT_PUBLIC_BASE_URL + "/Chauff/checkchauffeur",
         {
           method: "POST",
           headers: {
