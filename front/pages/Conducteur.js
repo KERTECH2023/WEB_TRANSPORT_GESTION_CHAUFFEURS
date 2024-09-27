@@ -3,7 +3,8 @@ import { toast } from "react-toastify";
 
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
-import axios from "axios";
+import { axiosClient } from "../config/axios";
+
 import { useRouter } from "next/router";
 import {
   Stepper,
@@ -242,8 +243,8 @@ const Conducteur = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:3005/Chauff/AjoutChauf",
+      const response = await axiosClient.post(
+        "/Chauff/AjoutChauf",
         {
           Nom,
           Prenom,
@@ -363,8 +364,8 @@ const Conducteur = () => {
     setloadingSubmit(true); // Start loading
 
     try {
-      const response = await axios.post(
-        `http://localhost:3005/Voi/addvoiture/${chauffId}`,
+      const response = await axiosClient.post(
+        `/Voi/addvoiture/${chauffId}`,
         {
           photoCartegrise,
           photoAssurance,

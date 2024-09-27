@@ -4,6 +4,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import EmailIcon from "@mui/icons-material/Email";
 import axios from "axios";
 import { useRouter } from "next/router";
+import { axiosClient } from "../config/axios";
 
 const Auth = () => {
   const [submitStatus, setSubmitStatus] = useState("");
@@ -17,8 +18,8 @@ const Auth = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:3005/Chauff/reset", { email })
+    axiosClient
+      .post("/Chauff/reset", { email })
       .then(() => {
         setSubmitStatus("Un email a été envoyé");
         setEmail("");
@@ -35,8 +36,8 @@ const Auth = () => {
 
   const handleSubmitLogin = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:3005/Chauff/loginch", { email, password })
+    axiosClient
+      .post("/Chauff/loginch", { email, password })
       .then((response) => {
         const user = response.data;
         if (user.Cstatus === "Désactivé") {

@@ -29,7 +29,7 @@ const SimpleForm = () => {
 
     if (Object.keys(errors).length === 0) {
       try {
-        const response = await axios.post("http://localhost:3005/submitForm", {
+        const response = await axiosClient.post("/submitForm", {
           nom,
           prenom,
           paysOrigine,
