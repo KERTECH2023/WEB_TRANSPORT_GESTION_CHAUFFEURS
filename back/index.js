@@ -18,7 +18,7 @@ const his = require("./routes/HistoRoute");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 
-mongoose.connect(config.database, {
+mongoose.connect(process.env.DATABASE, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -39,7 +39,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 const corsOptions = {
   //origin:'https://frontwebpfe-ashen.vercel.app',
-  origin: "*",
+  origin: "http://localhost:4000",
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
 };
