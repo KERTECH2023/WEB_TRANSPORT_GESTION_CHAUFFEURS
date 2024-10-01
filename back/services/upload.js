@@ -2,18 +2,19 @@ const admin = require("firebase-admin");
 const serviceAccount = require("../firebase-key.json");
 require("dotenv").config();
 const BUCKET = "prd-transport.appspot.com";
+const cer= "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCyOYau+MN5LcmR\n1YAzgxBXnydFd5zMHPMvsrSKtiBcYzjEjGpMMnQ6tgy+u4bsPaHaG5+ekYFf4rjO\n2boTdNpCyBLeNLv5duciAteOg3v0a8/Op77MAqRVSa6Vb+iJWYS1Wblo1znsEZj2\nreTl+lwvfSjQKZ+doR75thmvHJK1AH3I1YJem10U8q49pLz/EQ4iQIPHFeLuFdeX\nlR0UKzXGZP8T4OHkfYy0cGbRKwyi3GRzt6w4rHjo3lpEkVE1n7vbb1LRtRNQBQSX\nlH6BqOLEVIjWXc9OdNQ88QShF6Z31U9xLK9PYafQ8USsgE/ZayAA2KOt/fz6ddFH\nyptgkPebAgMBAAECggEAIhMhjv580QRSD5HUSwT58Oa66WsvDU9Tp4DxR7v+f+tw\nhROblynmUvtPgH/2EeDOuxag8/450A1W7CVwkBu9RxtdkCJg9hcnpbcJY3P8FQUv\n3ADyV6sBpFTMDkIxIWF+H/YhnsvXhSzwI+mnY9j0GxhA31u16rtNYszQKEy8N+Kn\niElxbmolg6f3g32Vw5dXdSaaKuLH5H6a0B/Lid2xDVc3BzsZhNRx3Uacw4dhRjlP\nROefZcznr5EUOlUILYSWChHIkoGDxNkajt01sV7kIwx8Fi7ydCBhQZiKp88i2L4L\nFHiVPwlueI+OA0yiATutwPXxB5katkoPIr2jn+S5gQKBgQD40y9V6sl4IasrviJy\nQdqfQPhRMJ5FwvMC4ACyjjTubg+ivCHYyXu2mgONp1PgYT3WhybwB5vvD/JZsOiK\n7jaZbsKdaj3+Bf+pMPm2E6kx1R31iedlgmmsJ3NiPtDM8yl/h98PdqVSni45p3md\n8Ecoi9qq1pyx9Cg2jFj00Bh84QKBgQC3XSxetytCxflbm83Hd3BQJEtbn6RNDZUt\nQAFcZFkvyZjl3/owNjjSg1lQw3AFXSX7Lzvb1KD0fMM56wmGcP4V011CiQ1JN51/\nhf3HrqvaPz+/Ad5P6NWO7xWtKg4UPURk7J6zQ4jwRPxcUULmGBjp6yvHSQOsCxF3\nqATJeFBn+wKBgEzDCeVdi03ORTo3a/UHr+RVbMXPU+R9oe6PIGf1SwsLVTOFCoQQ\nlGPe253FszCTjzoxc6e1ETwNFVzqILNLjfiDnPJnJjzJqPePLloncpj3AEkRhBti\nwirj+MqkSlIP6gt35S6mEZaNSgFrUy+QQsOVcZ4mmyyjAAzj+0V7NTLBAoGAEgvX\nfBLm7RFy8zMoU4NLyHdp+0CA+RxnHCb6e09c/7kFlUov42LSwNUwiyRQ+BYs0MXb\nTE1m8ej9hcu+Cj9AooFE4nF+n0Ab/hr/2RE11Kr46SGT8aVmr0SUi5BiBlfpTU2E\naPwylAMWGzfcL60bdpowmtJyzBHizDX7EqEGuNUCgYBhMxDksOwtLZ7B1F7q+m4f\nx4W1En9wrUDMvjY52GrUI0H7pr727mhex8xsavPertSQWdUul4by201S1ywkObrc\nnq5zO/9W0513M4ynXHYVfAuN3JEiXbgrdPKCJhEgj37HhRhM5p1iuGAbDIpwNQef\nGl9Irf85ziBE3cbrHwKBlQ==\n-----END PRIVATE KEY-----\n"
 const config = {
-  "type": "service_account",
-  "project_id": "prd-transport",
-  "private_key_id": "d0dd1f140716f5006faf472bef1b70c5332e53db",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC84PWO8RuCW13i\nwYRN9JKlZvXyihHFtThtFuVdKjS3BW//G/wthMWpSDaJ0kacV70LTrxR33lEirWw\nv4GdJtOJ7HyVBb+QgrPbeEGOgzCYHZKFRmpdUreio+R7b+yuf99qEBf259ASJwl2\ngw3vEB0aPowgwFW3OlFklqdXuBqVN9HLtS2wLG7xDg54A8/4aoxP9NCOI3eFkCj9\n/A+x7NpL0fUcB/rzp27h3u4t85lXpX3UCEviLkYBL14qpdYYD7KmdqpQxEOqA6AQ\nCWlFdj9/BGmR1UNS4mVLNzHhueqe83vO1C4HZBxatf04fbjlKYVjRKFc0PxR7y5Z\nVZZm9bY/AgMBAAECggEABHKEpJuXSeXAcumJ2PmoJLS+y0JVZ5hrHC1mTZM3K3ns\nkRvuUH7/xQJwnT5Jq755qjDUN4mRmTd+6BwKQ7iw6xpEeTrhWnHNrfO4mhzG8uAd\nyFtQkKLoTkm75oaP8Lj8V+zsJrttq6lZpeQgOHcm3ZuIFhLvKTcchHKMvTxac1no\ng0RlnipkbfOaY/dLW00r8M+NqQb9GTyP113A7Obq5Bg8frHlFvjDXgzZMdbERn4k\ndzI2x+DFizN42Lqdx8B17zxKSfLOxliNjWseO+1AGMYBKa9fCgTv3uMpBhI8WJQ3\nc2J9sSNhMPvc+HItmwJA4r/l+Ml5WvfczemCRgkSiQKBgQDzVGtFATk7SpggBMsP\nu3Sd0PRS9mE46xKiTHj1KiMD9Bfyf4IXH+I4CyBwIq49zux5PXw9oS/82ieRge1r\nKF4r/tkptolMD/bU+rpPk/nU3lUNEu95kYCPjro/yvfWDm071QOvQ5VIFvkvT030\n0/aE+h88TXTfEDn9Oi5fLn9LtQKBgQDGtrWPvG4e4Nb1CSfaePjBhN6/IAG6jpR7\n/Qo9EmSkSMOF9+lR09bJhabDAlokWN0+2ZbSFatKL3/mgWom4UDyD+eSK4Rtfsy4\nCwipxbNE2sxZMjK4ovBKqr48LEVB1GSq5rlSxoF0rmZV8yYc/V7Q0fNtxaC/5PJb\nWh206au6owKBgQDAQmV3Yl4cEPZd5iujxJOB1oYVvwJWfLZ+cjnoTGDaUNVTD5h0\nOQb/DRuWPnC5+XMy4Hf4IhHOkXhOKgCzeHPgAz8HDGkzJjH7Whg3pE3z+a/t4pZA\n0cxooXdbzD1Cbqe0bLy6kIW1LiG5VcnctlXD//UKKpE7ZpDLGltlbVG7OQKBgH4p\neIKmpt/R7ogqZPQvg/gRrP55ir9wUNObp0l5CQ7I5+KBsM/0CFVwFp2PO74B8Y46\nxafifBsgpzqpBcVjlEFbWbITEQQX0lAzKS/oxlW7+KvU1CEnyhoN57P6g4o1GCjt\nTdJBF+YF6BE/y/3x26YG9l/GbrYG3NylDWFUTmSzAoGAKXIKcPBA53InRy23PA5K\n6Imh1w5/oTOxYJDm+tsuoaF9IJpoAZbGLy+U5NUOd9yD45ENCMMzREFALdzNpRo2\nVO3FcavdG1kKq2lQd2b5Yk+pKtPbpvL+lpBNB9LJWqwxp+/PuGIWqZP52fqf+ty0\nAuQpgR9hKCIbrf7N3cpswzc=\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-dpu42@prd-transport.iam.gserviceaccount.com",
-  "client_id": "115384259108610553271",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-dpu42%40prd-transport.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
+  type: process.env.TYPE,
+  projectId: process.env.PROJECT_ID,
+  privateKeyId: process.env.PRIVATE_KEY_ID,
+  privateKey: cer, // Replace literal \n with actual new lines
+  clientEmail: process.env.CLIENT_EMAIL,
+  clientId: process.env.CLIENT_ID,
+  authUri: process.env.AUTH_URI,
+  tokenUri: process.env.TOKEN_URI,
+  authProviderCertUrl: process.env.AUTH_PROVIDER_X509_CERT_URL,
+  clientCertUrl: process.env.CLIENT_X509_CERT_URL,
+  universeDomain: process.env.UNIVERSE_DOMAIN,
 };
 admin.initializeApp({
   credential: admin.credential.cert(config),
