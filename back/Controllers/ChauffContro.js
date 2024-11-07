@@ -165,8 +165,8 @@ async function sendConfirmationEmail(Email, Nom) {
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "noreplytunisieuber@gmail.com", // Replace with your email
-      pass: "jspi ogjl jhqg mpln", // Replace with your email password
+      user: "noreplyflashdriver@gmail.com", // Replace with your email
+      pass: "uvfu llrf qsbw esok", // Replace with your email password
     },
   });
 
@@ -180,7 +180,7 @@ async function sendConfirmationEmail(Email, Nom) {
   });
 
   const mailOptions = {
-    from: "TunisieUber<noreplytunisieuber@gmail.com>",
+    from: "TunisieUber<noreplyflashdriver@gmail.com>",
     to: Email,
     subject: "TunisieUber Compte Pour Chauffeur ",
     html:
@@ -589,8 +589,8 @@ async function sendpassword(Email, Password, chauffeurName) {
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "noreplytunisieuber@gmail.com", // Replace with your email
-      pass: "jspi ogjl jhqg mpln", // Replace with your email password
+      user: "noreplyflashdriver@gmail.com", // Replace with your email
+      pass: "uvfu llrf qsbw esok", // Replace with your email password
     },
   });
 
@@ -604,7 +604,7 @@ async function sendpassword(Email, Password, chauffeurName) {
   });
 
   const mailOptions = {
-    from: "Tunisie Uber <noreplytunisieuber@gmail.com>",
+    from: "Tunisie Uber <noreplyflashdriver@gmail.com>",
     to: Email,
     subject: "Tunisie Uber Nouveau Mot De Passe",
     html:
