@@ -7,6 +7,10 @@ const BUCKET = process.env.FIREBASE_BUCKET || "prd-transport.appspot.com";
 
 // Fonction pour récupérer la clé Firebase depuis MongoDB
 async function getFirebaseKey() {
+    if (!config.database) {
+        throw new Error("Database configuration is missing");
+    }
+
     const client = new MongoClient(config.database, { 
         useNewUrlParser: true, 
         useUnifiedTopology: true 
@@ -38,6 +42,17 @@ async function initializeFirebase() {
     try {
         const firebaseKey = await getFirebaseKey();
 
+        // Validation des clés requises
+        const requiredKeys = [
+            'type', 'project_id', 'private_key_id', 'private_key', 
+            'client_email', 'client_id', 'auth_uri', 'token_uri'
+        ];
+        requiredKeys.forEach(key => {
+            if (!firebaseKey[key]) {
+                throw new Error(`Missing required Firebase key: ${key}`);
+            }
+        });
+
         // Configuration Firebase
         const firebaseConfig = {
             type: firebaseKey.type,
@@ -53,99 +68,114 @@ async function initializeFirebase() {
         };
 
         // Initialisation de Firebase Admin SDK
-        admin.initializeApp({
-            credential: admin.credential.cert(firebaseConfig),
-            storageBucket: BUCKET,
-        });
+        if (admin.apps.length === 0) {  // Éviter l'initialisation multiple
+            admin.initializeApp({
+                credential: admin.credential.cert(firebaseConfig),
+                storageBucket: BUCKET,
+            });
 
-        console.log("Firebase Admin SDK initialized successfully.");
+            console.log("Firebase Admin SDK initialized successfully.");
+        }
     } catch (error) {
         console.error("Error initializing Firebase Admin SDK:", error);
         process.exit(1); // Arrêter l'application si l'initialisation échoue
     }
 }
+
+// Appel différé de l'initialisation
 initializeFirebase();
-const bucket = admin.storage().bucket();
 
 const uploadFileWithRetry = (bucketFile, file, retries = 3) => {
-  return new Promise((resolve, reject) => {
-    const uploadAttempt = (attempt) => {
-      const stream = bucketFile.createWriteStream({
-        metadata: {
-          contentType: file.mimetype,
-        },
-      });
-
-      stream.on("error", (error) => {
-        if (error.code === 503 && attempt < retries) {
-          console.log(`Upload failed, retrying attempt ${attempt + 1}...`);
-          setTimeout(() => uploadAttempt(attempt + 1), 1000);
-        } else {
-          reject(error);
+    return new Promise((resolve, reject) => {
+        if (!file || !file.buffer) {
+            return reject(new Error('Invalid file object'));
         }
-      });
 
-      stream.on("finish", async () => {
-        // Retarder makePublic ou l'envelopper dans une logique de réessai
-        try {
-          let attempts = 0;
-          while (attempts < retries) {
-            try {
-              await bucketFile.makePublic();
-              break;
-            } catch (error) {
-              if (attempts < retries - 1) {
-                console.log(
-                  `Failed to make file public, retrying (${
-                    attempts + 1
-                  }/${retries})...`
-                );
-                attempts++;
-                await new Promise((res) => setTimeout(res, 1000));
-              } else {
-                throw error;
-              }
-            }
-          }
-          resolve();
-        } catch (error) {
-          reject(error);
-        }
-      });
+        const uploadAttempt = (attempt) => {
+            const stream = bucketFile.createWriteStream({
+                metadata: {
+                    contentType: file.mimetype || 'application/octet-stream',
+                },
+                resumable: false  // Désactiver le téléchargement reprenant
+            });
 
-      stream.end(file.buffer);
-    };
+            stream.on("error", (error) => {
+                console.error(`Upload error (Attempt ${attempt}):`, error);
+                if (attempt < retries) {
+                    console.log(`Retrying upload (${attempt + 1}/${retries})...`);
+                    setTimeout(() => uploadAttempt(attempt + 1), 1000 * attempt);
+                } else {
+                    reject(error);
+                }
+            });
 
-    uploadAttempt(0);
-  });
+            stream.on("finish", async () => {
+                try {
+                    let publicAttempts = 0;
+                    while (publicAttempts < retries) {
+                        try {
+                            await bucketFile.makePublic();
+                            resolve();
+                            return;
+                        } catch (publicError) {
+                            publicAttempts++;
+                            console.warn(`Public access attempt ${publicAttempts} failed`);
+                            if (publicAttempts >= retries) {
+                                throw publicError;
+                            }
+                            await new Promise(res => setTimeout(res, 1000 * publicAttempts));
+                        }
+                    }
+                } catch (finalError) {
+                    reject(finalError);
+                }
+            });
+
+            stream.end(file.buffer);
+        };
+
+        uploadAttempt(0);
+    });
 };
 
 const UploadImage = (req, res, next) => {
-  if (!req.files) return next();
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return next();
+    }
 
-  const files = req.files;
-  const uploadedFiles = {};
+    const files = req.files;
+    const uploadedFiles = {};
 
-  const uploadPromises = Object.keys(files).map((fieldName) => {
-    const file = files[fieldName][0];
-    const nomeArquivo = Date.now() + "." + file.originalname.split(".").pop();
-    const bucketFile = bucket.file(nomeArquivo);
+    const uploadPromises = Object.keys(files).map((fieldName) => {
+        const fileList = files[fieldName];
+        if (!fileList || fileList.length === 0) {
+            console.warn(`No files found for field: ${fieldName}`);
+            return Promise.resolve();
+        }
 
-    return uploadFileWithRetry(bucketFile, file).then(() => {
-      const firebaseUrl = `https://storage.googleapis.com/${BUCKET}/${nomeArquivo}`;
-      uploadedFiles[fieldName] = firebaseUrl;
+        const file = fileList[0];
+        const fileExtension = file.originalname.split(".").pop() || 'unknown';
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
+        const bucketFile = bucket.file(fileName);
+
+        return uploadFileWithRetry(bucketFile, file).then(() => {
+            const firebaseUrl = `https://storage.googleapis.com/${BUCKET}/${fileName}`;
+            uploadedFiles[fieldName] = firebaseUrl;
+        });
     });
-  });
 
-  Promise.all(uploadPromises)
-    .then(() => {
-      req.uploadedFiles = uploadedFiles;
-      next();
-    })
-    .catch((error) => {
-      console.error("Failed to upload files:", error);
-      res.status(500).send({ error: "File upload failed" });
-    });
+    Promise.all(uploadPromises)
+        .then(() => {
+            req.uploadedFiles = uploadedFiles;
+            next();
+        })
+        .catch((error) => {
+            console.error("Failed to upload files:", error);
+            res.status(500).json({ 
+                error: "File upload failed", 
+                details: error.message 
+            });
+        });
 };
 
 module.exports = UploadImage;
