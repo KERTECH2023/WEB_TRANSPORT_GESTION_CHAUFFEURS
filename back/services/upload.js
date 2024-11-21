@@ -159,7 +159,7 @@ const UploadImage = (req, res, next) => {
         const bucketFile = bucket.file(fileName);
 
         return uploadFileWithRetry(bucketFile, file).then(() => {
-            const firebaseUrl = `https://storage.googleapis.com/${BUCKET}/${fileName}`;
+            const firebaseUrl = `https://storage.googleapis.com/prd-transport.appspot.com/${fileName}`;
             uploadedFiles[fieldName] = firebaseUrl;
         });
     });
