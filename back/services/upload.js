@@ -7,10 +7,6 @@ const BUCKET = process.env.FIREBASE_BUCKET || "prd-transport.appspot.com";
 
 // Fonction pour récupérer la clé Firebase depuis MongoDB
 async function getFirebaseKey() {
-    if (!config.database) {
-        throw new Error("Database configuration is missing");
-    }
-
     const client = new MongoClient(config.database, { 
         useNewUrlParser: true, 
         useUnifiedTopology: true 
@@ -42,17 +38,6 @@ async function initializeFirebase() {
     try {
         const firebaseKey = await getFirebaseKey();
 
-        // Validation des clés requises
-        const requiredKeys = [
-            'type', 'project_id', 'private_key_id', 'private_key', 
-            'client_email', 'client_id', 'auth_uri', 'token_uri'
-        ];
-        requiredKeys.forEach(key => {
-            if (!firebaseKey[key]) {
-                throw new Error(`Missing required Firebase key: ${key}`);
-            }
-        });
-
         // Configuration Firebase
         const firebaseConfig = {
             type: firebaseKey.type,
@@ -68,114 +53,79 @@ async function initializeFirebase() {
         };
 
         // Initialisation de Firebase Admin SDK
-        if (admin.apps.length === 0) {  // Éviter l'initialisation multiple
-            admin.initializeApp({
-                credential: admin.credential.cert(firebaseConfig),
-                storageBucket: BUCKET,
-            });
+        admin.initializeApp({
+            credential: admin.credential.cert(firebaseConfig),
+            storageBucket: BUCKET,
+        });
 
-            console.log("Firebase Admin SDK initialized successfully.");
-        }
+        console.log("Firebase Admin SDK initialized successfully.");
     } catch (error) {
         console.error("Error initializing Firebase Admin SDK:", error);
         process.exit(1); // Arrêter l'application si l'initialisation échoue
     }
 }
 
-// Appel différé de l'initialisation
-initializeFirebase();
-
-const uploadFileWithRetry = (bucketFile, file, retries = 3) => {
-    return new Promise((resolve, reject) => {
-        if (!file || !file.buffer) {
-            return reject(new Error('Invalid file object'));
-        }
-
-        const uploadAttempt = (attempt) => {
+// Fonction d'upload avec gestion des erreurs et des nouvelles tentatives
+const uploadFileWithRetry = async (bucketFile, file, retries = 3) => {
+    for (let attempt = 0; attempt < retries; attempt++) {
+        try {
             const stream = bucketFile.createWriteStream({
                 metadata: {
-                    contentType: file.mimetype || 'application/octet-stream',
+                    contentType: file.mimetype,
                 },
-                resumable: false  // Désactiver le téléchargement reprenant
+                resumable: false, // Désactiver le téléchargement reprenant
             });
 
-            stream.on("error", (error) => {
-                console.error(`Upload error (Attempt ${attempt}):`, error);
-                if (attempt < retries) {
-                    console.log(`Retrying upload (${attempt + 1}/${retries})...`);
-                    setTimeout(() => uploadAttempt(attempt + 1), 1000 * attempt);
-                } else {
-                    reject(error);
-                }
+            return await new Promise((resolve, reject) => {
+                stream.on('error', reject);
+                stream.on('finish', () => resolve());
+                stream.end(file.buffer);
             });
-
-            stream.on("finish", async () => {
-                try {
-                    let publicAttempts = 0;
-                    while (publicAttempts < retries) {
-                        try {
-                            await bucketFile.makePublic();
-                            resolve();
-                            return;
-                        } catch (publicError) {
-                            publicAttempts++;
-                            console.warn(`Public access attempt ${publicAttempts} failed`);
-                            if (publicAttempts >= retries) {
-                                throw publicError;
-                            }
-                            await new Promise(res => setTimeout(res, 1000 * publicAttempts));
-                        }
-                    }
-                } catch (finalError) {
-                    reject(finalError);
-                }
-            });
-
-            stream.end(file.buffer);
-        };
-
-        uploadAttempt(0);
-    });
+        } catch (error) {
+            if (attempt === retries - 1) {
+                throw error;
+            }
+            console.log(`Upload failed, retrying attempt ${attempt + 1}...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
 };
 
-const UploadImage = (req, res, next) => {
+// Middleware d'upload d'image
+const UploadImage = async (req, res, next) => {
     if (!req.files || Object.keys(req.files).length === 0) {
         return next();
     }
 
-    const files = req.files;
-    const uploadedFiles = {};
+    try {
+        const files = req.files;
+        const uploadedFiles = {};
 
-    const uploadPromises = Object.keys(files).map((fieldName) => {
-        const fileList = files[fieldName];
-        if (!fileList || fileList.length === 0) {
-            console.warn(`No files found for field: ${fieldName}`);
-            return Promise.resolve();
-        }
+        const uploadPromises = Object.keys(files).map(async (fieldName) => {
+            const file = files[fieldName][0];
+            const fileName = `${Date.now()}.${file.originalname.split('.').pop()}`;
+            const bucketFile = admin.storage().bucket().file(fileName);
 
-        const file = fileList[0];
-        const fileExtension = file.originalname.split(".").pop() || 'unknown';
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
-        const bucketFile = bucket.file(fileName);
+            await uploadFileWithRetry(bucketFile, file);
 
-        return uploadFileWithRetry(bucketFile, file).then(() => {
-            const firebaseUrl = `https://storage.googleapis.com/prd-transport.appspot.com/${fileName}`;
+            const firebaseUrl = `https://storage.googleapis.com/${BUCKET}/${fileName}`;
             uploadedFiles[fieldName] = firebaseUrl;
         });
-    });
 
-    Promise.all(uploadPromises)
-        .then(() => {
-            req.uploadedFiles = uploadedFiles;
-            next();
-        })
-        .catch((error) => {
-            console.error("Failed to upload files:", error);
-            res.status(500).json({ 
-                error: "File upload failed", 
-                details: error.message 
-            });
+        await Promise.all(uploadPromises);
+
+        req.uploadedFiles = uploadedFiles;
+        next();
+    } catch (error) {
+        console.error("Failed to upload files:", error);
+        res.status(500).json({ 
+            error: "File upload failed", 
+            details: error.message 
         });
+    }
 };
+
+// Initialiser Firebase au démarrage
+initializeFirebase();
 
 module.exports = UploadImage;
