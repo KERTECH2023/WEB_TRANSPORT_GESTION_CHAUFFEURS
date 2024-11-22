@@ -1,131 +1,107 @@
 const admin = require("firebase-admin");
-const { MongoClient } = require("mongodb");
-const config = require("../config.json");
+const serviceAccount = require("../firebase-key.json");
 require("dotenv").config();
-
 const BUCKET = "prd-transport.appspot.com";
+const cer= "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDlIMV9CUL5VEoL\nkWiIS0cS80JucZ693pdpqRAqYG8Vpuc5IVkDnT2v2psYSk8xM9C2v9MhTPFXr9Bu\ncPMg6lW4MQ6j/0uNvL7TVG/t8i2HP5d2JTtGOV5J2/SFRHvz4EkP12rvmE+SQxTV\npLkAYmshyP/OASEiX8WjMZJ/EQALou8GmBdIVA2hYB4SIYFRH8np9zReguTfr9pc\nyiKBN0RV8mdD+LJgG7K6p+Sz9WU8L/p40QERAnPKDTbTagiwF2JDCHVE6lsMxJeK\nzHaSd+7GeYd4+x0Us0HNezZfd5fVokGHSGmnmAeQm0OTMEPeuCG+uJaZ9i0r9epX\nKDmu34ZLAgMBAAECggEAC5xahZiHjUzpJ6bpriZqZppvHluhmKuD7rXDfPJADs/T\nXcDD2vwH2TZxr4xscOjYRbp4v3I/tJrTLBWLLHrTdy79N/BC6t7KqLjZpywjhHwD\nd9gxJcDYd1OvE2XCBjyyVxwqbhPAzH+buavMOCnElgSyecTy4eQKhteHPeslnnE9\nscMfnSIRw568r5jGRxStknTJ5r/sn60512jVoa2xG/L7bXEEPK3RaGQxLPoN+s/z\nDZUokdTNdx+C1RvUnHxE9lhjyTIsWEon7B3Uef6iTePOMCUOWc2wxzdRAvqk6Llx\nbYoEGC4i54VR3t5IFOMG9E38nREZzXgALZRKE+dqoQKBgQDzPmUCsFZcyc5XVm+k\ntw5wq3lnz1Ha5aSEMqHJgvHzK8NhYZFoXw6SZu+djJTmyho/NAYD6RCzLW4oIXhe\n1hArrdSurhR3XwrAkCi4EFRnNQvUteMVw85mKffmAuxHNRiLs6FiCwdNgGN7qqAI\nnWeUPmJJXXtOigd9bQC6fKmDEQKBgQDxJN64YUjvEuLsZvFQAnHPGNiT7/Jqv9tF\nxgyERo1BASrU01ZupJ8yMdVLnJsVANonr8VZlP3BO/VRtiHwvudD8sGt9DBYgQ4T\n2voIrYd8bWvXnNc9Id5qQOnlk2DZgIU6QrKypgdueByKJhDQP3TLh4K1h0ZOv2Sf\n0sLtVgR7mwKBgQCodbHnJtDo+iqZehdf8BdkGJ3AM2jxPNGvbJF3yeRfERQDQVs+\n+XZSFlAkwNPu8lEzLIht9N/H99KuoF+I7p/MYFtHjvBFq+D6c9x/fW+2+pny+vUG\ngdFUGATDm4qf1jnlpsZB7HlmR2CeqRCkZr7xgDL5tHBNeHKvfupePS/4wQKBgAYa\ns9ShCdKbfMkVNgibdzwR2fGswks3fhp/D/QNQSgjGm12yBpW6ny/zDF0zmwysFMO\n3QUOg3nvxZ8C6EsK2hnbPFHl+49R/QQ9p9SuZ96ben5jxwMSJ2ozKHiaSXpYCYdX\nBuUE1O1T9wz8N7K92HwKeyGTQhFeQPLWx/5wDf7/AoGBAPMRi6UaAMNOskskyTng\n7K5lezTlx7f5d8w9tf+6GfKmqLA0EUONFJZRoRva9RzhiCdYTdjAgABMPpRxZyhZ\ne/irLL64qDxf9bQSZLfWXhv0uqsDeYcKu61lruKZ6fLF4uhpOoUmVFV/0DaEIqii\n4qZe2eNKkyJjcq5UC960+cPr\n-----END PRIVATE KEY-----\n"
+const config = {
+  type: process.env.TYPE,
+  projectId: process.env.PROJECT_ID,
+  privateKeyId: process.env.PRIVATE_KEY_ID,
+  privateKey: cer, // Replace literal \n with actual new lines
+  clientEmail: process.env.CLIENT_EMAIL,
+  clientId: process.env.CLIENT_ID,
+  authUri: process.env.AUTH_URI,
+  tokenUri: process.env.TOKEN_URI,
+  authProviderCertUrl: process.env.AUTH_PROVIDER_X509_CERT_URL,
+  clientCertUrl: process.env.CLIENT_X509_CERT_URL,
+  universeDomain: process.env.UNIVERSE_DOMAIN,
+};
+admin.initializeApp({
+  credential: admin.credential.cert(config),
+  storageBucket: BUCKET,
+});
 
-// Fonction pour récupérer la clé Firebase depuis MongoDB
-async function getFirebaseKey() {
-    const client = new MongoClient(config.database, { 
-        useNewUrlParser: true, 
-        useUnifiedTopology: true 
-    });
+const bucket = admin.storage().bucket();
 
-    try {
-        await client.connect();
-        console.log("Connected to MongoDB");
+const uploadFileWithRetry = (bucketFile, file, retries = 3) => {
+  return new Promise((resolve, reject) => {
+    const uploadAttempt = (attempt) => {
+      const stream = bucketFile.createWriteStream({
+        metadata: {
+          contentType: file.mimetype,
+        },
+      });
 
-        const db = client.db(); 
-        const collection = db.collection("firebasekey");
-
-        const key = await collection.findOne();
-        if (!key) {
-            throw new Error("Firebase key not found in MongoDB");
+      stream.on("error", (error) => {
+        if (error.code === 503 && attempt < retries) {
+          console.log(`Upload failed, retrying attempt ${attempt + 1}...`);
+          setTimeout(() => uploadAttempt(attempt + 1), 1000);
+        } else {
+          reject(error);
         }
+      });
 
-        return key;
-    } catch (error) {
-        console.error("Error fetching Firebase key from MongoDB:", error);
-        throw error;
-    } finally {
-        await client.close();
-    }
-}
-
-// Fonction pour initialiser Firebase avec la clé récupérée
-async function initializeFirebase() {
-    try {
-        const firebaseKey = await getFirebaseKey();
-
-        // Configuration Firebase
-        const firebaseConfig = {
-            type: firebaseKey.type,
-            projectId: firebaseKey.project_id,
-            privateKeyId: firebaseKey.private_key_id,
-            privateKey: firebaseKey.private_key.replace(/\\n/g, '\n'),
-            clientEmail: firebaseKey.client_email,
-            clientId: firebaseKey.client_id,
-            authUri: firebaseKey.auth_uri,
-            tokenUri: firebaseKey.token_uri,
-            authProviderCertUrl: firebaseKey.auth_provider_x509_cert_url,
-            clientCertUrl: firebaseKey.client_x509_cert_url,
-        };
-
-        // Initialisation de Firebase Admin SDK
-        admin.initializeApp({
-            credential: admin.credential.cert(firebaseConfig),
-            storageBucket: BUCKET,
-        });
-
-        console.log("Firebase Admin SDK initialized successfully.");
-    } catch (error) {
-        console.error("Error initializing Firebase Admin SDK:", error);
-        process.exit(1); // Arrêter l'application si l'initialisation échoue
-    }
-}
-
-// Fonction d'upload avec gestion des erreurs et des nouvelles tentatives
-const uploadFileWithRetry = async (bucketFile, file, retries = 3) => {
-    for (let attempt = 0; attempt < retries; attempt++) {
+      stream.on("finish", async () => {
+        // Retarder makePublic ou l'envelopper dans une logique de réessai
         try {
-            const stream = bucketFile.createWriteStream({
-                metadata: {
-                    contentType: file.mimetype,
-                },
-                resumable: false, // Désactiver le téléchargement reprenant
-            });
-
-            return await new Promise((resolve, reject) => {
-                stream.on('error', reject);
-                stream.on('finish', () => resolve());
-                stream.end(file.buffer);
-            });
-        } catch (error) {
-            if (attempt === retries - 1) {
+          let attempts = 0;
+          while (attempts < retries) {
+            try {
+              await bucketFile.makePublic();
+              break;
+            } catch (error) {
+              if (attempts < retries - 1) {
+                console.log(
+                  `Failed to make file public, retrying (${
+                    attempts + 1
+                  }/${retries})...`
+                );
+                attempts++;
+                await new Promise((res) => setTimeout(res, 1000));
+              } else {
                 throw error;
+              }
             }
-            console.log(`Upload failed, retrying attempt ${attempt + 1}...`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          resolve();
+        } catch (error) {
+          reject(error);
         }
-    }
+      });
+
+      stream.end(file.buffer);
+    };
+
+    uploadAttempt(0);
+  });
 };
 
-// Middleware d'upload d'image
-const UploadImage = async (req, res, next) => {
-    if (!req.files || Object.keys(req.files).length === 0) {
-        return next();
-    }
+const UploadImage = (req, res, next) => {
+  if (!req.files) return next();
 
-    try {
-        const files = req.files;
-        const uploadedFiles = {};
+  const files = req.files;
+  const uploadedFiles = {};
 
-        const uploadPromises = Object.keys(files).map(async (fieldName) => {
-            const file = files[fieldName][0];
-            const fileName = `${Date.now()}.${file.originalname.split('.').pop()}`;
-            const bucketFile = admin.storage().bucket().file(fileName);
+  const uploadPromises = Object.keys(files).map((fieldName) => {
+    const file = files[fieldName][0];
+    const nomeArquivo = Date.now() + "." + file.originalname.split(".").pop();
+    const bucketFile = bucket.file(nomeArquivo);
 
-            await uploadFileWithRetry(bucketFile, file);
+    return uploadFileWithRetry(bucketFile, file).then(() => {
+      const firebaseUrl = `https://storage.googleapis.com/${BUCKET}/${nomeArquivo}`;
+      uploadedFiles[fieldName] = firebaseUrl;
+    });
+  });
 
-            const firebaseUrl = `https://storage.googleapis.com/${BUCKET}/${fileName}`;
-            uploadedFiles[fieldName] = firebaseUrl;
-        });
-
-        await Promise.all(uploadPromises);
-
-        req.uploadedFiles = uploadedFiles;
-        next();
-    } catch (error) {
-        console.error("Failed to upload files:", error);
-        res.status(500).json({ 
-            error: "File upload failed", 
-            details: error.message 
-        });
-    }
+  Promise.all(uploadPromises)
+    .then(() => {
+      req.uploadedFiles = uploadedFiles;
+      next();
+    })
+    .catch((error) => {
+      console.error("Failed to upload files:", error);
+      res.status(500).send({ error: "File upload failed" });
+    });
 };
-
-// Initialiser Firebase au démarrage
-initializeFirebase();
 
 module.exports = UploadImage;
