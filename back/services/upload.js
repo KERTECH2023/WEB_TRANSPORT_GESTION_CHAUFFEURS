@@ -16,7 +16,7 @@ async function getFirebaseKey() {
         await client.connect();
         console.log("Connected to MongoDB");
 
-        const db = client.db(); 
+        const db = client.db();
         const collection = db.collection("firebasekey");
 
         const key = await collection.findOne();
@@ -65,92 +65,87 @@ async function initializeFirebase() {
     }
 }
 
+// Initialiser Firebase au démarrage
+initializeFirebase();
+
 const bucket = admin.storage().bucket();
 
 // Fonction d'upload avec gestion des erreurs et des nouvelles tentatives
 const uploadFileWithRetry = (bucketFile, file, retries = 3) => {
     return new Promise((resolve, reject) => {
-      const uploadAttempt = (attempt) => {
-        const stream = bucketFile.createWriteStream({
-          metadata: {
-            contentType: file.mimetype,
-          },
-        });
-  
-        stream.on("error", (error) => {
-          if (error.code === 503 && attempt < retries) {
-            console.log(`Upload failed, retrying attempt ${attempt + 1}...`);
-            setTimeout(() => uploadAttempt(attempt + 1), 1000);
-          } else {
-            reject(error);
-          }
-        });
-  
-        stream.on("finish", async () => {
-          // Retarder makePublic ou l'envelopper dans une logique de réessai
-          try {
-            let attempts = 0;
-            while (attempts < retries) {
-              try {
-                await bucketFile.makePublic();
-                break;
-              } catch (error) {
-                if (attempts < retries - 1) {
-                  console.log(
-                    `Failed to make file public, retrying (${
-                      attempts + 1
-                    }/${retries})...`
-                  );
-                  attempts++;
-                  await new Promise((res) => setTimeout(res, 1000));
+        const uploadAttempt = (attempt) => {
+            const stream = bucketFile.createWriteStream({
+                metadata: {
+                    contentType: file.mimetype,
+                },
+            });
+
+            stream.on("error", (error) => {
+                if (error.code === 503 && attempt < retries) {
+                    console.log(`Upload failed, retrying attempt ${attempt + 1}...`);
+                    setTimeout(() => uploadAttempt(attempt + 1), 1000);
                 } else {
-                  throw error;
+                    reject(error);
                 }
-              }
-            }
-            resolve();
-          } catch (error) {
-            reject(error);
-          }
-        });
-  
-        stream.end(file.buffer);
-      };
-  
-      uploadAttempt(0);
+            });
+
+            stream.on("finish", async () => {
+                try {
+                    for (let i = 0; i < retries; i++) {
+                        try {
+                            await bucketFile.makePublic();
+                            console.log("File made public.");
+                            resolve();
+                            return;
+                        } catch (error) {
+                            if (i === retries - 1) {
+                                throw error;
+                            }
+                            console.log(`Retrying to make file public (${i + 1}/${retries})...`);
+                            await new Promise((res) => setTimeout(res, 1000));
+                        }
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            });
+
+            stream.end(file.buffer);
+        };
+
+        uploadAttempt(0);
     });
-  };
-  
+};
+
 // Middleware d'upload d'image
 const UploadImage = (req, res, next) => {
-    if (!req.files) return next();
-  
+    if (!req.files) {
+        return next();
+    }
+
     const files = req.files;
     const uploadedFiles = {};
-  
-    const uploadPromises = Object.keys(files).map((fieldName) => {
-      const file = files[fieldName][0];
-      const nomeArquivo = Date.now() + "." + file.originalname.split(".").pop();
-      const bucketFile = bucket.file(nomeArquivo);
-  
-      return uploadFileWithRetry(bucketFile, file).then(() => {
-        const firebaseUrl = `https://storage.googleapis.com/${BUCKET}/${nomeArquivo}`;
-        uploadedFiles[fieldName] = firebaseUrl;
-      });
-    });
-  
-    Promise.all(uploadPromises)
-      .then(() => {
-        req.uploadedFiles = uploadedFiles;
-        next();
-      })
-      .catch((error) => {
-        console.error("Failed to upload files:", error);
-        res.status(500).send({ error: "File upload failed" });
-      });
-  };
 
-// Initialiser Firebase au démarrage
-initializeFirebase();
+    const uploadPromises = Object.keys(files).map((fieldName) => {
+        const file = files[fieldName][0];
+        const fileName = `${Date.now()}.${file.originalname.split(".").pop()}`;
+        const bucketFile = bucket.file(fileName);
+
+        return uploadFileWithRetry(bucketFile, file).then(() => {
+            const firebaseUrl = `https://storage.googleapis.com/${BUCKET}/${fileName}`;
+            uploadedFiles[fieldName] = firebaseUrl;
+        });
+    });
+
+    Promise.all(uploadPromises)
+        .then(() => {
+            req.uploadedFiles = uploadedFiles;
+            next();
+        })
+        .catch((error) => {
+            console.error("Failed to upload files:", error);
+            res.status(500).send({ error: "File upload failed" });
+        });
+};
 
 module.exports = UploadImage;
