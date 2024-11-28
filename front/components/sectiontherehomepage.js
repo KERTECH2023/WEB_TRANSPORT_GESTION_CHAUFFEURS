@@ -46,11 +46,11 @@ const ContentThere = () => {
     Téléchargez notre application  <br /> FlashDriver <br />
     </p>
 
-    <p className="text-white text-4xl font-bold">
-    <a className="flex  items-center ml-24 w-20 h-20">
-            <Image src={Logoo} alt="Logo" className="  rounded-full" />
-          </a>
-    </p>
+    <div>
+  <a href="#" className="button google-play">
+    <Image src={Logoo} alt="Logo" className="  rounded-full" />
+  </a>{' '}
+</div>
 
     <div>
   <a href="#" className="button google-play">
