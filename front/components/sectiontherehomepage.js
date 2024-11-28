@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 import Image from "next/legacy/image";
 import { SiGoogleplay, SiApple } from 'react-icons/si';
+import Logoo from "../public/logowhite.png";
 //import Image1 from "../public/img23.jpg";
 
 
@@ -42,7 +43,13 @@ const ContentThere = () => {
     }}
   >
     <p className="text-white text-4xl font-bold">
-    Tunisie Uber, Le Taxi Qui <br /> Répond Aux Attentes <br /> D’aujourd’hui
+    Téléchargez notre application  <br /> FlashDriver <br />
+    </p>
+
+    <p className="text-white text-4xl font-bold">
+    <a className="flex  items-center ml-24 w-20 h-20">
+            <Image src={Logoo} alt="Logo" className="  rounded-full" />
+          </a>
     </p>
 
     <div>
