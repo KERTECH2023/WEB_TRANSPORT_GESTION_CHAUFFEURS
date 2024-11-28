@@ -47,10 +47,10 @@ const ContentThere = () => {
     </p>
 
     <div>
-  <a href="#" className="button google-play">
-    <Image src={Logoo} alt="Logo" className="  rounded-full" />
-  </a>{' '}
-</div>
+    <a >
+            <Image src={Logoo} alt="Logo" className="  rounded-full" />
+          </a>
+    </div>
 
     <div>
   <a href="#" className="button google-play">
