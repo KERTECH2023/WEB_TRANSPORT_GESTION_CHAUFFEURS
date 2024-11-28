@@ -46,15 +46,10 @@ const ContentThere = () => {
     Téléchargez notre application  <br /> FlashDriver <br />
     </p>
 
-    <div>
-    <a>
-  <Image
-    src={Logoo}
-    alt="Logo"
-    style={{ width: '50px', height: '50px', borderRadius: '50%' }}
-  />
-</a>
-
+    <div className="flex  items-center ml-24 w-20 h-20">
+    <a >
+            <Image src={Logoo}  style={{ width: '50px', height: '50px', borderRadius: '50%' }} alt="Logo" className="  rounded-full" />
+          </a>
     </div>
 
     <div>
