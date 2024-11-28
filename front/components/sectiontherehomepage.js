@@ -2,7 +2,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 import Image from "next/legacy/image";
 import { SiGoogleplay, SiApple } from 'react-icons/si';
-import Logoo from "../public/logowhite.png";
 //import Image1 from "../public/img23.jpg";
 
 
@@ -43,14 +42,8 @@ const ContentThere = () => {
     }}
   >
     <p className="text-white text-4xl font-bold">
-    Téléchargez notre application  <br /> FlashDriver <br />
+    Tunisie Uber, Le Taxi Qui <br /> Répond Aux Attentes <br /> D’aujourd’hui
     </p>
-
-    <div className="flex  items-center ml-24 w-20 h-20">
-    <a >
-            <Image src={Logoo}  style={{ width: '50px', height: '50px', borderRadius: '50%' }} alt="Logo" className="  rounded-full" />
-          </a>
-    </div>
 
     <div>
   <a href="#" className="button google-play">
