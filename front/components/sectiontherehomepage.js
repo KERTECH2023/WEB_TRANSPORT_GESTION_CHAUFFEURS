@@ -47,9 +47,14 @@ const ContentThere = () => {
     </p>
 
     <div>
-    <a >
-            <Image src={Logoo} alt="Logo" className="  rounded-full" />
-          </a>
+    <a>
+  <Image
+    src={Logoo}
+    alt="Logo"
+    style={{ width: '50px', height: '50px', borderRadius: '50%' }}
+  />
+</a>
+
     </div>
 
     <div>
