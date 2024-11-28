@@ -408,8 +408,8 @@ const Conducteur = () => {
           <form action="" id="login" method="post" onSubmit={handleSubmit}>
             <div className="flex flex-col items-center justify-center space-y-4 py-24">
               <p className="text-3xl text-center font-light text-gray-600">
-                 Votre code sera envoyé prochainement par mail ?<br />
-           
+                Vous souhaitez nous Rejoindre ?<br />
+                Veuillez Remplir Le Formulaire ci-dessous avec vos informations
               </p>
               {submitStatus && (
                 <div className="flex justify-center items-center mt-4">
@@ -425,7 +425,7 @@ const Conducteur = () => {
                   </Step>
                 ))}
               </Stepper>
-              <div className="container mx-auto px-16  lg:grid-cols-2">
+              <div className="container mx-auto px-8 xl:px-32 lg:grid lg:grid-cols-2 gap-8">
                 {activeStep === 0 && (
                   <div>
                     <Typography variant="h5" gutterBottom>
@@ -588,8 +588,8 @@ const Conducteur = () => {
                     </div>
 
                     {/* Adresse */}
-                    <div className="flex justify-between ">
-                      <div className="col-span-1 row-span-1 p-4 px-8 border-l">
+                   
+                    <div className="col-span-1 row-span-1 p-4 px-8 border">
                         <label className="block mb-2 text-gray-900">
                           Adresse
                         </label>
@@ -608,7 +608,7 @@ const Conducteur = () => {
                       </div>
 
                       {/* Ville */}
-                      <div className="col-span-1 row-span-1 p-4 px-8  ">
+                      <div className="col-span-1 row-span-1 p-4 px-8 border">
                         <label className="block mb-2 text-gray-900">
                           Ville
                         </label>
@@ -627,7 +627,7 @@ const Conducteur = () => {
                       </div>
 
                       {/* Pays */}
-                      <div className="col-span-1 row-span-1 p-4 px-8 border-r">
+                      <div className="col-span-1 row-span-1 p-4 px-8 border">
                         <label className="block mb-2 text-gray-900">Pays</label>
                         <input
                           type="text"
@@ -642,7 +642,7 @@ const Conducteur = () => {
                           <label className="text-red-500">{PaysError}</label>
                         )}
                       </div>
-                    </div>
+                    
                     {/* Code Postal */}
                     <div className="col-span-1 row-span-1 p-4 px-8 border">
                       <label className="block mb-2 text-gray-900">
