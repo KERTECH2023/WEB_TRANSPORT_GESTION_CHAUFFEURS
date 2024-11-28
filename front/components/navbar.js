@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa";
 import Image from "next/legacy/image";
 import imgbg from "../public/bgnv.jpg";
-import Logoo from "../public/logowhite.png";
+
 
 const Navbar = () => {
   const [activeLink, setActiveLink] = useState("");
@@ -116,7 +116,7 @@ const Navbar = () => {
       <div className="container mx-auto  flex justify-between items-center">
         <Link href="/" legacyBehavior>
           <a className="flex  items-center ml-24 w-20 h-20">
-            <Image src={Logoo} alt="Logo" className="  rounded-full" />
+            <Image src="https://firebasestorage.googleapis.com/v0/b/prd-transport.appspot.com/o/logoc.png?alt=media&token=6a225136-94c5-407b-8501-c233e9aa721f" alt="Logo" className="  rounded-full" />
           </a>
         </Link>
         <div
