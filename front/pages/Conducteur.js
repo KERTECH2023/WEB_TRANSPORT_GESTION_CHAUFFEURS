@@ -408,8 +408,8 @@ const Conducteur = () => {
           <form action="" id="login" method="post" onSubmit={handleSubmit}>
             <div className="flex flex-col items-center justify-center space-y-4 py-24">
               <p className="text-3xl text-center font-light text-gray-600">
-                 Votre code sera envoyé prochainement par mail ?<br />
-           
+                Vous souhaitez nous Rejoindre ?<br />
+                Veuillez Remplir Le Formulaire ci-dessous avec vos informations
               </p>
               {submitStatus && (
                 <div className="flex justify-center items-center mt-4">
