@@ -1,17 +1,15 @@
-import React, { useRef, useState } from "react";
-// Import Swiper React components
+import Logoo from "../public/logowhite.png";
+import Image from "next/image";
+import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import Link from "next/link";
-
-// Import Swiper styles
 import "swiper/css";
 import "swiper/css/navigation";
-
-// import required modules
 import { Autoplay, Navigation } from "swiper";
-const header = () => {
+
+const Header = () => {
   return (
-    <div className=" h-[27em] w-full -mb-8">
+    <div className="h-[27em] w-full -mb-8">
       <Swiper
         navigation={true}
         autoplay={{
@@ -20,6 +18,7 @@ const header = () => {
         }}
         modules={[Autoplay, Navigation]}
       >
+        {/* Slide 1 */}
         <SwiperSlide>
           <div
             className="h-[27em] bg-no-repeat bg-cover bg-center"
@@ -29,84 +28,67 @@ const header = () => {
               backgroundPosition: "center",
             }}
           >
-            <div className="h-[27em] bg-black bg-opacity-10 ">
-              <div className="h-[27em] flex flex-col justify-center items-center space-y-6">
-                <p className="text-7xl text-white ">
-                  {" "}
+            <div className="h-[27em] bg-black bg-opacity-10">
+              <div className="h-full flex flex-col justify-center items-center space-y-6 px-4 text-center">
+                <p className="text-4xl md:text-7xl text-white font-bold">
                   Votre voyage, notre passion
                 </p>
-                <p className="text-2xl font-light text-white ">
+                <p className="text-lg md:text-2xl font-light text-white">
                   Commandez un taxi en un clic depuis votre mobile
                 </p>
-
-                <Link href="/Conducteur">
-                  <button
-                    type="button"
-                    className="text-white  bg-amber-600 hover:bg-amber-800   rounded-3xl  px-8 py-3 text-center mr-2 mb-2 "
-                  >
-                    Devenir Conducteur
-                  </button>
-                </Link>
+                <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
+                  <Link href="/Conducteur">
+                    <button
+                      type="button"
+                      className="text-white bg-amber-600 hover:bg-amber-800 rounded-3xl px-8 py-3"
+                    >
+                      Devenir Conducteur
+                    </button>
+                  </Link>
+                  <div className="flex items-center space-x-3">
+                    <p className="text-white text-lg md:text-xl">
+                      Télécharger notre application FlashDriver
+                    </p>
+                    <Image src={Logoo} alt="Logo FlashDriver" width={40} height={40} />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </SwiperSlide>
+
+        {/* Repeat similar structure for other slides */}
         <SwiperSlide>
           <div
             className="h-[27em] bg-no-repeat bg-cover bg-center"
             style={{
               backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(/img02.jpg)`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
             }}
           >
-            <div className="h-[27em] bg-black bg-opacity-10 ">
-              <div className="h-[27em] flex flex-col justify-center items-center space-y-6">
-                <p className="text-7xl text-white ">
-                  {" "}
+            <div className="h-full bg-black bg-opacity-10">
+              <div className="h-full flex flex-col justify-center items-center space-y-6 px-4 text-center">
+                <p className="text-4xl md:text-7xl text-white font-bold">
                   Votre voyage, notre passion
                 </p>
-                <p className="text-2xl font-light text-white ">
+                <p className="text-lg md:text-2xl font-light text-white">
                   Commandez un taxi en un clic depuis votre mobile
                 </p>
-                <Link href="/Conducteur">
-                  <button
-                    type="button"
-                    className="text-white  bg-amber-600 hover:bg-amber-800   rounded-3xl  px-8 py-3 text-center mr-2 mb-2 "
-                  >
-                    Devenir Conducteur
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </SwiperSlide>
-        <SwiperSlide>
-          <div
-            className="h-[27em] bg-no-repeat bg-cover bg-center"
-            style={{
-              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(/img11.jpg)`,
-              backgroundSize: "cover",
-              backgroundPosition: "",
-            }}
-          >
-            <div className="h-[27em] bg-black bg-opacity-10 ">
-              <div className="h-[27em] flex flex-col justify-center items-center space-y-6">
-                <p className="text-7xl text-white ">
-                  {" "}
-                  Votre voyage, notre passion
-                </p>
-                <p className="text-2xl font-light text-white ">
-                  Commandez un taxi en un clic depuis votre mobile
-                </p>
-                <Link href="/Conducteur">
-                  <button
-                    type="button"
-                    className="text-white  bg-amber-600 hover:bg-amber-800   rounded-3xl  px-8 py-3 text-center mr-2 mb-2 "
-                  >
-                    Devenir Conducteur
-                  </button>
-                </Link>
+                <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
+                  <Link href="/Conducteur">
+                    <button
+                      type="button"
+                      className="text-white bg-amber-600 hover:bg-amber-800 rounded-3xl px-8 py-3"
+                    >
+                      Devenir Conducteur
+                    </button>
+                  </Link>
+                  <div className="flex items-center space-x-3">
+                    <p className="text-white text-lg md:text-xl">
+                      Télécharger notre application FlashDriver
+                    </p>
+                    <Image src={Logoo} alt="Logo FlashDriver" width={40} height={40} />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -115,4 +97,5 @@ const header = () => {
     </div>
   );
 };
-export default header;
+
+export default Header;
