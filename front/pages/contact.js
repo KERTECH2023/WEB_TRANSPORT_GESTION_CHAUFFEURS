@@ -72,39 +72,8 @@ const Contact = () => {
     <div>
       {/* Content */}
       <div>
-        <MapSection location={location} zoomLevel={17} />
-        <div className="lg:grid lg:grid-cols-2">
-          <div className="col-span-1 p-24 flex flex-col space-y-8">
-            <p className="text-2xl text-gray-600">
-              AutoRide <br />
-              Services
-            </p>
-            <p className="text-xl font-light text-gray-500">
-              39,rue 8301 Immeuble Safsaf
-              <br /> bloc A N°2-5 Montplaisir 1073 Tunis
-            </p>
-            <p className="text-xl font-light text-gray-500">
-              N° Téléphone: (620) 255 7005 <br />
-            </p>
-            <p className="text-xl font-light text-gray-500">
-              Email: info@autoride.com
-            </p>
-          </div>
-          <div className="col-span-1 bg-gray-100 p-24 flex flex-col space-y-8">
-            <p className="text-2xl text-gray-600">Chairman of the Board</p>
-            <p className="text-xl font-light text-gray-500">
-              Monji Zitouni
-              <br /> N° Téléphone: (620) 252 8021, Fax: (620) 252 8022 <br />
-              Email: monji.Zitouni@autoride.com
-            </p>
-            <p className="text-2xl text-gray-600">Directeur de dévelopement</p>
-            <p className="text-xl font-light text-gray-500">
-              Monji
-              <br /> Phone: (620) 252 8021, Fax: (620) 252 8022 <br />
-              Email: mark.Monji@autoride.com
-            </p>
-          </div>
-        </div>
+        
+      
 
         <form action="" id="login" method="post" onSubmit={handleSubmite}>
           <div className="flex flex-col items-center justify-center  space-y-4 py-24">
