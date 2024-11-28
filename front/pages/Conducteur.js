@@ -191,9 +191,8 @@ const Conducteur = () => {
           .map((country) => ({
             value: country.name.common, // Nom du pays
             label: country.idd?.root
-              ? `${country.idd.root}${
-                  country.idd.suffixes ? country.idd.suffixes[0] : ""
-                }`
+              ? `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ""
+              }`
               : "",
             icon: country.flags?.png,
           }))
@@ -547,10 +546,10 @@ const Conducteur = () => {
                       <label className="block mb-2 text-gray-900">
                         Téléphone
                       </label>
-                      <div className="flex items-center mb-2">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-2">
                         <select
                           id="phoneCode"
-                          className="block w-36 p-2.5 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 mr-2"
+                          className="w-full sm:w-36 p-2.5 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                           onChange={(e) => setPhoneCode(e.target.value)}
                           value={phoneCode || ""}
                           required
@@ -566,13 +565,14 @@ const Conducteur = () => {
                         <input
                           type="number"
                           id="phone"
-                          className="text-gray-900 block w-full p-2.5 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                          className="w-full p-2.5 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                           placeholder="012345678"
                           onChange={(e) => setphone(e.target.value)}
                           value={phone || ""}
                           required
                         />
                       </div>
+
 
                       {/* Messages d'erreur */}
                       <div className="flex gap-28">
@@ -588,61 +588,61 @@ const Conducteur = () => {
                     </div>
 
                     {/* Adresse */}
-                   
+
                     <div className="col-span-1 row-span-1 p-4 px-8 border">
-                        <label className="block mb-2 text-gray-900">
-                          Adresse
-                        </label>
-                        <input
-                          type="text"
-                          id="adresse"
-                          className="text-gray-900 block w-full p-2.5"
-                          placeholder="Adresse"
-                          onChange={(e) => setaddress(e.target.value)}
-                          value={address || ""}
-                          required
-                        />
-                        {addressError && (
-                          <label className="text-red-500">{addressError}</label>
-                        )}
-                      </div>
+                      <label className="block mb-2 text-gray-900">
+                        Adresse
+                      </label>
+                      <input
+                        type="text"
+                        id="adresse"
+                        className="text-gray-900 block w-full p-2.5"
+                        placeholder="Adresse"
+                        onChange={(e) => setaddress(e.target.value)}
+                        value={address || ""}
+                        required
+                      />
+                      {addressError && (
+                        <label className="text-red-500">{addressError}</label>
+                      )}
+                    </div>
 
-                      {/* Ville */}
-                      <div className="col-span-1 row-span-1 p-4 px-8 border">
-                        <label className="block mb-2 text-gray-900">
-                          Ville
-                        </label>
-                        <input
-                          type="text"
-                          id="ville"
-                          className="text-gray-900 block w-full p-2.5"
-                          placeholder="Ville"
-                          onChange={(e) => setVille(e.target.value)}
-                          value={ville || ""}
-                          required
-                        />{" "}
-                        {villeError && (
-                          <label className="text-red-500">{villeError}</label>
-                        )}
-                      </div>
+                    {/* Ville */}
+                    <div className="col-span-1 row-span-1 p-4 px-8 border">
+                      <label className="block mb-2 text-gray-900">
+                        Ville
+                      </label>
+                      <input
+                        type="text"
+                        id="ville"
+                        className="text-gray-900 block w-full p-2.5"
+                        placeholder="Ville"
+                        onChange={(e) => setVille(e.target.value)}
+                        value={ville || ""}
+                        required
+                      />{" "}
+                      {villeError && (
+                        <label className="text-red-500">{villeError}</label>
+                      )}
+                    </div>
 
-                      {/* Pays */}
-                      <div className="col-span-1 row-span-1 p-4 px-8 border">
-                        <label className="block mb-2 text-gray-900">Pays</label>
-                        <input
-                          type="text"
-                          id="pays"
-                          className="text-gray-900 block w-full p-2.5"
-                          placeholder="Pays"
-                          onChange={(e) => setPays(e.target.value)}
-                          value={pays || ""}
-                          required
-                        />
-                        {PaysError && (
-                          <label className="text-red-500">{PaysError}</label>
-                        )}
-                      </div>
-                    
+                    {/* Pays */}
+                    <div className="col-span-1 row-span-1 p-4 px-8 border">
+                      <label className="block mb-2 text-gray-900">Pays</label>
+                      <input
+                        type="text"
+                        id="pays"
+                        className="text-gray-900 block w-full p-2.5"
+                        placeholder="Pays"
+                        onChange={(e) => setPays(e.target.value)}
+                        value={pays || ""}
+                        required
+                      />
+                      {PaysError && (
+                        <label className="text-red-500">{PaysError}</label>
+                      )}
+                    </div>
+
                     {/* Code Postal */}
                     <div className="col-span-1 row-span-1 p-4 px-8 border">
                       <label className="block mb-2 text-gray-900">
