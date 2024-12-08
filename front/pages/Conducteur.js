@@ -555,12 +555,10 @@ const Conducteur = () => {
                           required
                         >
                           <option value="">Choisir le code</option>
-                          {countries.map((country) => (
-                            <option key={country.value} value={country.label}>
-                              {country.value} {country.label}
-                            </option>
-                          ))}
+                          <option value="+33">France (+33)</option>
+                          <option value="+216">Tunisie (+216)</option>
                         </select>
+
 
                         <input
                           type="number"
