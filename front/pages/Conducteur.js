@@ -205,7 +205,22 @@ const Conducteur = () => {
         setCountries(sortedData);
       })
       .catch((error) => console.error("Error fetching countries:", error));
-  }, []);
+
+
+    let interval;
+    if (loading && progress < 100) {
+      interval = setInterval(() => {
+        setProgress((prevProgress) => {
+          if (prevProgress < 100) {
+            return Math.min(prevProgress + 10, 100); // Increment progress
+          }
+          clearInterval(interval);
+          return 100;
+        });
+      }, 1000); // Update progress every second (adjust as needed)
+    }
+    return () => clearInterval(interval); // Clear interval on component unmount
+  }, [loading, progress]);
 
   const calculateMaxDate = () => {
     const today = new Date();
@@ -320,6 +335,45 @@ const Conducteur = () => {
       setLoading(false);
     }
   };
+
+  function compressImage(file, callback) {
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      const img = new Image();
+      img.onload = function () {
+        // Créer un canvas pour la compression
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Redimensionner l'image si nécessaire
+        const maxWidth = 800;
+        const maxHeight = 800;
+        let width = img.width;
+        let height = img.height;
+
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width = width * ratio;
+        height = height * ratio;
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convertir le canvas en un fichier avec une compression de qualité
+        canvas.toBlob(
+          (blob) => {
+            const compressedFile = new File([blob], file.name, { type: file.type });
+            callback(compressedFile); // Retourner le fichier compressé
+          },
+          file.type === "image/jpeg" ? "image/jpeg" : "image/png",
+          0.7 // Compression (qualité entre 0 et 1, 0.7 est une bonne valeur de compromis)
+        );
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
 
   const handleCarDetailsSubmit = async (e) => {
     e.preventDefault();
@@ -694,59 +748,82 @@ const Conducteur = () => {
                     </Typography>
                     {/* Add attachment fields */}
                     {/* Photo visage */}
-                    <div className="col-span-1 row-span-1  p-4 px-8 border">
+                    <div className="col-span-1 row-span-1 p-4 px-8 border">
                       <label className="block mb-2 text-gray-900">Visage</label>
                       <input
                         type="file"
                         id="avatar"
                         className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => setphotoAvatar(e.target.files[0])}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          compressImage(file, (compressedFile) => {
+                            setphotoAvatar(compressedFile);
+                          });
+                        }}
                         required
                       />
                     </div>
-                    <div className="col-span-1 row-span-1  p-4 px-8 border">
+
+                    <div className="col-span-1 row-span-1 p-4 px-8 border">
                       <label className="block mb-2 text-gray-900">CIN</label>
                       <input
                         type="file"
                         id="photo_cin"
                         className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => setphotoCin(e.target.files[0])}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          compressImage(file, (compressedFile) => {
+                            setphotoCin(compressedFile);
+                          });
+                        }}
                         required
                       />
                     </div>
 
-                    <div className="col-span-1 row-span-1  p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900"> VTC</label>
+                    <div className="col-span-1 row-span-1 p-4 px-8 border">
+                      <label className="block mb-2 text-gray-900">Carte professionnelle</label>
                       <input
                         type="file"
                         id="photo_VTC"
                         className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => setphotoVtc(e.target.files[0])}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          compressImage(file, (compressedFile) => {
+                            setphotoVtc(compressedFile);
+                          });
+                        }}
                         required
                       />
                     </div>
-                    <div className="col-span-1 row-span-1  p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900">
-                        {" "}
-                        Permis Recto
-                      </label>
+
+                    <div className="col-span-1 row-span-1 p-4 px-8 border">
+                      <label className="block mb-2 text-gray-900">Permis Recto</label>
                       <input
                         type="file"
                         id="permis_recto"
                         className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => setphotoPermisVer(e.target.files[0])}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          compressImage(file, (compressedFile) => {
+                            setphotoPermisVer(compressedFile);
+                          });
+                        }}
                         required
                       />
                     </div>
-                    <div className="col-span-1 row-span-1  p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900">
-                        Permis Verso
-                      </label>
+
+                    <div className="col-span-1 row-span-1 p-4 px-8 border">
+                      <label className="block mb-2 text-gray-900">Permis Verso</label>
                       <input
                         type="file"
                         id="permis_verso"
                         className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => setphotoPermisRec(e.target.files[0])}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          compressImage(file, (compressedFile) => {
+                            setphotoPermisRec(compressedFile);
+                          });
+                        }}
                         required
                       />
                     </div>
@@ -854,7 +931,7 @@ const Conducteur = () => {
                         color="primary"
                         disabled={loading}
                       >
-                        {loading ? "Loading..." : "Suivant"}
+                        {loading ? `${progress}%` : "Suivant"}
                       </Button>
                     ) : activeStep === steps.length - 1 ? (
                       <Button
@@ -868,7 +945,7 @@ const Conducteur = () => {
                         }}
                         disabled={loading}
                       >
-                        {loading ? "Loading..." : "Rejoignez Nous"}
+                        {loading ? `${progress}%` : "Rejoignez Nous"}
                       </Button>
                     ) : (
                       <Button
@@ -877,11 +954,12 @@ const Conducteur = () => {
                         onClick={handleNext}
                         disabled={loading}
                       >
-                        {loading ? "Loading..." : "Suivant"}
+                        {loading ? `${progress}%` : "Suivant"}
                       </Button>
                     )}
                   </div>
                 )}
+
               </div>
             </div>
           </form>
