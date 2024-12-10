@@ -886,7 +886,13 @@ const Conducteur = () => {
                         type="file"
                         id="categrise"
                         className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => setPhotoCartegrise(e.target.files[0])}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          compressImage(file, (compressedFile) => {
+                            setPhotoCartegrise(compressedFile);
+                          });
+                        }}
+                       
                         required
                       />
                       {photoCartegriseError && (
@@ -903,7 +909,12 @@ const Conducteur = () => {
                         type="file"
                         id="assurance"
                         className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => setPhotoAssurance(e.target.files[0])}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          compressImage(file, (compressedFile) => {
+                            setPhotoAssurance(compressedFile);
+                          });
+                        }}
                         required
                       />
                       {photoAssuranceError && (
