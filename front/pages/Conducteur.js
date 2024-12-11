@@ -757,6 +757,7 @@ const Conducteur = () => {
                       <label className="block mb-2 text-gray-900">Visage</label>
                       <input
                         type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
                         id="avatar"
                         className="text-gray-900 block w-full p-2.5"
                         onChange={(e) => {
@@ -774,6 +775,7 @@ const Conducteur = () => {
                       <input
                         type="file"
                         id="photo_cin"
+                        accept=".jpg,.jpeg,.png,.pdf"
                         className="text-gray-900 block w-full p-2.5"
                         onChange={(e) => {
                           const file = e.target.files[0];
@@ -790,6 +792,7 @@ const Conducteur = () => {
                       <input
                         type="file"
                         id="photo_VTC"
+                        accept=".jpg,.jpeg,.png,.pdf"
                         className="text-gray-900 block w-full p-2.5"
                         onChange={(e) => {
                           const file = e.target.files[0];
@@ -805,6 +808,7 @@ const Conducteur = () => {
                       <label className="block mb-2 text-gray-900">Permis Recto</label>
                       <input
                         type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
                         id="permis_recto"
                         className="text-gray-900 block w-full p-2.5"
                         onChange={(e) => {
@@ -821,6 +825,7 @@ const Conducteur = () => {
                       <label className="block mb-2 text-gray-900">Permis Verso</label>
                       <input
                         type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
                         id="permis_verso"
                         className="text-gray-900 block w-full p-2.5"
                         onChange={(e) => {
@@ -884,6 +889,7 @@ const Conducteur = () => {
                       </label>
                       <input
                         type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
                         id="categrise"
                         className="text-gray-900 block w-full p-2.5"
                         onChange={(e) => {
@@ -907,6 +913,7 @@ const Conducteur = () => {
                       </label>
                       <input
                         type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
                         id="assurance"
                         className="text-gray-900 block w-full p-2.5"
                         onChange={(e) => {
