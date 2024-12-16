@@ -18,7 +18,7 @@ import {
 
 const Conducteur = () => {
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ["Information Personnelles", "Documents", "Condition"];
+  const steps = ["Information Personnelles", "Documents", "Détails Véhicule"];
   const [isSubmitted, setIsSubmitted] = useState(false);
   const checkChauffeur = async () => {
     try {
@@ -935,7 +935,12 @@ const Conducteur = () => {
                   </div>
 
                 )}
-               
+                {activeStep === 2 && (
+                  <div>
+                   
+                    
+                  </div>
+                )}
               </div>
               <div className="mt-2">
                 {activeStep === steps.length ? (
