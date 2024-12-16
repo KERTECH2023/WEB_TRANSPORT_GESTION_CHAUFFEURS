@@ -18,7 +18,7 @@ import {
 
 const Conducteur = () => {
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ["Information Personnelles", "Documents"];
+  const steps = ["Information Personnelles", "Documents", "Condition"];
   const [isSubmitted, setIsSubmitted] = useState(false);
   const checkChauffeur = async () => {
     try {
@@ -949,7 +949,18 @@ const Conducteur = () => {
                     <Button disabled={activeStep === 0} onClick={handleBack}>
                       Retour
                     </Button>
-                    { activeStep === steps.length - 1  ? (
+                    {activeStep === steps.length - 2 ? (
+                      <Button
+                        id="sub_btn"
+                        type="submit"
+                        value="login"
+                        variant="contained"
+                        color="primary"
+                        disabled={loading}
+                      >
+                        {loading ? `${progress}%` : "Suivant"}
+                      </Button>
+                    ) : activeStep === steps.length - 1 ? (
                       <Button
                         id="sub_btn"
                         type="submit"
@@ -970,7 +981,7 @@ const Conducteur = () => {
                         onClick={handleNext}
                         disabled={loading}
                       >
-                        {loading ? `${progress}%` : "Suivants"}
+                        {loading ? `${progress}%` : "Suivant"}
                       </Button>
                     )}
                   </div>
