@@ -968,6 +968,7 @@ const Conducteur = () => {
                         variant="contained"
                         color="primary"
                         onClick={(e) => {
+                          handleNext;
                           handleCarDetailsSubmit(e);
                         }}
                         disabled={loading}
@@ -978,14 +979,11 @@ const Conducteur = () => {
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={(e) => {
-                          handleNext;
-                          handleCarDetailsSubmit(e);
-                          
-                        }}
+                        
+                        
                         disabled={loading}
                       >
-                        {loading ? `${progress}%` : "Suivant"}
+                        {loading ? `${progress}%` : "Suivantgg"}
                       </Button>
                     )}
                   </div>
