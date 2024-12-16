@@ -981,7 +981,7 @@ const Conducteur = () => {
                         onClick={handleNext}
                         disabled={loading}
                       >
-                        {loading ? `${progress}%` : "Suivant"}
+                        {loading ? `${progress}%` : "Suivantss"}
                       </Button>
                     )}
                   </div>
