@@ -949,7 +949,7 @@ const Conducteur = () => {
                     <Button disabled={activeStep === 0} onClick={handleBack}>
                       Retour
                     </Button>
-                    {activeStep === steps.length - 1 ? (
+                    {activeStep === steps.length - 2 ? (
                       <Button
                         id="sub_btn"
                         type="submit"
@@ -960,7 +960,21 @@ const Conducteur = () => {
                       >
                         {loading ? `${progress}%` : "Suivant"}
                       </Button>
-                    )  : (
+                    ) : activeStep === steps.length - 1 ? (
+                      <Button
+                        id="sub_btn"
+                        type="submit"
+                        value="login"
+                        variant="contained"
+                        color="primary"
+                        onClick={(e) => {
+                          handleCarDetailsSubmit(e);
+                        }}
+                        disabled={loading}
+                      >
+                        {loading ? `${progress}%` : "Rejoignez Nous"}
+                      </Button>
+                    ) : (
                       <Button
                         variant="contained"
                         color="primary"
@@ -971,7 +985,7 @@ const Conducteur = () => {
                         }}
                         disabled={loading}
                       >
-                        {loading ? `${progress}%` : "Rejoignez Nous"}
+                        {loading ? `${progress}%` : "Suivant"}
                       </Button>
                     )}
                   </div>
