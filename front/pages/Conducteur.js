@@ -838,14 +838,11 @@ const Conducteur = () => {
                       />
                     </div>
 
-                    {/* Other attachment fields */}
-                  </div>
-                )}
-                {activeStep === 2 && (
-                  <div>
+
                     <Typography variant="h5" gutterBottom>
                       Détails Véhicule
                     </Typography>
+
                     <div className="col-span-1 row-span-1  p-4 px-8 border">
                       <label className="block mb-2 text-gray-900">
                         Immatriculation
@@ -930,8 +927,15 @@ const Conducteur = () => {
                         </label>
                       )}
                     </div>
+
+ 
+
+
+                    {/* Other attachment fields */}
                   </div>
+
                 )}
+               
               </div>
               <div className="mt-2">
                 {activeStep === steps.length ? (
