@@ -838,11 +838,6 @@ const Conducteur = () => {
                       />
                     </div>
 
-                    {/* Other attachment fields */}
-                  </div>
-                )}
-                {activeStep === 2 && (
-                  <div>
                     <Typography variant="h5" gutterBottom>
                       Détails Véhicule
                     </Typography>
@@ -930,6 +925,13 @@ const Conducteur = () => {
                         </label>
                       )}
                     </div>
+
+                    {/* Other attachment fields */}
+                  </div>
+                )}
+                {activeStep === 2 && (
+                  <div>
+                    
                   </div>
                 )}
               </div>
