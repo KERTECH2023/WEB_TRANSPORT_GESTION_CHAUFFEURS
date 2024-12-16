@@ -18,7 +18,7 @@ import {
 
 const Conducteur = () => {
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ["Information Personnelles", "Documents", "Détails Véhicule"];
+  const steps = ["Information Personnelles", "Documents"];
   const [isSubmitted, setIsSubmitted] = useState(false);
   const checkChauffeur = async () => {
     try {
@@ -119,8 +119,10 @@ const Conducteur = () => {
       setLoading(true); // Start loading
 
       try {
-        // Call handleSubmit function
-        await handleSubmit();
+      
+          // Call handleSubmit function
+          await handleSubmit();
+          await handleCarDetailsSubmit();
 
         // Move to next step
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -929,11 +931,7 @@ const Conducteur = () => {
                     {/* Other attachment fields */}
                   </div>
                 )}
-                {activeStep === 2 && (
-                  <div>
-                    
-                  </div>
-                )}
+                
               </div>
               <div className="mt-2">
                 {activeStep === steps.length ? (
@@ -947,7 +945,7 @@ const Conducteur = () => {
                     <Button disabled={activeStep === 0} onClick={handleBack}>
                       Retour
                     </Button>
-                    {activeStep === steps.length - 2 ? (
+                    {activeStep === steps.length - 1 ? (
                       <Button
                         id="sub_btn"
                         type="submit"
@@ -958,27 +956,11 @@ const Conducteur = () => {
                       >
                         {loading ? `${progress}%` : "Suivant"}
                       </Button>
-                    ) : activeStep === steps.length - 1 ? (
-                      <Button
-                        id="sub_btn"
-                        type="submit"
-                        value="login"
-                        variant="contained"
-                        color="primary"
-                      
-                        disabled={loading}
-                      >
-                        {loading ? `${progress}%` : "Rejoignez Nous"}
-                      </Button>
-                    ) : (
+                    )  : (
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={(e) => {
-                          handleNext;
-                          handleCarDetailsSubmit(e);
-                        }}
-                  
+                        onClick={handleNext}
                         disabled={loading}
                       >
                         {loading ? `${progress}%` : "Suivant"}
