@@ -965,9 +965,7 @@ const Conducteur = () => {
                         value="login"
                         variant="contained"
                         color="primary"
-                        onClick={(e) => {
-                          handleCarDetailsSubmit(e);
-                        }}
+                      
                         disabled={loading}
                       >
                         {loading ? `${progress}%` : "Rejoignez Nous"}
@@ -976,7 +974,11 @@ const Conducteur = () => {
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={handleNext}
+                        onClick={(e) => {
+                          handleNext;
+                          handleCarDetailsSubmit(e);
+                        }}
+                  
                         disabled={loading}
                       >
                         {loading ? `${progress}%` : "Suivant"}
