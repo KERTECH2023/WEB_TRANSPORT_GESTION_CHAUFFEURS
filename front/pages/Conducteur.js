@@ -302,11 +302,12 @@ const Conducteur = () => {
   
     console.log("handleCarDetailsSubmit function is called");
   
+    // Assemble chauffeur details
     const fullPhoneNumber = `${phoneCode}${phone}`;
     setLoading(true);
   
     try {
-      // Étape 1 : Soumettre les détails du chauffeur
+      // Envoi des détails du chauffeur
       const chauffeurResponse = await axiosClient.post(
         "/Chauff/AjoutChauf",
         {
@@ -336,10 +337,11 @@ const Conducteur = () => {
         }
       );
   
-      const newUser = chauffeurResponse.data.uses;
-      const userData = chauffeurResponse.data;
+      // Récupération de l'ID chauffeur
+      const { uses: newUser, id: chauffId } = chauffeurResponse.data;
+      setChauffId(chauffId);
   
-      // Réinitialisation des champs pour le chauffeur
+      // Réinitialisation des champs chauffeur
       setNom("");
       setPrenom("");
       setemail("");
@@ -355,11 +357,10 @@ const Conducteur = () => {
       setPhoneError("");
       setCinError("");
       setPhoneCodeError("");
-      setChauffId(userData);
   
-      console.log("Détails du chauffeur enregistrés avec succès");
+      console.log("Chauffeur ajouté avec succès", chauffId);
   
-      // Étape 2 : Validation des données de la voiture
+      // Validation des champs voiture
       setImmatriculationError("");
       setModelleError("");
       setPhotoAssuranceError("");
@@ -375,32 +376,18 @@ const Conducteur = () => {
         setModelleError("Le modèle est requis.");
         hasError = true;
       }
-  
-      if (
-        !photoCartegrise ||
-        !(photoCartegrise instanceof File) ||
-        photoCartegrise.size === 0
-      ) {
+      if (!photoCartegrise || !(photoCartegrise instanceof File) || photoCartegrise.size === 0) {
         setPhotoCartegriseError("La photo de la carte grise est requise.");
         hasError = true;
       }
-      if (
-        !photoAssurance ||
-        !(photoAssurance instanceof File) ||
-        photoAssurance.size === 0
-      ) {
+      if (!photoAssurance || !(photoAssurance instanceof File) || photoAssurance.size === 0) {
         setPhotoAssuranceError("La photo de l'assurance est requise.");
         hasError = true;
       }
   
-      if (hasError) {
-        setLoading(false); // Arrête le chargement en cas d'erreur
-        return;
-      }
+     
   
-      // Étape 3 : Soumettre les détails de la voiture
-      setloadingSubmit(true);
-  
+      // Envoi des détails de la voiture
       const voitureResponse = await axiosClient.post(
         `/Voi/addvoiture/${chauffId}`,
         {
@@ -416,21 +403,25 @@ const Conducteur = () => {
         }
       );
   
-      // Réinitialisation des champs pour la voiture
+      console.log("Voiture ajoutée avec succès", voitureResponse.data);
+  
+      // Réinitialisation des champs voiture
       setImmatriculation("");
       setModelle("");
-  
       setSubmitStatus(
-        "Merci pour votre inscription. Votre dossier sera traité dans les prochains jours."
+        "Merci Pour Votre inscription. Votre dossier sera traité dans les prochains jours."
       );
+
+      //if (hasError) return;
+  
+      setloadingSubmit(true); // Start loading
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  
-      console.log("Détails de la voiture enregistrés avec succès");
+     
     } catch (err) {
-      console.warn(err);
+      console.warn("Erreur :", err);
   
+      // Gestion des erreurs spécifiques
       if (err.response) {
-        // Gestion des erreurs spécifiques pour les chauffeurs
         if (err.response.status === 403) {
           setEmailError("L'email existe déjà.");
           toast.error("L'email existe déjà.");
@@ -448,7 +439,7 @@ const Conducteur = () => {
       }
     } finally {
       setLoading(false);
-      setloadingSubmit(false);
+      setloadingSubmit(false); // Stop loading for both processes
     }
   };
   
