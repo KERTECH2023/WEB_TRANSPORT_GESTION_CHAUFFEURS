@@ -310,9 +310,36 @@ const Conducteur = () => {
 
     // Assemble chauffeur details
     const fullPhoneNumber = `${phoneCode}${phone}`;
-   
+    setLoading(true);
 
     try {
+
+       
+      let hasError = false;
+
+      if (!immatriculation) {
+        setImmatriculationError("L'immatriculation est requise.");
+        hasError = true;
+      }
+      if (!modelle) {
+        setModelleError("Le modèle est requis.");
+        hasError = true;
+      }
+      if (!photoCartegrise || !(photoCartegrise instanceof File) || photoCartegrise.size === 0) {
+        setPhotoCartegriseError("La photo de la carte grise est requise.");
+        hasError = true;
+      }
+      if (!photoAssurance || !(photoAssurance instanceof File) || photoAssurance.size === 0) {
+        setPhotoAssuranceError("La photo de l'assurance est requise.");
+        hasError = true;
+      }
+
+      
+      if (hasError) return;
+
+
+
+
       // Envoi des détails du chauffeur
       const chauffeurResponse = await axiosClient.post(
         "/Chauff/AjoutChauf",
@@ -372,28 +399,8 @@ const Conducteur = () => {
       setPhotoAssuranceError("");
       setPhotoCartegriseError("");
 
-      let hasError = false;
 
-      if (!immatriculation) {
-        setImmatriculationError("L'immatriculation est requise.");
-        hasError = true;
-      }
-      if (!modelle) {
-        setModelleError("Le modèle est requis.");
-        hasError = true;
-      }
-      if (!photoCartegrise || !(photoCartegrise instanceof File) || photoCartegrise.size === 0) {
-        setPhotoCartegriseError("La photo de la carte grise est requise.");
-        hasError = true;
-      }
-      if (!photoAssurance || !(photoAssurance instanceof File) || photoAssurance.size === 0) {
-        setPhotoAssuranceError("La photo de l'assurance est requise.");
-        hasError = true;
-      }
-
-      if (hasError) return;
-
-      
+      setloadingSubmit(true); // Start loading
 
       setChauffId(userData);
 
@@ -416,9 +423,6 @@ const Conducteur = () => {
 
       console.log("Voiture ajoutée avec succès", response.data);
 
-      setLoading(true);
-
-      setloadingSubmit(true); // Start loading
       setSubmitStatus(
         "Merci Pour Votre inscription votre dossier sera traité dans les prochains jours"
       );
