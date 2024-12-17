@@ -326,11 +326,14 @@ const Conducteur = () => {
     e.preventDefault();
     console.log("handleSubmit function is called");
 
+    // Création du numéro de téléphone complet
     const fullPhoneNumber = `${phoneCode}${phone}`;
 
+    // Activation de l'état de chargement
     setLoading(true);
 
     try {
+      // Envoi de la requête POST pour l'ajout du chauffeur
       const response = await axiosClient.post(
         "/Chauff/AjoutChauf",
         {
@@ -360,7 +363,7 @@ const Conducteur = () => {
         }
       );
 
-      const newUser = response.data.uses;
+      // Réinitialisation des champs du formulaire
       setNom("");
       setPrenom("");
       setemail("");
@@ -372,17 +375,110 @@ const Conducteur = () => {
       setcnicNo("");
       setaddress("");
       setpostalCode("");
+      
+      // Réinitialisation des états d'erreur
       setEmailError("");
       setPhoneError("");
       setCinError("");
       setPhoneCodeError("");
 
+      // Récupération et stockage des données utilisateur
       const userData = response.data;
       setChauffId(userData);
 
+      // Appel de la fonction de soumission des détails de la voiture
+      const handleCarDetailsSubmit = async () => {
+        console.log("handleCarDetailsSubmit function is called");
+
+        // Réinitialisation des états d'erreur pour les détails de la voiture
+        setImmatriculationError("");
+        setModelleError("");
+        setPhotoAssuranceError("");
+        setPhotoCartegriseError("");
+
+        let hasError = false;
+
+        // Validation des champs de la voiture
+        if (!immatriculation) {
+          setImmatriculationError("L'immatriculation est requise.");
+          hasError = true;
+        }
+        if (!modelle) {
+          setModelleError("Le modèle est requis.");
+          hasError = true;
+        }
+
+        // Validation de la photo de la carte grise
+        if (
+          !photoCartegrise ||
+          !(photoCartegrise instanceof File) ||
+          photoCartegrise.size === 0
+        ) {
+          setPhotoCartegriseError("La photo de la carte grise est requise.");
+          hasError = true;
+        }
+
+        // Validation de la photo d'assurance
+        if (
+          !photoAssurance ||
+          !(photoAssurance instanceof File) ||
+          photoAssurance.size === 0
+        ) {
+          setPhotoAssuranceError("La photo de l'assurance est requise.");
+          hasError = true;
+        }
+
+        // Arrêt si des erreurs sont présentes
+        if (hasError) return;
+
+        // Activation de l'état de chargement pour la soumission
+        setloadingSubmit(true);
+
+        try {
+          // Envoi de la requête POST pour l'ajout de la voiture
+          const response = await axiosClient.post(
+            `/Voi/addvoiture/${chauffId}`,
+            {
+              photoCartegrise,
+              photoAssurance,
+              immatriculation,
+              modelle,
+            },
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+
+          // Message de succès
+          setSubmitStatus(
+            "Merci Pour Votre inscription votre dossier sera traité dans les prochains jours"
+          );
+
+          // Réinitialisation des champs de la voiture
+          setImmatriculation("");
+          setModelle("");
+
+
+        } catch (err) {
+          console.warn(err);
+        } finally {
+          // Désactivation de l'état de chargement
+          setloadingSubmit(false);
+        }
+      };
+
+      // Exécution de la fonction de soumission des détails de la voiture
+      await handleCarDetailsSubmit();
+
+      // Passage à l'étape suivante
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
+
     } catch (err) {
       console.warn(err);
+      
+      // Gestion des erreurs spécifiques
       if (err.response) {
         if (err.response.status === 403) {
           setEmailError("l'email existe déjà");
@@ -390,12 +486,14 @@ const Conducteur = () => {
         } else {
           setEmailError("");
         }
+        
         if (err.response.data.phoneExists) {
           setPhoneError("Phone already exists");
           toast.error(`${phoneError}`);
         } else {
           setPhoneError("");
         }
+        
         if (err.response.data.cinExists) {
           setCinError("CIN already exists");
           toast.error(`${cinError}`);
@@ -403,9 +501,11 @@ const Conducteur = () => {
           setCinError("");
         }
       } else {
+        // Message d'erreur générique
         toast.error(`Merci de verifier vos données`);
       }
     } finally {
+      // Désactivation de l'état de chargement
       setLoading(false);
     }
   };
@@ -1034,7 +1134,7 @@ const Conducteur = () => {
                         color="primary"
                         onClick={(e) => {
                           handleNext(e);
-                          handleCarDetailsSubmit(e);
+                          
                         }}
                         disabled={loading}
                       >
