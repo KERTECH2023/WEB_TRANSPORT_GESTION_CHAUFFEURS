@@ -360,50 +360,8 @@ const Conducteur = () => {
   
       console.log("Chauffeur ajouté avec succès", chauffId);
   
-      // Validation des champs voiture
-      setImmatriculationError("");
-      setModelleError("");
-      setPhotoAssuranceError("");
-      setPhotoCartegriseError("");
-  
-      let hasError = false;
-  
-      if (!immatriculation) {
-        setImmatriculationError("L'immatriculation est requise.");
-        hasError = true;
-      }
-      if (!modelle) {
-        setModelleError("Le modèle est requis.");
-        hasError = true;
-      }
-      if (!photoCartegrise || !(photoCartegrise instanceof File) || photoCartegrise.size === 0) {
-        setPhotoCartegriseError("La photo de la carte grise est requise.");
-        hasError = true;
-      }
-      if (!photoAssurance || !(photoAssurance instanceof File) || photoAssurance.size === 0) {
-        setPhotoAssuranceError("La photo de l'assurance est requise.");
-        hasError = true;
-      }
-  
+      
      
-  
-      // Envoi des détails de la voiture
-      const voitureResponse = await axiosClient.post(
-        `/Voi/addvoiture/${chauffId}`,
-        {
-          photoCartegrise,
-          photoAssurance,
-          immatriculation,
-          modelle,
-        },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-  
-      console.log("Voiture ajoutée avec succès", voitureResponse.data);
   
       // Réinitialisation des champs voiture
       setImmatriculation("");
@@ -442,6 +400,80 @@ const Conducteur = () => {
       setloadingSubmit(false); // Stop loading for both processes
     }
   };
+
+
+
+  const handleCarDetailsSubmits = async (e) => {
+    e.preventDefault();
+    console.log("handleCarDetailsSubmit function is called");
+
+    setImmatriculationError("");
+    setModelleError("");
+    setPhotoAssuranceError("");
+    setPhotoCartegriseError("");
+
+    let hasError = false;
+
+    if (!immatriculation) {
+      setImmatriculationError("L'immatriculation est requise.");
+      hasError = true;
+    }
+    if (!modelle) {
+      setModelleError("Le modèle est requis.");
+      hasError = true;
+    }
+
+    if (
+      !photoCartegrise ||
+      !(photoCartegrise instanceof File) ||
+      photoCartegrise.size === 0
+    ) {
+      setPhotoCartegriseError("La photo de la carte grise est requise.");
+      hasError = true;
+    }
+    if (
+      !photoAssurance ||
+      !(photoAssurance instanceof File) ||
+      photoAssurance.size === 0
+    ) {
+      setPhotoAssuranceError("La photo de l'assurance est requise.");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    setloadingSubmit(true); // Start loading
+
+    try {
+      const response = await axiosClient.post(
+        `/Voi/addvoiture/${chauffId}`,
+        {
+          photoCartegrise,
+          photoAssurance,
+          immatriculation,
+          modelle,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setSubmitStatus(
+        "Merci Pour Votre inscription votre dossier sera traité dans les prochains jours"
+      );
+      setImmatriculation("");
+      setModelle("");
+
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    } catch (err) {
+      console.warn(err);
+    } finally {
+      setloadingSubmit(false); // Stop loading
+    }
+  };
+
   
 
   return (
@@ -958,6 +990,7 @@ const Conducteur = () => {
                         color="primary"
                         onClick={(e) => {
                           handleCarDetailsSubmit(e);
+                          handleCarDetailsSubmits(e);
                         }}
                         disabled={loading}
                       >
