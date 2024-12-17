@@ -936,15 +936,16 @@ const Conducteur = () => {
                     <div className="col-span-1 row-span-1 p-4 px-8 border">
                       <div className="flex items-start">
                         <input
-                          type="checkbox"
-                          id="termsCheckbox"
+                          type="radio"
+                          id="termsRadio"
+                          name="termsRadioGroup"
                           className="mr-3 mt-1 h-5 w-5 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
                           checked={isChecked}
                           onChange={(e) => setIsChecked(e.target.checked)}
                           required
                           aria-label="J'accepte les conditions générales"
                         />
-                        <label htmlFor="termsCheckbox" className="text-gray-900 leading-6">
+                        <label htmlFor="termsRadio" className="text-gray-900 leading-6">
                           J'accepte les{" "}
                           <a
                             href="https://firebasestorage.googleapis.com/v0/b/prd-transport.appspot.com/o/Condition%20G%C3%A9n%C3%A9rale.pdf?alt=media&token=53dd298c-e1e1-4964-86af-935f37e9e2f7"
@@ -957,6 +958,7 @@ const Conducteur = () => {
                         </label>
                       </div>
                     </div>
+
 
 
                   </div>
