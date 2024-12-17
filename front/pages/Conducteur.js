@@ -114,13 +114,82 @@ const Conducteur = () => {
 
       // Proceed to next step
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    } else if (activeStep === 1) {
+    } else if (activeStep === 3) {
       // For step 2 (activeStep === 1)
       setLoading(true); // Start loading
 
       try {
         // Call handleSubmit function
         await handleSubmit();
+
+      } catch (error) {
+        console.error("Error in handleSubmit:", error);
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    }
+  };
+
+  const handleNexts = async () => {
+    if (activeStep === 0) {
+      // Check required fields
+      if (
+        !Nom ||
+        !Prenom ||
+        !email ||
+        !cnicNo ||
+        !phone ||
+        !civilite ||
+        !DateNaissance ||
+        !address ||
+        !postalCode ||
+        !ville ||
+        !pays ||
+        !typeChauffeur ||
+        !phoneCode
+      ) {
+        setNomError(!Nom ? "Veuillez entrer votre Nom" : "");
+        setPrenError(!Prenom ? "Veuillez entrer votre Prénom" : "");
+        setEmailError(!email ? "Veuillez entrer votre Email" : "");
+        setCinError(!cnicNo ? "Veuillez entrer votre Numéro de Permis" : "");
+        setPhoneError(
+          !phone ? "Veuillez entrer votre Numéro de Téléphone" : ""
+        );
+        setCiviliteError(
+          !civilite ? "Veuillez sélectionner votre Civilité" : ""
+        );
+        setDateNaissanceError(
+          !DateNaissance ? "Veuillez entrer votre Date de Naissance" : ""
+        );
+        setAddressError(!address ? "Veuillez entrer votre Adresse" : "");
+        setPostalCodeError(
+          !postalCode ? "Veuillez entrer votre Code Postal" : ""
+        );
+        setVilleError(!ville ? "Veuillez entrer votre Ville" : "");
+        setPaysError(!pays ? "Veuillez entrer votre Pays" : "");
+        setTypeChauffeurError(
+          !typeChauffeur ? "Veuillez sélectionner votre Type de Chauffeur" : ""
+        );
+
+        setPhoneCodeError(!phoneCode ? "Requis" : "");
+
+        return;
+      }
+
+      const chauffeurExists = await checkChauffeur();
+
+      if (!chauffeurExists) {
+        return;
+      }
+
+      // Proceed to next step
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    } else if (activeStep === 1) {
+      // For step 2 (activeStep === 1)
+      setLoading(true); // Start loading
+
+      try {
+       
 
         // Move to next step
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -964,6 +1033,7 @@ const Conducteur = () => {
                         variant="contained"
                         color="primary"
                         onClick={(e) => {
+                          handleNext(e);
                           handleCarDetailsSubmit(e);
                         }}
                         disabled={loading}
@@ -974,7 +1044,7 @@ const Conducteur = () => {
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={handleNext}
+                        onClick={handleNexts}
                         disabled={loading}
                       >
                         {loading ? `${progress}%` : "Suivant"}
