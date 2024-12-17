@@ -135,6 +135,11 @@ const Conducteur = () => {
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
+
+  const [acceptTerms, setAcceptTerms] = useState(false);
+
+
+
   const [chauffId, setChauffId] = useState();
   const [immatriculation, setImmatriculation] = useState();
   const [modelle, setModelle] = useState();
@@ -954,7 +959,9 @@ const Conducteur = () => {
                       {/* Bouton pour valider */}
                       <button
                         type="button"
-                        className={`mt-4 p-2 rounded ${acceptTerms ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        className={`mt-4 p-2 rounded ${acceptTerms
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
                           }`}
                         disabled={!acceptTerms}
                         onClick={() => {
