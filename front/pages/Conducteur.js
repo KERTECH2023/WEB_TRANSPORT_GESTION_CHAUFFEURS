@@ -388,6 +388,10 @@ const Conducteur = () => {
       if (hasError) return;
 
       setloadingSubmit(true); // Start loading
+
+      setChauffId(userData);
+      console.log("Chauffeur ajouté avec succès userdata", userData);
+      console.log("Chauffeur ajouté avec succès id ", chauffId);
   
       // Envoi des détails de la voiture
       const response = await axiosClient.post(
