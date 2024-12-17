@@ -114,82 +114,13 @@ const Conducteur = () => {
 
       // Proceed to next step
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    } else if (activeStep === 3) {
+    } else if (activeStep === 1) {
       // For step 2 (activeStep === 1)
       setLoading(true); // Start loading
 
       try {
         // Call handleSubmit function
         await handleSubmit();
-
-      } catch (error) {
-        console.error("Error in handleSubmit:", error);
-      } finally {
-        setLoading(false); // Stop loading
-      }
-    }
-  };
-
-  const handleNexts = async () => {
-    if (activeStep === 0) {
-      // Check required fields
-      if (
-        !Nom ||
-        !Prenom ||
-        !email ||
-        !cnicNo ||
-        !phone ||
-        !civilite ||
-        !DateNaissance ||
-        !address ||
-        !postalCode ||
-        !ville ||
-        !pays ||
-        !typeChauffeur ||
-        !phoneCode
-      ) {
-        setNomError(!Nom ? "Veuillez entrer votre Nom" : "");
-        setPrenError(!Prenom ? "Veuillez entrer votre Prénom" : "");
-        setEmailError(!email ? "Veuillez entrer votre Email" : "");
-        setCinError(!cnicNo ? "Veuillez entrer votre Numéro de Permis" : "");
-        setPhoneError(
-          !phone ? "Veuillez entrer votre Numéro de Téléphone" : ""
-        );
-        setCiviliteError(
-          !civilite ? "Veuillez sélectionner votre Civilité" : ""
-        );
-        setDateNaissanceError(
-          !DateNaissance ? "Veuillez entrer votre Date de Naissance" : ""
-        );
-        setAddressError(!address ? "Veuillez entrer votre Adresse" : "");
-        setPostalCodeError(
-          !postalCode ? "Veuillez entrer votre Code Postal" : ""
-        );
-        setVilleError(!ville ? "Veuillez entrer votre Ville" : "");
-        setPaysError(!pays ? "Veuillez entrer votre Pays" : "");
-        setTypeChauffeurError(
-          !typeChauffeur ? "Veuillez sélectionner votre Type de Chauffeur" : ""
-        );
-
-        setPhoneCodeError(!phoneCode ? "Requis" : "");
-
-        return;
-      }
-
-      const chauffeurExists = await checkChauffeur();
-
-      if (!chauffeurExists) {
-        return;
-      }
-
-      // Proceed to next step
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    } else if (activeStep === 1) {
-      // For step 2 (activeStep === 1)
-      setLoading(true); // Start loading
-
-      try {
-       
 
         // Move to next step
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -324,190 +255,7 @@ const Conducteur = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("handleSubmit function is called");
-
-    // Création du numéro de téléphone complet
-    const fullPhoneNumber = `${phoneCode}${phone}`;
-
-    // Activation de l'état de chargement
-    setLoading(true);
-
-    try {
-      // Envoi de la requête POST pour l'ajout du chauffeur
-      const response = await axiosClient.post(
-        "/Chauff/AjoutChauf",
-        {
-          Nom,
-          Prenom,
-          email,
-          fullPhoneNumber,
-          photoAvatar,
-          photoCin,
-          photoPermisRec,
-          photoPermisVer,
-          photoVtc,
-          civilite,
-          DateNaissance,
-          Nationalite,
-          cnicNo,
-          address,
-          postalCode,
-          ville,
-          pays,
-          typeChauffeur,
-        },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      // Réinitialisation des champs du formulaire
-      setNom("");
-      setPrenom("");
-      setemail("");
-      setphone("");
-      document.getElementById("login").reset();
-      setCivilite("");
-      setDateNaissance("");
-      setNationalite("");
-      setcnicNo("");
-      setaddress("");
-      setpostalCode("");
-      
-      // Réinitialisation des états d'erreur
-      setEmailError("");
-      setPhoneError("");
-      setCinError("");
-      setPhoneCodeError("");
-
-      // Récupération et stockage des données utilisateur
-      const userData = response.data;
-      setChauffId(userData);
-
-      // Appel de la fonction de soumission des détails de la voiture
-      const handleCarDetailsSubmit = async () => {
-        console.log("handleCarDetailsSubmit function is called");
-
-        // Réinitialisation des états d'erreur pour les détails de la voiture
-        setImmatriculationError("");
-        setModelleError("");
-        setPhotoAssuranceError("");
-        setPhotoCartegriseError("");
-
-        let hasError = false;
-
-        // Validation des champs de la voiture
-        if (!immatriculation) {
-          setImmatriculationError("L'immatriculation est requise.");
-          hasError = true;
-        }
-        if (!modelle) {
-          setModelleError("Le modèle est requis.");
-          hasError = true;
-        }
-
-        // Validation de la photo de la carte grise
-        if (
-          !photoCartegrise ||
-          !(photoCartegrise instanceof File) ||
-          photoCartegrise.size === 0
-        ) {
-          setPhotoCartegriseError("La photo de la carte grise est requise.");
-          hasError = true;
-        }
-
-        // Validation de la photo d'assurance
-        if (
-          !photoAssurance ||
-          !(photoAssurance instanceof File) ||
-          photoAssurance.size === 0
-        ) {
-          setPhotoAssuranceError("La photo de l'assurance est requise.");
-          hasError = true;
-        }
-
-        // Arrêt si des erreurs sont présentes
-        if (hasError) return;
-
-        // Activation de l'état de chargement pour la soumission
-        setloadingSubmit(true);
-
-        try {
-          // Envoi de la requête POST pour l'ajout de la voiture
-          const response = await axiosClient.post(
-            `/Voi/addvoiture/${chauffId}`,
-            {
-              photoCartegrise,
-              photoAssurance,
-              immatriculation,
-              modelle,
-            },
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-
-          // Message de succès
-          setSubmitStatus(
-            "Merci Pour Votre inscription votre dossier sera traité dans les prochains jours"
-          );
-
-          // Réinitialisation des champs de la voiture
-          setImmatriculation("");
-          setModelle("");
-
-
-        } catch (err) {
-          console.warn(err);
-        } finally {
-          // Désactivation de l'état de chargement
-          setloadingSubmit(false);
-        }
-      };
-
-      // Exécution de la fonction de soumission des détails de la voiture
-      await handleCarDetailsSubmit();
-
-      // Passage à l'étape suivante
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
-
-    } catch (err) {
-      console.warn(err);
-      
-      // Gestion des erreurs spécifiques
-      if (err.response) {
-        if (err.response.status === 403) {
-          setEmailError("l'email existe déjà");
-          toast.error(`${emailError}`);
-        } else {
-          setEmailError("");
-        }
-        
-        if (err.response.data.phoneExists) {
-          setPhoneError("Phone already exists");
-          toast.error(`${phoneError}`);
-        } else {
-          setPhoneError("");
-        }
-        
-        if (err.response.data.cinExists) {
-          setCinError("CIN already exists");
-          toast.error(`${cinError}`);
-        } else {
-          setCinError("");
-        }
-      } else {
-        // Message d'erreur générique
-        toast.error(`Merci de verifier vos données`);
-      }
-    } finally {
-      // Désactivation de l'état de chargement
-      setLoading(false);
-    }
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   function compressImage(file, callback) {
@@ -551,6 +299,95 @@ const Conducteur = () => {
 
   const handleCarDetailsSubmit = async (e) => {
     e.preventDefault();
+
+    console.log("handleSubmit function is called");
+
+    const fullPhoneNumber = `${phoneCode}${phone}`;
+
+    setLoading(true);
+
+    try {
+      const response = await axiosClient.post(
+        "/Chauff/AjoutChauf",
+        {
+          Nom,
+          Prenom,
+          email,
+          fullPhoneNumber,
+          photoAvatar,
+          photoCin,
+          photoPermisRec,
+          photoPermisVer,
+          photoVtc,
+          civilite,
+          DateNaissance,
+          Nationalite,
+          cnicNo,
+          address,
+          postalCode,
+          ville,
+          pays,
+          typeChauffeur,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const newUser = response.data.uses;
+      setNom("");
+      setPrenom("");
+      setemail("");
+      setphone("");
+      document.getElementById("login").reset();
+      setCivilite("");
+      setDateNaissance("");
+      setNationalite("");
+      setcnicNo("");
+      setaddress("");
+      setpostalCode("");
+      setEmailError("");
+      setPhoneError("");
+      setCinError("");
+      setPhoneCodeError("");
+
+      const userData = response.data;
+      setChauffId(userData);
+
+     
+    } catch (err) {
+      console.warn(err);
+      if (err.response) {
+        if (err.response.status === 403) {
+          setEmailError("l'email existe déjà");
+          toast.error(`${emailError}`);
+        } else {
+          setEmailError("");
+        }
+        if (err.response.data.phoneExists) {
+          setPhoneError("Phone already exists");
+          toast.error(`${phoneError}`);
+        } else {
+          setPhoneError("");
+        }
+        if (err.response.data.cinExists) {
+          setCinError("CIN already exists");
+          toast.error(`${cinError}`);
+        } else {
+          setCinError("");
+        }
+      } else {
+        toast.error(`Merci de verifier vos données`);
+      }
+    } finally {
+      setLoading(false);
+    }
+
+
+
+
     console.log("handleCarDetailsSubmit function is called");
 
     setImmatriculationError("");
@@ -1133,8 +970,7 @@ const Conducteur = () => {
                         variant="contained"
                         color="primary"
                         onClick={(e) => {
-                          handleNext(e);
-                          
+                          handleCarDetailsSubmit(e);
                         }}
                         disabled={loading}
                       >
@@ -1144,7 +980,7 @@ const Conducteur = () => {
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={handleNexts}
+                        onClick={handleNext}
                         disabled={loading}
                       >
                         {loading ? `${progress}%` : "Suivant"}
