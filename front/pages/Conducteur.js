@@ -403,7 +403,7 @@ const Conducteur = () => {
         }
 
         // Arrêt si des erreurs sont présentes
-        if (hasError) return;
+       //
 
         // Activation de l'état de chargement pour la soumission
         setloadingSubmit(true);
