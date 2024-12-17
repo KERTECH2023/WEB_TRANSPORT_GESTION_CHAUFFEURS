@@ -13,9 +13,17 @@ const firestoreServiceAccount = require("../firebase-key.json");
 const checkChauffeur = async (req, res) => {
   const { email, phone: phoneNumber, cnicNo, phoneCode } = req.body;
 
+  // Validation de l'entrée
+  if (!phoneNumber || !phoneCode) {
+    return res.status(400).json({
+      message: "Le numéro de téléphone et le code de pays sont requis.",
+    });
+  }
+
+  // Concaténer le code du pays avec le numéro de téléphone
   let phone = phoneCode + phoneNumber;
 
-  console.log(phoneCode);
+  console.log(phone); // Afficher le téléphone complet dans la console
 
   try {
     // Vérification du permis de conduire
@@ -29,6 +37,7 @@ const checkChauffeur = async (req, res) => {
         });
       }
     }
+
     // Vérification de l'email
     if (email) {
       const chauffeurByEmail = await Chauffeur.findOne({ email });
@@ -54,14 +63,13 @@ const checkChauffeur = async (req, res) => {
     }
 
     // Si aucun champ n'est dupliqué
-    return res
-      .status(200)
-      .json({ exists: false, message: "Chauffeur non trouvé" });
+    return res.status(200).json({ exists: false, message: "Chauffeur non trouvé" });
   } catch (error) {
     console.error("Erreur lors de la vérification du chauffeur:", error);
     return res.status(500).json({ message: "Erreur du serveur" });
   }
 };
+
 
 const register = async (req, res) => {
   // Extract data from req.body
