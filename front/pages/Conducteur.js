@@ -135,11 +135,6 @@ const Conducteur = () => {
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
-
-  const [acceptTerms, setAcceptTerms] = useState(false);
-
-
-
   const [chauffId, setChauffId] = useState();
   const [immatriculation, setImmatriculation] = useState();
   const [modelle, setModelle] = useState();
@@ -933,15 +928,12 @@ const Conducteur = () => {
                     </div>
 
                     <div className="col-span-1 row-span-1 p-4 px-8 border">
-                      {/* Checkbox pour accepter les conditions */}
                       <div className="flex items-center">
                         <input
                           type="checkbox"
                           id="termsCheckbox"
                           className="mr-2"
                           required
-                          checked={acceptTerms}
-                          onChange={(e) => setAcceptTerms(e.target.checked)}
                         />
                         <label htmlFor="termsCheckbox" className="text-gray-900">
                           J'accepte les{" "}
@@ -955,23 +947,6 @@ const Conducteur = () => {
                           </a>
                         </label>
                       </div>
-
-                      {/* Bouton pour valider */}
-                      <button
-                        type="button"
-                        className={`mt-4 p-2 rounded ${acceptTerms
-                            ? "bg-blue-600 text-white hover:bg-blue-700"
-                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          }`}
-                        disabled={!acceptTerms}
-                        onClick={() => {
-                          if (acceptTerms) {
-                            alert("Conditions acceptées !");
-                          }
-                        }}
-                      >
-                        Vérifier et Continuer
-                      </button>
                     </div>
 
                   </div>
