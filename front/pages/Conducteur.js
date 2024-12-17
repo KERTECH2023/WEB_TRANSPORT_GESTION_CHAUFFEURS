@@ -185,8 +185,8 @@ const Conducteur = () => {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const router = useRouter();
 
- 
-    const [progress, setProgress] = useState(0);
+
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     fetch("https://restcountries.com/v3.1/all")
@@ -299,13 +299,13 @@ const Conducteur = () => {
 
   const handleCarDetailsSubmit = async (e) => {
     e.preventDefault();
-  
+
     console.log("handleCarDetailsSubmit function is called");
-  
+
     // Assemble chauffeur details
     const fullPhoneNumber = `${phoneCode}${phone}`;
     setLoading(true);
-  
+
     try {
       // Envoi des détails du chauffeur
       const chauffeurResponse = await axiosClient.post(
@@ -336,8 +336,8 @@ const Conducteur = () => {
           },
         }
       );
-  
-     
+
+
       setNom("");
       setPrenom("");
       setemail("");
@@ -357,17 +357,17 @@ const Conducteur = () => {
       const userData = chauffeurResponse.data;
       setChauffId(userData);
       // Réinitialisation des champs chauffeur
-  
+
       console.log("Chauffeur ajouté avec succès", chauffId);
-  
+
       // Validation des champs voiture
       setImmatriculationError("");
       setModelleError("");
       setPhotoAssuranceError("");
       setPhotoCartegriseError("");
-  
+
       let hasError = false;
-  
+
       if (!immatriculation) {
         setImmatriculationError("L'immatriculation est requise.");
         hasError = true;
@@ -384,14 +384,14 @@ const Conducteur = () => {
         setPhotoAssuranceError("La photo de l'assurance est requise.");
         hasError = true;
       }
-  
+
       if (hasError) return;
 
       setloadingSubmit(true); // Start loading
 
       setChauffId(userData);
-      
-  
+
+
       // Envoi des détails de la voiture
       const response = await axiosClient.post(
         `/Voi/addvoiture/${userData}`,
@@ -407,22 +407,22 @@ const Conducteur = () => {
           },
         }
       );
-  
+
       console.log("Voiture ajoutée avec succès", response.data);
-  
+
       setSubmitStatus(
         "Merci Pour Votre inscription votre dossier sera traité dans les prochains jours"
       );
       setImmatriculation("");
       setModelle("");
 
-    
-      
+
+
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-     
+
     } catch (err) {
       console.warn("Erreur :", err);
-  
+
       // Gestion des erreurs spécifiques
       if (err.response) {
         if (err.response.status === 403) {
@@ -445,7 +445,7 @@ const Conducteur = () => {
       setloadingSubmit(false); // Stop loading for both processes
     }
   };
-  
+
 
   return (
     <Container>
@@ -894,7 +894,7 @@ const Conducteur = () => {
                             setPhotoCartegrise(compressedFile);
                           });
                         }}
-                       
+
                         required
                       />
                       {photoCartegriseError && (
@@ -926,6 +926,47 @@ const Conducteur = () => {
                         </label>
                       )}
                     </div>
+
+                    <div className="col-span-1 row-span-1 p-4 px-8 border">
+                      {/* Checkbox pour accepter les conditions */}
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="termsCheckbox"
+                          className="mr-2"
+                          required
+                          checked={acceptTerms}
+                          onChange={(e) => setAcceptTerms(e.target.checked)}
+                        />
+                        <label htmlFor="termsCheckbox" className="text-gray-900">
+                          J'accepte les{" "}
+                          <a
+                            href="https://firebasestorage.googleapis.com/v0/b/prd-transport.appspot.com/o/Condition%20G%C3%A9n%C3%A9rale.pdf?alt=media&token=53dd298c-e1e1-4964-86af-935f37e9e2f7"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            conditions générales
+                          </a>
+                        </label>
+                      </div>
+
+                      {/* Bouton pour valider */}
+                      <button
+                        type="button"
+                        className={`mt-4 p-2 rounded ${acceptTerms ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          }`}
+                        disabled={!acceptTerms}
+                        onClick={() => {
+                          if (acceptTerms) {
+                            alert("Conditions acceptées !");
+                          }
+                        }}
+                      >
+                        Vérifier et Continuer
+                      </button>
+                    </div>
+
                   </div>
                 )}
               </div>
