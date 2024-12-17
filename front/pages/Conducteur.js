@@ -310,7 +310,7 @@ const Conducteur = () => {
 
     // Assemble chauffeur details
     const fullPhoneNumber = `${phoneCode}${phone}`;
-    setLoading(true);
+   
 
     try {
       // Envoi des détails du chauffeur
@@ -393,7 +393,7 @@ const Conducteur = () => {
 
       if (hasError) return;
 
-      setloadingSubmit(true); // Start loading
+      
 
       setChauffId(userData);
 
@@ -416,6 +416,9 @@ const Conducteur = () => {
 
       console.log("Voiture ajoutée avec succès", response.data);
 
+      setLoading(true);
+
+      setloadingSubmit(true); // Start loading
       setSubmitStatus(
         "Merci Pour Votre inscription votre dossier sera traité dans les prochains jours"
       );
