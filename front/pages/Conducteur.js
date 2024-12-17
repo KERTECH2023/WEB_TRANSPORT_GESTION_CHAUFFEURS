@@ -333,8 +333,86 @@ const Conducteur = () => {
         setPhotoAssuranceError("La photo de l'assurance est requise.");
         hasError = true;
       }
+       
 
-      
+
+
+
+
+       // Validate Chauffeur details
+    if (!Nom) {
+      setNomError("Le nom est requis.");
+      hasError = true;
+    }
+    if (!Prenom) {
+      setPrenomError("Le prénom est requis.");
+      hasError = true;
+    }
+    if (!email ) {
+      setEmailError("L'email est invalide.");
+      hasError = true;
+    }
+    if (!phone ) {
+      setPhoneError("Le numéro de téléphone est invalide.");
+      hasError = true;
+    }
+    if (!photoAvatar || !(photoAvatar instanceof File) || photoAvatar.size === 0) {
+      setPhotoAvatarError("La photo de l'avatar est requise.");
+      hasError = true;
+    }
+    if (!photoCin || !(photoCin instanceof File) || photoCin.size === 0) {
+      setPhotoCinError("La photo du CIN est requise.");
+      hasError = true;
+    }
+    if (!photoPermisRec || !(photoPermisRec instanceof File) || photoPermisRec.size === 0) {
+      setPhotoPermisRecError("La photo du permis de conduire (recto) est requise.");
+      hasError = true;
+    }
+    if (!photoPermisVer || !(photoPermisVer instanceof File) || photoPermisVer.size === 0) {
+      setPhotoPermisVerError("La photo du permis de conduire (verso) est requise.");
+      hasError = true;
+    }
+    if (!photoVtc || !(photoVtc instanceof File) || photoVtc.size === 0) {
+      setPhotoVtcError("La photo du VTC est requise.");
+      hasError = true;
+    }
+    if (!civilite) {
+      setCiviliteError("La civilité est requise.");
+      hasError = true;
+    }
+    if (!DateNaissance) {
+      setDateNaissanceError("La date de naissance est requise.");
+      hasError = true;
+    }
+    if (!Nationalite) {
+      setNationaliteError("La nationalité est requise.");
+      hasError = true;
+    }
+    if (!cnicNo) {
+      setCnicNoError("Le numéro CIN est requis.");
+      hasError = true;
+    }
+    if (!address) {
+      setAddressError("L'adresse est requise.");
+      hasError = true;
+    }
+    if (!postalCode) {
+      setPostalCodeError("Le code postal est requis.");
+      hasError = true;
+    }
+    if (!ville) {
+      setVilleError("La ville est requise.");
+      hasError = true;
+    }
+    if (!pays) {
+      setPaysError("Le pays est requis.");
+      hasError = true;
+    }
+    if (!typeChauffeur) {
+      setTypeChauffeurError("Le type de chauffeur est requis.");
+      hasError = true;
+    }
+
       if (hasError) return;
 
 
