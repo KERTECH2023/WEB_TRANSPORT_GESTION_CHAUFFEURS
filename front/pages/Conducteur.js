@@ -337,11 +337,7 @@ const Conducteur = () => {
         }
       );
   
-      // Récupération de l'ID chauffeur
-      const { uses: newUser, id: chauffId } = chauffeurResponse.data;
-      setChauffId(chauffId);
-  
-      // Réinitialisation des champs chauffeur
+     
       setNom("");
       setPrenom("");
       setemail("");
@@ -357,23 +353,69 @@ const Conducteur = () => {
       setPhoneError("");
       setCinError("");
       setPhoneCodeError("");
+
+      const userData = chauffeurResponse.data;
+      setChauffId(userData);
+      // Réinitialisation des champs chauffeur
   
       console.log("Chauffeur ajouté avec succès", chauffId);
   
-      
-     
+      // Validation des champs voiture
+      setImmatriculationError("");
+      setModelleError("");
+      setPhotoAssuranceError("");
+      setPhotoCartegriseError("");
   
-      // Réinitialisation des champs voiture
+      let hasError = false;
+  
+      if (!immatriculation) {
+        setImmatriculationError("L'immatriculation est requise.");
+        hasError = true;
+      }
+      if (!modelle) {
+        setModelleError("Le modèle est requis.");
+        hasError = true;
+      }
+      if (!photoCartegrise || !(photoCartegrise instanceof File) || photoCartegrise.size === 0) {
+        setPhotoCartegriseError("La photo de la carte grise est requise.");
+        hasError = true;
+      }
+      if (!photoAssurance || !(photoAssurance instanceof File) || photoAssurance.size === 0) {
+        setPhotoAssuranceError("La photo de l'assurance est requise.");
+        hasError = true;
+      }
+  
+      if (hasError) return;
+
+      setloadingSubmit(true); // Start loading
+  
+      // Envoi des détails de la voiture
+      const response = await axiosClient.post(
+        `/Voi/addvoiture/${chauffId}`,
+        {
+          photoCartegrise,
+          photoAssurance,
+          immatriculation,
+          modelle,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+  
+      console.log("Voiture ajoutée avec succès", response.data);
+  
+      setSubmitStatus(
+        "Merci Pour Votre inscription votre dossier sera traité dans les prochains jours"
+      );
       setImmatriculation("");
       setModelle("");
-      setSubmitStatus(
-        "Merci Pour Votre inscription. Votre dossier sera traité dans les prochains jours."
-      );
 
-      //if (hasError) return;
-  
+    
       
-     
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
      
     } catch (err) {
       console.warn("Erreur :", err);
@@ -400,222 +442,6 @@ const Conducteur = () => {
       setloadingSubmit(false); // Stop loading for both processes
     }
   };
-
-
-
-  const handleChauffeurCarDetailsSubmit = async (e) => {
-    e.preventDefault();
-    console.log("Début du processus de soumission");
-  
-    // Validation des champs du chauffeur
-    const chauffeurRequiredFields = [
-      { value: Nom, setter: setNom, errorMessage: "Le nom est requis" },
-      { value: Prenom, setter: setPrenom, errorMessage: "Le prénom est requis" },
-      { value: email, setter: setemail, errorMessage: "L'email est requis" },
-      { value: phone, setter: setphone, errorMessage: "Le numéro de téléphone est requis" },
-      { value: civilite, setter: setCivilite, errorMessage: "La civilité est requise" },
-      { value: DateNaissance, setter: setDateNaissance, errorMessage: "La date de naissance est requise" },
-      { value: Nationalite, setter: setNationalite, errorMessage: "La nationalité est requise" },
-      { value: cnicNo, setter: setcnicNo, errorMessage: "Le numéro de CIN est requis" },
-      { value: address, setter: setaddress, errorMessage: "L'adresse est requise" },
-      { value: postalCode, setter: setpostalCode, errorMessage: "Le code postal est requis" },
-    ];
-  
-    // Validation des photos du chauffeur
-    const chauffeurRequiredPhotos = [
-      { photo: photoAvatar, setter: setPhotoAvatarError, errorMessage: "La photo de profil est requise" },
-      { photo: photoCin, setter: setPhotoCinError, errorMessage: "La photo de la carte d'identité est requise" },
-      { photo: photoPermisRec, setter: setPhotoPermisRecError, errorMessage: "La photo du permis recto est requise" },
-      { photo: photoPermisVer, setter: setPhotoPermisVerError, errorMessage: "La photo du permis verso est requise" },
-      { photo: photoVtc, setter: setPhotoVtcError, errorMessage: "La photo VTC est requise" },
-    ];
-  
-    // Validation des champs de la voiture
-    const voitureRequiredFields = [
-      { 
-        value: immatriculation, 
-        setter: setImmatriculationError, 
-        errorMessage: "L'immatriculation est requise" 
-      },
-      { 
-        value: modelle, 
-        setter: setModelleError, 
-        errorMessage: "Le modèle est requis" 
-      }
-    ];
-  
-    // Validation des photos de la voiture
-    const voitureRequiredPhotos = [
-      { 
-        photo: photoCartegrise, 
-        setter: setPhotoCartegriseError, 
-        errorMessage: "La photo de la carte grise est requise" 
-      },
-      { 
-        photo: photoAssurance, 
-        setter: setPhotoAssuranceError, 
-        errorMessage: "La photo de l'assurance est requise" 
-      }
-    ];
-  
-    let hasError = false;
-  
-    // Validation des champs du chauffeur
-    chauffeurRequiredFields.forEach(field => {
-      if (!field.value) {
-        field.setter(field.errorMessage);
-        hasError = true;
-      }
-    });
-  
-    // Validation des photos du chauffeur
-    chauffeurRequiredPhotos.forEach(photo => {
-      if (!photo.photo || !(photo.photo instanceof File) || photo.photo.size === 0) {
-        photo.setter(photo.errorMessage);
-        hasError = true;
-      }
-    });
-  
-    // Validation des champs de la voiture
-    voitureRequiredFields.forEach(field => {
-      if (!field.value) {
-        field.setter(field.errorMessage);
-        hasError = true;
-      }
-    });
-  
-    // Validation des photos de la voiture
-    voitureRequiredPhotos.forEach(photo => {
-      if (!photo.photo || !(photo.photo instanceof File) || photo.photo.size === 0) {
-        photo.setter(photo.errorMessage);
-        hasError = true;
-      }
-    });
-  
-    // Validation email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setemail("Format d'email invalide");
-      hasError = true;
-    }
-  
-    // Validation numéro de téléphone
-    const phoneRegex = /^\d{9,10}$/;
-    if (!phoneRegex.test(phone)) {
-      setPhoneError("Numéro de téléphone invalide");
-      hasError = true;
-    }
-  
-    if (hasError) return;
-  
-    setLoading(true);
-    setloadingSubmit(true);
-  
-    try {
-      // Étape 1 : Soumission des détails du chauffeur
-      const fullPhoneNumber = `${phoneCode}${phone}`;
-      const chauffeurResponse = await axiosClient.post(
-        "/Chauff/AjoutChauf",
-        {
-          Nom,
-          Prenom,
-          email,
-          fullPhoneNumber,
-          photoAvatar,
-          photoCin,
-          photoPermisRec,
-          photoPermisVer,
-          photoVtc,
-          civilite,
-          DateNaissance,
-          Nationalite,
-          cnicNo,
-          address,
-          postalCode,
-          ville,
-          pays,
-          typeChauffeur,
-        },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-  
-      // Récupération de l'ID chauffeur
-      const { uses: newUser, id: chauffId } = chauffeurResponse.data;
-      setChauffId(chauffId);
-  
-      // Étape 2 : Soumission des détails de la voiture
-      const voitureResponse = await axiosClient.post(
-        `/Voi/addvoiture/${chauffId}`,
-        {
-          photoCartegrise,
-          photoAssurance,
-          immatriculation,
-          modelle,
-        },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-  
-      // Réinitialisation de tous les champs
-      [...chauffeurRequiredFields, ...voitureRequiredFields].forEach(field => field.setter(""));
-      [...chauffeurRequiredPhotos, ...voitureRequiredPhotos].forEach(photo => photo.setter(null));
-      
-      // Réinitialisation du formulaire
-      document.getElementById("login").reset();
-  
-      // Effacement des erreurs
-      setEmailError("");
-      setPhoneError("");
-      setCinError("");
-      setPhoneCodeError("");
-      setImmatriculationError("");
-      setModelleError("");
-      setPhotoAssuranceError("");
-      setPhotoCartegriseError("");
-  
-      // Message de succès
-      setSubmitStatus(
-        "Merci pour votre inscription, votre dossier sera traité dans les prochains jours."
-      );
-  
-      // Passage à l'étape suivante
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  
-      console.log("Chauffeur et voiture ajoutés avec succès", chauffId);
-  
-    } catch (err) {
-      console.warn("Erreur :", err);
-  
-      // Gestion des erreurs
-      if (err.response) {
-        if (err.response.status === 403) {
-          setEmailError("L'email existe déjà.");
-          toast.error("L'email existe déjà.");
-        }
-        if (err.response.data.phoneExists) {
-          setPhoneError("Le numéro de téléphone existe déjà.");
-          toast.error("Le numéro de téléphone existe déjà.");
-        }
-        if (err.response.data.cinExists) {
-          setCinError("Le CIN existe déjà.");
-          toast.error("Le CIN existe déjà.");
-        }
-      } else {
-        toast.error("Merci de vérifier vos données.");
-      }
-    } finally {
-      setLoading(false);
-      setloadingSubmit(false);
-    }
-  };
-
   
 
   return (
@@ -1131,8 +957,7 @@ const Conducteur = () => {
                         variant="contained"
                         color="primary"
                         onClick={(e) => {
-                          
-                          handleChauffeurCarDetailsSubmit(e);
+                          handleCarDetailsSubmit(e);
                         }}
                         disabled={loading}
                       >
