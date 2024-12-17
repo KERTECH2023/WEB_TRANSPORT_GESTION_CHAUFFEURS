@@ -299,15 +299,15 @@ const Conducteur = () => {
 
   const handleCarDetailsSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("handleSubmit function is called");
-
+  
+    console.log("handleCarDetailsSubmit function is called");
+  
     const fullPhoneNumber = `${phoneCode}${phone}`;
-
     setLoading(true);
-
+  
     try {
-      const response = await axiosClient.post(
+      // Étape 1 : Soumettre les détails du chauffeur
+      const chauffeurResponse = await axiosClient.post(
         "/Chauff/AjoutChauf",
         {
           Nom,
@@ -335,8 +335,11 @@ const Conducteur = () => {
           },
         }
       );
-
-      const newUser = response.data.uses;
+  
+      const newUser = chauffeurResponse.data.uses;
+      const userData = chauffeurResponse.data;
+  
+      // Réinitialisation des champs pour le chauffeur
       setNom("");
       setPrenom("");
       setemail("");
@@ -352,83 +355,53 @@ const Conducteur = () => {
       setPhoneError("");
       setCinError("");
       setPhoneCodeError("");
-
-      const userData = response.data;
       setChauffId(userData);
-
-     
-    } catch (err) {
-      console.warn(err);
-      if (err.response) {
-        if (err.response.status === 403) {
-          setEmailError("l'email existe déjà");
-          toast.error(`${emailError}`);
-        } else {
-          setEmailError("");
-        }
-        if (err.response.data.phoneExists) {
-          setPhoneError("Phone already exists");
-          toast.error(`${phoneError}`);
-        } else {
-          setPhoneError("");
-        }
-        if (err.response.data.cinExists) {
-          setCinError("CIN already exists");
-          toast.error(`${cinError}`);
-        } else {
-          setCinError("");
-        }
-      } else {
-        toast.error(`Merci de verifier vos données`);
+  
+      console.log("Détails du chauffeur enregistrés avec succès");
+  
+      // Étape 2 : Validation des données de la voiture
+      setImmatriculationError("");
+      setModelleError("");
+      setPhotoAssuranceError("");
+      setPhotoCartegriseError("");
+  
+      let hasError = false;
+  
+      if (!immatriculation) {
+        setImmatriculationError("L'immatriculation est requise.");
+        hasError = true;
       }
-    } finally {
-      setLoading(false);
-    }
-
-
-
-
-    console.log("handleCarDetailsSubmit function is called");
-
-    setImmatriculationError("");
-    setModelleError("");
-    setPhotoAssuranceError("");
-    setPhotoCartegriseError("");
-
-    let hasError = false;
-
-    if (!immatriculation) {
-      setImmatriculationError("L'immatriculation est requise.");
-      hasError = true;
-    }
-    if (!modelle) {
-      setModelleError("Le modèle est requis.");
-      hasError = true;
-    }
-
-    if (
-      !photoCartegrise ||
-      !(photoCartegrise instanceof File) ||
-      photoCartegrise.size === 0
-    ) {
-      setPhotoCartegriseError("La photo de la carte grise est requise.");
-      hasError = true;
-    }
-    if (
-      !photoAssurance ||
-      !(photoAssurance instanceof File) ||
-      photoAssurance.size === 0
-    ) {
-      setPhotoAssuranceError("La photo de l'assurance est requise.");
-      hasError = true;
-    }
-
-    if (hasError) return;
-
-    setloadingSubmit(true); // Start loading
-
-    try {
-      const response = await axiosClient.post(
+      if (!modelle) {
+        setModelleError("Le modèle est requis.");
+        hasError = true;
+      }
+  
+      if (
+        !photoCartegrise ||
+        !(photoCartegrise instanceof File) ||
+        photoCartegrise.size === 0
+      ) {
+        setPhotoCartegriseError("La photo de la carte grise est requise.");
+        hasError = true;
+      }
+      if (
+        !photoAssurance ||
+        !(photoAssurance instanceof File) ||
+        photoAssurance.size === 0
+      ) {
+        setPhotoAssuranceError("La photo de l'assurance est requise.");
+        hasError = true;
+      }
+  
+      if (hasError) {
+        setLoading(false); // Arrête le chargement en cas d'erreur
+        return;
+      }
+  
+      // Étape 3 : Soumettre les détails de la voiture
+      setloadingSubmit(true);
+  
+      const voitureResponse = await axiosClient.post(
         `/Voi/addvoiture/${chauffId}`,
         {
           photoCartegrise,
@@ -442,20 +415,43 @@ const Conducteur = () => {
           },
         }
       );
-
-      setSubmitStatus(
-        "Merci Pour Votre inscription votre dossier sera traité dans les prochains jours"
-      );
+  
+      // Réinitialisation des champs pour la voiture
       setImmatriculation("");
       setModelle("");
-
+  
+      setSubmitStatus(
+        "Merci pour votre inscription. Votre dossier sera traité dans les prochains jours."
+      );
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  
+      console.log("Détails de la voiture enregistrés avec succès");
     } catch (err) {
       console.warn(err);
+  
+      if (err.response) {
+        // Gestion des erreurs spécifiques pour les chauffeurs
+        if (err.response.status === 403) {
+          setEmailError("L'email existe déjà.");
+          toast.error("L'email existe déjà.");
+        }
+        if (err.response.data.phoneExists) {
+          setPhoneError("Le numéro de téléphone existe déjà.");
+          toast.error("Le numéro de téléphone existe déjà.");
+        }
+        if (err.response.data.cinExists) {
+          setCinError("Le CIN existe déjà.");
+          toast.error("Le CIN existe déjà.");
+        }
+      } else {
+        toast.error("Merci de vérifier vos données.");
+      }
     } finally {
-      setloadingSubmit(false); // Stop loading
+      setLoading(false);
+      setloadingSubmit(false);
     }
   };
+  
 
   return (
     <Container>
