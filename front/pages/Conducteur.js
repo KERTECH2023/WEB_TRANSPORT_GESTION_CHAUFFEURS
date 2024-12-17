@@ -18,7 +18,7 @@ import {
 
 const Conducteur = () => {
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ["Information Personnelles", "Documents"];
+  const steps = ["Information Personnelles", "Documents", "Détails Véhicule"];
   const [isSubmitted, setIsSubmitted] = useState(false);
   const checkChauffeur = async () => {
     try {
@@ -119,10 +119,8 @@ const Conducteur = () => {
       setLoading(true); // Start loading
 
       try {
-      
-          // Call handleSubmit function
-          await handleSubmit();
-          
+        // Call handleSubmit function
+        await handleSubmit();
 
         // Move to next step
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -255,6 +253,93 @@ const Conducteur = () => {
     console.log("Updated chauffId:", chauffId);
   }, [chauffId]);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("handleSubmit function is called");
+
+    const fullPhoneNumber = `${phoneCode}${phone}`;
+
+    setLoading(true);
+
+    try {
+      const response = await axiosClient.post(
+        "/Chauff/AjoutChauf",
+        {
+          Nom,
+          Prenom,
+          email,
+          fullPhoneNumber,
+          photoAvatar,
+          photoCin,
+          photoPermisRec,
+          photoPermisVer,
+          photoVtc,
+          civilite,
+          DateNaissance,
+          Nationalite,
+          cnicNo,
+          address,
+          postalCode,
+          ville,
+          pays,
+          typeChauffeur,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const newUser = response.data.uses;
+      setNom("");
+      setPrenom("");
+      setemail("");
+      setphone("");
+      document.getElementById("login").reset();
+      setCivilite("");
+      setDateNaissance("");
+      setNationalite("");
+      setcnicNo("");
+      setaddress("");
+      setpostalCode("");
+      setEmailError("");
+      setPhoneError("");
+      setCinError("");
+      setPhoneCodeError("");
+
+      const userData = response.data;
+      setChauffId(userData);
+
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    } catch (err) {
+      console.warn(err);
+      if (err.response) {
+        if (err.response.status === 403) {
+          setEmailError("l'email existe déjà");
+          toast.error(`${emailError}`);
+        } else {
+          setEmailError("");
+        }
+        if (err.response.data.phoneExists) {
+          setPhoneError("Phone already exists");
+          toast.error(`${phoneError}`);
+        } else {
+          setPhoneError("");
+        }
+        if (err.response.data.cinExists) {
+          setCinError("CIN already exists");
+          toast.error(`${cinError}`);
+        } else {
+          setCinError("");
+        }
+      } else {
+        toast.error(`Merci de verifier vos données`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   function compressImage(file, callback) {
     const reader = new FileReader();
@@ -295,40 +380,55 @@ const Conducteur = () => {
   }
 
 
-
-  const handleSubmit = async (e) => {
+  const handleCarDetailsSubmit = async (e) => {
     e.preventDefault();
-    console.log("handleSubmit function is called");
+    console.log("handleCarDetailsSubmit function is called");
 
-    // Création du numéro de téléphone complet
-    const fullPhoneNumber = `${phoneCode}${phone}`;
+    setImmatriculationError("");
+    setModelleError("");
+    setPhotoAssuranceError("");
+    setPhotoCartegriseError("");
 
-    // Activation de l'état de chargement
-    setLoading(true);
+    let hasError = false;
+
+    if (!immatriculation) {
+      setImmatriculationError("L'immatriculation est requise.");
+      hasError = true;
+    }
+    if (!modelle) {
+      setModelleError("Le modèle est requis.");
+      hasError = true;
+    }
+
+    if (
+      !photoCartegrise ||
+      !(photoCartegrise instanceof File) ||
+      photoCartegrise.size === 0
+    ) {
+      setPhotoCartegriseError("La photo de la carte grise est requise.");
+      hasError = true;
+    }
+    if (
+      !photoAssurance ||
+      !(photoAssurance instanceof File) ||
+      photoAssurance.size === 0
+    ) {
+      setPhotoAssuranceError("La photo de l'assurance est requise.");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    setloadingSubmit(true); // Start loading
 
     try {
-      // Envoi de la requête POST pour l'ajout du chauffeur
       const response = await axiosClient.post(
-        "/Chauff/AjoutChauf",
+        `/Voi/addvoiture/${chauffId}`,
         {
-          Nom,
-          Prenom,
-          email,
-          fullPhoneNumber,
-          photoAvatar,
-          photoCin,
-          photoPermisRec,
-          photoPermisVer,
-          photoVtc,
-          civilite,
-          DateNaissance,
-          Nationalite,
-          cnicNo,
-          address,
-          postalCode,
-          ville,
-          pays,
-          typeChauffeur,
+          photoCartegrise,
+          photoAssurance,
+          immatriculation,
+          modelle,
         },
         {
           headers: {
@@ -337,152 +437,17 @@ const Conducteur = () => {
         }
       );
 
-      // Réinitialisation des champs du formulaire
-      setNom("");
-      setPrenom("");
-      setemail("");
-      setphone("");
-      document.getElementById("login").reset();
-      setCivilite("");
-      setDateNaissance("");
-      setNationalite("");
-      setcnicNo("");
-      setaddress("");
-      setpostalCode("");
-      
-      // Réinitialisation des états d'erreur
-      setEmailError("");
-      setPhoneError("");
-      setCinError("");
-      setPhoneCodeError("");
+      setSubmitStatus(
+        "Merci Pour Votre inscription votre dossier sera traité dans les prochains jours"
+      );
+      setImmatriculation("");
+      setModelle("");
 
-      // Récupération et stockage des données utilisateur
-      const userData = response.data;
-      setChauffId(userData);
-
-      // Appel de la fonction de soumission des détails de la voiture
-      const handleCarDetailsSubmit = async () => {
-        console.log("handleCarDetailsSubmit function is called");
-
-        // Réinitialisation des états d'erreur pour les détails de la voiture
-        setImmatriculationError("");
-        setModelleError("");
-        setPhotoAssuranceError("");
-        setPhotoCartegriseError("");
-
-        let hasError = false;
-
-        // Validation des champs de la voiture
-        if (!immatriculation) {
-          setImmatriculationError("L'immatriculation est requise.");
-          hasError = true;
-        }
-        if (!modelle) {
-          setModelleError("Le modèle est requis.");
-          hasError = true;
-        }
-
-        // Validation de la photo de la carte grise
-        if (
-          !photoCartegrise ||
-          !(photoCartegrise instanceof File) ||
-          photoCartegrise.size === 0
-        ) {
-          setPhotoCartegriseError("La photo de la carte grise est requise.");
-          hasError = true;
-        }
-
-        // Validation de la photo d'assurance
-        if (
-          !photoAssurance ||
-          !(photoAssurance instanceof File) ||
-          photoAssurance.size === 0
-        ) {
-          setPhotoAssuranceError("La photo de l'assurance est requise.");
-          hasError = true;
-        }
-
-        // Arrêt si des erreurs sont présentes
-       //
-
-        // Activation de l'état de chargement pour la soumission
-        setloadingSubmit(true);
-
-        try {
-          // Envoi de la requête POST pour l'ajout de la voiture
-          const response = await axiosClient.post(
-            `/Voi/addvoiture/${chauffId}`,
-            {
-              photoCartegrise,
-              photoAssurance,
-              immatriculation,
-              modelle,
-            },
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-
-          // Message de succès
-          setSubmitStatus(
-            "Merci Pour Votre inscription votre dossier sera traité dans les prochains jours"
-          );
-
-          // Réinitialisation des champs de la voiture
-          setImmatriculation("");
-          setModelle("");
-
-          // Passage à l'étape suivante
-          setActiveStep((prevActiveStep) => prevActiveStep + 1);
-
-        } catch (err) {
-          console.warn(err);
-        } finally {
-          // Désactivation de l'état de chargement
-          setloadingSubmit(false);
-        }
-      };
-
-      // Exécution de la fonction de soumission des détails de la voiture
-      await handleCarDetailsSubmit();
-
-      // Passage à l'étape suivante
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-
     } catch (err) {
       console.warn(err);
-      
-      // Gestion des erreurs spécifiques
-      if (err.response) {
-        if (err.response.status === 403) {
-          setEmailError("l'email existe déjà");
-          toast.error(`${emailError}`);
-        } else {
-          setEmailError("");
-        }
-        
-        if (err.response.data.phoneExists) {
-          setPhoneError("Phone already exists");
-          toast.error(`${phoneError}`);
-        } else {
-          setPhoneError("");
-        }
-        
-        if (err.response.data.cinExists) {
-          setCinError("CIN already exists");
-          toast.error(`${cinError}`);
-        } else {
-          setCinError("");
-        }
-      } else {
-        // Message d'erreur générique
-        toast.error(`Merci de verifier vos données`);
-      }
     } finally {
-      // Désactivation de l'état de chargement
-      setLoading(false);
+      setloadingSubmit(false); // Stop loading
     }
   };
 
@@ -873,6 +838,11 @@ const Conducteur = () => {
                       />
                     </div>
 
+                    {/* Other attachment fields */}
+                  </div>
+                )}
+                {activeStep === 2 && (
+                  <div>
                     <Typography variant="h5" gutterBottom>
                       Détails Véhicule
                     </Typography>
@@ -960,11 +930,8 @@ const Conducteur = () => {
                         </label>
                       )}
                     </div>
-
-                    {/* Other attachment fields */}
                   </div>
                 )}
-                
               </div>
               <div className="mt-2">
                 {activeStep === steps.length ? (
@@ -978,7 +945,7 @@ const Conducteur = () => {
                     <Button disabled={activeStep === 0} onClick={handleBack}>
                       Retour
                     </Button>
-                    {activeStep === steps.length - 1 ? (
+                    {activeStep === steps.length - 2 ? (
                       <Button
                         id="sub_btn"
                         type="submit"
@@ -989,7 +956,21 @@ const Conducteur = () => {
                       >
                         {loading ? `${progress}%` : "Suivant"}
                       </Button>
-                    )  : (
+                    ) : activeStep === steps.length - 1 ? (
+                      <Button
+                        id="sub_btn"
+                        type="submit"
+                        value="login"
+                        variant="contained"
+                        color="primary"
+                        onClick={(e) => {
+                          handleCarDetailsSubmit(e);
+                        }}
+                        disabled={loading}
+                      >
+                        {loading ? `${progress}%` : "Rejoignez Nous"}
+                      </Button>
+                    ) : (
                       <Button
                         variant="contained"
                         color="primary"
