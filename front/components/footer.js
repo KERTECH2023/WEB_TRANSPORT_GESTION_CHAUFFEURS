@@ -48,7 +48,7 @@ const footer = () => {
       </div>
 
       <div className="py-10 container mx-10 flex flex-row justify-between">
-        <p>Copyright 2023 par KerTechnologie</p>
+        <p>Copyright 2025 par KerTechnologie</p>
         <div className="flex flex-row space-x-6">
           <Link href="/Politique">
             <h2
