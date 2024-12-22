@@ -20,7 +20,8 @@ const Conducteur = () => {
   const [activeStep, setActiveStep] = useState(0);
   const steps = ["Information Personnelles", "Documents", "Détails Véhicule"];
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const checkChauffeur = async () => {
+  
+  /*const checkChauffeur = async () => {
     try {
       const response = await fetch(
         process.env.NEXT_PUBLIC_BASE_URL + "/Chauff/checkchauffeur",
@@ -59,6 +60,7 @@ const Conducteur = () => {
       return false;
     }
   };
+  */
 
   const handleNext = async () => {
     if (activeStep === 0) {
@@ -106,11 +108,11 @@ const Conducteur = () => {
         return;
       }
 
-      const chauffeurExists = await checkChauffeur();
+   /* const chauffeurExists = await checkChauffeur();
 
       if (!chauffeurExists) {
         return;
-      }
+      }*/
 
       // Proceed to next step
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
