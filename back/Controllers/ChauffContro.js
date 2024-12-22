@@ -72,101 +72,100 @@ const checkChauffeur = async (req, res) => {
 
 
 const register = async (req, res) => {
-  // Extract data from req.body
-  const {
-    Nom,
-    Prenom,
-    email,
-    fullPhoneNumber,
-    DateNaissance,
-    gender,
-    cnicNo,
-    address,
-    postalCode,
-    ville,
-    pays,
-    typeChauffeur,
-  } = req.body;
+  try {
+    // Extraction des données de `req.body`
+    const {
+      Nom,
+      Prenom,
+      email,
+      fullPhoneNumber,
+      DateNaissance,
+      gender,
+      cnicNo,
+      address,
+      postalCode,
+      ville,
+      pays,
+      typeChauffeur,
+    } = req.body;
 
-  // Extract uploaded file URLs from req.uploadedFiles
-  const photoAvatarUrl = req.uploadedFiles.photoAvatar || "";
-  const photoPermisRecUrl = req.uploadedFiles.photoPermisRec || "";
-  const photoPermisVerUrl = req.uploadedFiles.photoPermisVer || "";
-  const photoVtcUrl = req.uploadedFiles.photoVtc || "";
-  const photoCinUrl = req.uploadedFiles.photoCin || "";
-  const verifUtilisateur = await Chauffeur.findOne({ email });
-  if (verifUtilisateur) {
-    res.status(403).send({ message: "Chauffeur existe deja!" });
-  } else {
-    // Create a new user object
-    const nouveauUtilisateur = new Chauffeur();
+    // Vérification de l'existence des fichiers uploadés
+    const uploadedFiles = req.uploadedFiles || {};
+    const photoAvatarUrl = uploadedFiles.photoAvatar || "";
+    const photoPermisRecUrl = uploadedFiles.photoPermisRec || "";
+    const photoPermisVerUrl = uploadedFiles.photoPermisVer || "";
+    const photoVtcUrl = uploadedFiles.photoVtc || "";
+    const photoCinUrl = uploadedFiles.photoCin || "";
 
-    // Hash the phone number as the password
+    // Vérification si l'utilisateur existe déjà
+    const verifUtilisateur = await Chauffeur.findOne({ email });
+    if (verifUtilisateur) {
+      return res.status(403).send({ message: "Chauffeur existe déjà !" });
+    }
+
+    // Hachage du numéro de téléphone comme mot de passe
     const mdpEncrypted = bcrypt.hashSync(fullPhoneNumber.toString(), 10);
 
-    // Generate a random username
+    // Génération d'un nom d'utilisateur aléatoire
     const nounIndex = Math.floor(Math.random() * Nom.length);
     const preIndex = Math.floor(Math.random() * Prenom.length);
     const randomNumber = Math.floor(Math.random() * 90000);
+    const username = `${Nom[nounIndex]}${Prenom[preIndex]}${randomNumber}`;
 
-    nouveauUtilisateur.username = `${Nom[nounIndex]}${Prenom[preIndex]}${randomNumber}`;
-    nouveauUtilisateur.Nom = Nom;
-    nouveauUtilisateur.Prenom = Prenom;
-    nouveauUtilisateur.email = email;
-    nouveauUtilisateur.phone = fullPhoneNumber;
-    nouveauUtilisateur.password = mdpEncrypted;
-    nouveauUtilisateur.photoAvatar = photoAvatarUrl;
-    nouveauUtilisateur.photoCin = photoCinUrl;
-    nouveauUtilisateur.photoPermisRec = photoPermisRecUrl;
-    nouveauUtilisateur.photoPermisVer = photoPermisVerUrl;
-    nouveauUtilisateur.photoVtc = photoVtcUrl;
-    nouveauUtilisateur.gender = gender;
-    nouveauUtilisateur.role = "Chauffeur";
-    nouveauUtilisateur.Cstatus = "En_cours";
-    nouveauUtilisateur.DateNaissance = DateNaissance;
-    nouveauUtilisateur.cnicNo = cnicNo;
-    nouveauUtilisateur.address = address;
-    nouveauUtilisateur.postalCode = postalCode;
-    nouveauUtilisateur.Ville = ville;
-    nouveauUtilisateur.Pays = pays;
-    nouveauUtilisateur.type = typeChauffeur;
-    nouveauUtilisateur.isActive = true;
+    // Création d'un nouvel objet Chauffeur
+    const nouveauUtilisateur = new Chauffeur({
+      username,
+      Nom,
+      Prenom,
+      email,
+      phone: fullPhoneNumber,
+      password: mdpEncrypted,
+      photoAvatar: photoAvatarUrl,
+      photoCin: photoCinUrl,
+      photoPermisRec: photoPermisRecUrl,
+      photoPermisVer: photoPermisVerUrl,
+      photoVtc: photoVtcUrl,
+      gender,
+      role: "Chauffeur",
+      Cstatus: "En_cours",
+      DateNaissance,
+      cnicNo,
+      address,
+      postalCode,
+      Ville: ville,
+      Pays: pays,
+      type: typeChauffeur,
+      isActive: true,
+    });
 
-    console.log(nouveauUtilisateur);
+    console.log("Nouvel utilisateur créé :", nouveauUtilisateur);
 
-    // Save the new user to the database
+    // Sauvegarde de l'utilisateur dans la base de données
+    await nouveauUtilisateur.save();
+
+    // Création d'un token JWT
+    const token = jwt.sign(
+      { _id: nouveauUtilisateur._id },
+      config.token_secret,
+      { expiresIn: "120000" } // en millisecondes
+    );
+
+    // Envoi de l'email de confirmation
     try {
-      await nouveauUtilisateur.save();
-      /*const driversRef = realtimeDB.ref('Drivers');
-driversRef.child(nouveauUtilisateur._id.toString()).set({
-  ...nouveauUtilisateur,
-});*/
-
-      // Token creation
-      const token = jwt.sign(
-        { _id: nouveauUtilisateur._id },
-        config.token_secret,
-        {
-          expiresIn: "120000", // in Milliseconds (3600000 = 1 hour)
-        }
-      );
-
-      // Send confirmation email
-      try {
-        const response = await sendConfirmationEmail(email, Nom);
-        console.log("Email sent successfully:", response);
-      } catch (error) {
-        console.error("Error sending email:", error);
-      }
-      const id = nouveauUtilisateur.id;
-      // Send response to the client
-      res.status(201).send(id);
-    } catch (error) {
-      console.error("Error while saving user:", error);
-      res.status(500).send({ message: "Error while saving user." });
+      await sendConfirmationEmail(email, Nom);
+      console.log("Email de confirmation envoyé avec succès.");
+    } catch (emailError) {
+      console.error("Erreur lors de l'envoi de l'email :", emailError);
     }
+
+    // Envoi de l'ID de l'utilisateur en réponse
+    res.status(201).send({ id: nouveauUtilisateur._id, token });
+  } catch (error) {
+    console.error("Erreur lors de l'inscription :", error);
+    res.status(500).send({ message: "Erreur interne du serveur." });
   }
 };
+
 
 async function sendConfirmationEmail(Email, Nom) {
   // create reusable transporter object using the default SMTP transport
