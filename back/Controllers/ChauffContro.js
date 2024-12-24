@@ -584,142 +584,74 @@ const resetPassword = async (req, res) => {
   }
 };
 
+
+
 async function generateNewPassword() {
   // Generate a new password using your preferred logic
   const newPassword = Math.random().toString(36).slice(-8); // Generate an 8-character random string
   return newPassword;
 }
 
-async function sendpassword(Email, Password, chauffeurName) {
-  // create reusable transporter object using the default SMTP transport
-  let transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "noreplyflashdriver@gmail.com", // Replace with your email
-      pass: "uvfu llrf qsbw esok", // Replace with your email password
-    },
-  });
+async function sendpassword(email, password, chauffeurName) {
+  try {
+    // Create a transporter object using the default SMTP transport
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "noreplyflashdriver@gmail.com", // Replace with your email
+        pass: "uvfu llrf qsbw esok", // Replace with your email password (use app-specific password for security)
+      },
+    });
 
-  transporter.verify(function (error, success) {
-    if (error) {
-      console.log(error);
-      console.log("Server not ready");
-    } else {
-      console.log("Server is ready to take our messages");
-    }
-  });
+    // Verify the SMTP server configuration
+    await transporter.verify();
 
-  const mailOptions = {
-    from: "Flash Driver <noreplyflashdriver@gmail.com>",
-    to: Email,
-    subject: "Flash Driver Nouveau Mot De Passe",
-    html:
-      `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenue chez FlashDriver</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <style type="text/css">
-        body, table, td, a { 
-            -webkit-text-size-adjust: 100%; 
-            -ms-text-size-adjust: 100%; 
-        }
-        body {
-            font-family: 'Inter', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f4f7f6;
-        }
-        .wrapper {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .header {
-            background: linear-gradient(135deg, #FFC312 0%, #FFD700 100%);
-            color: #2D033A;
-            text-align: center;
-            padding: 30px 20px;
-        }
-        .content {
-            padding: 40px 30px;
-        }
-        .footer {
-            background-color: #2D033A;
-            color: #ffffff;
-            text-align: center;
-            padding: 20px;
-        }
-        h1, h2 {
-            margin: 0 0 20px 0;
-            line-height: 1.2;
-        }
-        p {
-            margin: 0 0 15px 0;
-        }
-        .btn {
-            display: inline-block;
-            background-color: #FFC312;
-            color: #2D033A;
-            text-decoration: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            margin-top: 20px;
-            font-weight: 600;
-        }
-    </style>
-</head>
-<body>
-    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f7f6;">
-        <tr>
-            <td align="center" style="padding: 20px;">
-                <table class="wrapper" border="0" cellpadding="0" cellspacing="0" width="600">
-                    <tr>
-                        <td class="header">
-                            <h1 style="font-size: 32px; margin-bottom: 10px;">FlashDriver</h1>
-                            <p style="font-size: 18px;">Votre partenaire de mobilité</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="content">
-                            <h2 style="font-size: 24px; color: #2D033A;">Cher(e) ` + Nom + `,</h2>
-                            
-                            <p>Nous sommes ravis de vous accueillir dans la famille FlashDriver ! Votre compte a été créé avec succès.</p>
-                            
-                            <p>Nous travaillons actuellement à valider votre compte et vous fournirons très prochainement vos détails de connexion.</p>
-                            
-                            <p>Dans l'attente de votre première course, notre équipe met tout en œuvre pour vous offrir le meilleur service possible.</p>
-                            
-                            <a href="#" class="btn">Découvrir FlashDriver</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="footer">
-                            <p style="margin-bottom: 10px;">© 2024 FlashDriver. Tous droits réservés.</p>
-                            <p style="font-size: 12px; opacity: 0.7;">Restez mobile, restez libre</p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</body>
-</html>`,
-  };
+    const mailOptions = {
+      from: "Flash Driver <noreplyflashdriver@gmail.com>",
+      to: email,
+      subject: "Flash Driver Nouveau Mot De Passe",
+      html: `
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Flash Driver Nouveau Mot De Passe</title>
+          <style>
+            body { font-family: Arial, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; }
+            .wrapper { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { text-align: center; background: #FFD700; color: #2D033A; padding: 20px; border-radius: 12px 12px 0 0; }
+            .footer { text-align: center; font-size: 12px; color: #888; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="wrapper">
+            <div class="header">
+              <h1>FlashDriver</h1>
+              <p>Votre partenaire de mobilité</p>
+            </div>
+            <div>
+              <h2>Bonjour ${chauffeurName},</h2>
+              <p>Voici votre nouveau mot de passe : <strong>${password}</strong></p>
+              <p>Veuillez le changer après votre première connexion.</p>
+            </div>
+            <div class="footer">
+              <p>© 2024 FlashDriver. Tous droits réservés.</p>
+              <p>Restez mobile, restez libre</p>
+            </div>
+          </div>
+        </body>
+        </html>`,
+    };
 
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log("Email sent: " + info.response);
-    }
-  });
+    // Send the email
+    let info = await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully:", info.response);
+  } catch (error) {
+    console.error("Failed to send email:", error);
+  }
 }
+
 
 /**----------------------Supprimer un agent------------------- */
 
