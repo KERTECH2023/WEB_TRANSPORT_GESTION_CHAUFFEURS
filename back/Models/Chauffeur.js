@@ -12,12 +12,12 @@ const ChauffSchema = new mongoose.Schema(
     Nom: {
       type: String,
       trim: true,
-      maxlength: [20, "FName must be less or equal then 20 characters."],
+      
     },
     Prenom: {
       type: String,
       trim: true,
-      maxlength: [20, "LName must be less or equal then 20 characters."],
+      
     },
     email: {
       type: String,
@@ -97,7 +97,7 @@ const ChauffSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: [true, "Please provide an address"],
-      maxlength: [40, "Address must be less or equal then 30 characters."],
+     
     },
 
     ratingsAverage: {
