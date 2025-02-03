@@ -15,7 +15,7 @@ const AIRPORTS = {
 };
 
 // Remplacez ceci par votre clé API HERE Maps
-const HERE_API_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
+const HERE_API_KEY = 'YOUR_HERE_API_KEY';
 
 const SimpleForm = () => {
   const [formData, setFormData] = useState({
@@ -35,6 +35,7 @@ const SimpleForm = () => {
   const [distance, setDistance] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitStatus, setSubmitStatus] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -43,6 +44,42 @@ const SimpleForm = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const fetchSuggestions = async (query) => {
+    if (!query) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `https://geocode.search.hereapi.com/v1/search`,
+        {
+          params: {
+            apiKey: HERE_API_KEY,
+            q: query,
+            limit: 5
+          }
+        }
+      );
+
+      if (response.data.items) {
+        setSuggestions(response.data.items);
+      }
+    } catch (error) {
+      console.error('Erreur de géocodage:', error);
+      toast.error('Erreur lors de la recherche de la destination');
+    }
+  };
+
+  const handleDestinationSelect = (suggestion) => {
+    setFormData(prev => ({
+      ...prev,
+      destination: suggestion.title
+    }));
+    setSuggestions([]);
+    geocodeDestination(suggestion.title);
   };
 
   const geocodeDestination = async (destination) => {
@@ -269,13 +306,29 @@ const SimpleForm = () => {
             name="destination"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-md"
             value={formData.destination}
-            onChange={handleChange}
+            onChange={(e) => {
+              handleChange(e);
+              fetchSuggestions(e.target.value);
+            }}
           />
           {errors.destination && (
             <span className="text-red-500">{errors.destination}</span>
           )}
-        </div>
 
+          {suggestions.length > 0 && (
+            <ul className="mt-2 border border-gray-300 rounded-lg max-h-40 overflow-auto bg-white">
+              {suggestions.map((suggestion) => (
+                <li
+                  key={suggestion.id}
+                  className="px-4 py-2 cursor-pointer hover:bg-gray-200"
+                  onClick={() => handleDestinationSelect(suggestion)}
+                >
+                  {suggestion.title}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <div className="mb-4">
           <label className="block text-gray-700">Numéro de vol</label>
           <input
