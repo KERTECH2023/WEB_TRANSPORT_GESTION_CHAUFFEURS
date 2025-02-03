@@ -1,56 +1,8 @@
-
-
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 
-
-
-const [destinationSuggestions, setDestinationSuggestions] = useState([]);
-const [suggestionLoading, setSuggestionLoading] = useState(false);
-
-// Existing handleChange method modified to include destination suggestions
-const handleChange = (e) => {
-  const { name, value } = e.target;
-  setFormData(prev => ({
-    ...prev,
-    [name]: value
-  }));
-
-  // Add destination suggestion logic
-  if (name === 'destination' && value.length > 2) {
-    fetchDestinationSuggestions(value);
-  }
-};
-
-// New method to fetch destination suggestions
-const fetchDestinationSuggestions = async (query) => {
-  if (!query) return;
-
-  setSuggestionLoading(true);
-  try {
-    const response = await axios.get(
-      'https://autocomplete.search.hereapi.com/v1/autocomplete',
-      {
-        params: {
-          apiKey: HERE_API_KEY,
-          q: query,
-          limit: 5,
-          in: 'countryCode:TUN' // Limit to Tunisia
-        }
-      }
-    );
-
-    setDestinationSuggestions(response.data.items || []);
-  } catch (error) {
-    console.error('Erreur de recherche de destination:', error);
-  } finally {
-    setSuggestionLoading(false);
-  }
-};
-// Données des aéroports
 const AIRPORTS = {
   djerba: {
     name: "Aéroport de Djerba-Zarzis",
@@ -62,19 +14,10 @@ const AIRPORTS = {
   }
 };
 
-// Clé API HERE Maps
-const HERE_API_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
-
-// Exemples de destinations
-const DESTINATIONS = [
-  "Hôtel Dar Djerba, Djerba",
-  "Hôtel Movenpick, Tunis",
-  "Hôtel Laico, Tunis",
-  "Hôtel Hasdrubal Thalassa, Djerba"
-];
+// Remplacez ceci par votre clé API OpenRouteService
+const ORS_API_KEY = '5b3ce3597851110001cf6248666a7544a8974e0ca4291ebd8e4095a8';
 
 const SimpleForm = () => {
-  // États du formulaire
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
@@ -88,13 +31,12 @@ const SimpleForm = () => {
     heureArrivee: ""
   });
 
-  const [destinationCoords, setDestinationCoords] = useState(null); // Coordonnées de la destination
-  const [distance, setDistance] = useState(null); // Distance calculée
-  const [errors, setErrors] = useState({}); // Erreurs de validation
-  const [submitStatus, setSubmitStatus] = useState(""); // Statut de soumission
+  const [destinationCoords, setDestinationCoords] = useState(null);
+  const [distance, setDistance] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [submitStatus, setSubmitStatus] = useState("");
   const router = useRouter();
 
-  // Gestion des changements dans les champs du formulaire
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -103,23 +45,23 @@ const SimpleForm = () => {
     }));
   };
 
-  // Géocodage avec HERE Maps
   const geocodeDestination = async (destination) => {
     try {
       const response = await axios.get(
-        `https://geocode.search.hereapi.com/v1/geocode`,
+        `https://api.openrouteservice.org/geocode/search`,
         {
           params: {
-            apiKey: HERE_API_KEY,
-            q: destination
+            api_key: ORS_API_KEY,
+            text: destination,
+            size: 1
           }
         }
       );
 
-      if (response.data.items && response.data.items.length > 0) {
-        const coords = response.data.items[0].position; // { lat, lng }
-        setDestinationCoords([coords.lat, coords.lng]);
-        return [coords.lat, coords.lng];
+      if (response.data.features && response.data.features.length > 0) {
+        const coords = response.data.features[0].geometry.coordinates;
+        setDestinationCoords(coords);
+        return coords;
       }
     } catch (error) {
       console.error('Erreur de géocodage:', error);
@@ -128,31 +70,24 @@ const SimpleForm = () => {
     return null;
   };
 
-  // Calcul de distance avec HERE Maps
   const calculateDistance = async (startCoords, endCoords) => {
     try {
-      // Vérification du format des coordonnées
-      if (!startCoords || !endCoords || startCoords.length !== 2 || endCoords.length !== 2) {
-        throw new Error('Les coordonnées doivent être sous la forme [latitude, longitude]');
-      }
-
-      const response = await axios.get(
-        'https://router.hereapi.com/v8/routes',
+      const response = await axios.post(
+        'https://api.openrouteservice.org/v2/directions/driving-car',
         {
-          params: {
-            apiKey: HERE_API_KEY,
-            origin: `${startCoords[0]},${startCoords[1]}`, // Origine
-            destination: `${endCoords[0]},${endCoords[1]}`, // Destination
-            transportMode: 'car', // Mode de transport
-            return: 'summary' // On ne récupère que le résumé (distance, durée)
+          coordinates: [startCoords, endCoords]
+        },
+        {
+          headers: {
+            'Authorization': ORS_API_KEY,
+            'Content-Type': 'application/json'
           }
         }
       );
 
       if (response.data.routes && response.data.routes.length > 0) {
-        const distanceMeters = response.data.routes[0].sections[0].summary.length; // Distance en mètres
-        const distanceKm = (distanceMeters / 1000).toFixed(2); // Conversion en km
-        setDistance(distanceKm); // Mise à jour de l'état distance
+        const distanceKm = (response.data.routes[0].summary.distance / 1000).toFixed(2);
+        setDistance(distanceKm);
         return distanceKm;
       }
     } catch (error) {
@@ -162,7 +97,6 @@ const SimpleForm = () => {
     return null;
   };
 
-  // Mise à jour de la distance lorsque l'aéroport ou la destination change
   useEffect(() => {
     const updateDistance = async () => {
       if (formData.aeroportDepart && formData.destination) {
@@ -170,7 +104,7 @@ const SimpleForm = () => {
         if (airport) {
           const destCoords = await geocodeDestination(formData.destination);
           if (destCoords) {
-            await calculateDistance(airport.coordinates, destCoords);
+            calculateDistance(airport.coordinates.reverse(), destCoords);
           }
         }
       }
@@ -179,11 +113,9 @@ const SimpleForm = () => {
     updateDistance();
   }, [formData.aeroportDepart, formData.destination]);
 
-  // Soumission du formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation des champs
     const errors = {};
     if (!formData.nom) errors.nom = "Le nom est requis";
     if (!formData.prenom) errors.prenom = "Le prénom est requis";
@@ -201,7 +133,6 @@ const SimpleForm = () => {
     
     setErrors(errors);
 
-    // Si aucune erreur, soumettre le formulaire
     if (Object.keys(errors).length === 0) {
       try {
         const response = await axios.post("/api/submitForm", {
@@ -340,13 +271,7 @@ const SimpleForm = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-md"
             value={formData.destination}
             onChange={handleChange}
-            list="destinations"
           />
-          <datalist id="destinations">
-            {DESTINATIONS.map((dest, index) => (
-              <option key={index} value={dest} />
-            ))}
-          </datalist>
           {errors.destination && (
             <span className="text-red-500">{errors.destination}</span>
           )}
