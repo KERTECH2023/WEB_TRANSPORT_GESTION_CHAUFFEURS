@@ -78,7 +78,7 @@ const register = async (req, res) => {
     Prenom,
     email,
     fullPhoneNumber,
-    civilite,
+    gender,
     cnicNo,
     address,
     typeChauffeur,
@@ -113,7 +113,7 @@ const register = async (req, res) => {
     nouveauUtilisateur.photoAvatar = photoAvatarUrl;
     nouveauUtilisateur.photoCin = photoCinUrl;
     nouveauUtilisateur.photoVtc = photoVtcUrl;
-    nouveauUtilisateur.gender = civilite;
+    nouveauUtilisateur.gender = gender;
     nouveauUtilisateur.role = "Chauffeur";
     nouveauUtilisateur.Cstatus = "En_cours";
     nouveauUtilisateur.cnicNo = cnicNo;
