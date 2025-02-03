@@ -26,8 +26,6 @@ router.post(
   "/AjoutChauf",
   Multer.fields([
     { name: "photoAvatar", maxCount: 1 },
-    { name: "photoPermisRec", maxCount: 1 },
-    { name: "photoPermisVer", maxCount: 1 },
     { name: "photoVtc", maxCount: 1 },
     { name: "photoCin", maxCount: 1 },
   ]),
