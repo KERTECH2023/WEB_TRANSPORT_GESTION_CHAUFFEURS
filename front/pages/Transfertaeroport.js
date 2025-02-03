@@ -15,7 +15,7 @@ const AIRPORTS = {
 };
 
 // Remplacez ceci par votre clé API HERE Maps
-const HERE_API_KEY = 'YOUR_HERE_API_KEY';
+const HERE_API_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
 
 const SimpleForm = () => {
   const [formData, setFormData] = useState({
@@ -53,13 +53,15 @@ const SimpleForm = () => {
     }
 
     try {
+      // Utilisation de l'API de découverte de HERE pour obtenir des suggestions de lieux
       const response = await axios.get(
-        `https://geocode.search.hereapi.com/v1/search`,
+        `https://discover.search.hereapi.com/v1/discover`,
         {
           params: {
             apiKey: HERE_API_KEY,
             q: query,
-            limit: 5
+            limit: 5,
+            at: '33.875031,10.775278' // Position de départ pour la recherche (par exemple, l'aéroport de Djerba)
           }
         }
       );
@@ -68,7 +70,7 @@ const SimpleForm = () => {
         setSuggestions(response.data.items);
       }
     } catch (error) {
-      console.error('Erreur de géocodage:', error);
+      console.error('Erreur de recherche de destination:', error);
       toast.error('Erreur lors de la recherche de la destination');
     }
   };
@@ -184,17 +186,12 @@ const SimpleForm = () => {
     }
   };
 
+
   return (
     <div className="max-w-lg mx-auto mt-5 p-7 bg-white rounded-lg shadow-2xl">
       <h1 className="text-2xl font-bold text-center mb-6">
         Transfert Aéroport
       </h1>
-
-      {distance && (
-        <div className="mb-4 p-4 bg-blue-100 text-blue-700 border border-blue-300 rounded">
-          Distance estimée: {distance} km
-        </div>
-      )}
 
       {submitStatus && (
         <div className="mb-4 p-4 bg-green-100 text-green-700 border border-green-300 rounded">
@@ -298,37 +295,36 @@ const SimpleForm = () => {
             <span className="text-red-500">{errors.aeroportDepart}</span>
           )}
         </div>
+        <div>
+    
+        {/* Champs de formulaire ici */}
+        <input
+          type="text"
+          name="destination"
+          value={formData.destination}
+          onChange={handleChange}
+          onBlur={() => fetchSuggestions(formData.destination)}
+          placeholder="Entrez votre destination"
+        />
+        {suggestions.length > 0 && (
+          <ul>
+            {suggestions.map((suggestion, index) => (
+              <li key={index} onClick={() => handleDestinationSelect(suggestion)}>
+                {suggestion.title}
+              </li>
+            ))}
+          </ul>
+        )}
+  
 
-        <div className="mb-4">
-          <label className="block text-gray-700">Destination</label>
-          <input
-            type="text"
-            name="destination"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-md"
-            value={formData.destination}
-            onChange={(e) => {
-              handleChange(e);
-              fetchSuggestions(e.target.value);
-            }}
-          />
-          {errors.destination && (
-            <span className="text-red-500">{errors.destination}</span>
-          )}
-
-          {suggestions.length > 0 && (
-            <ul className="mt-2 border border-gray-300 rounded-lg max-h-40 overflow-auto bg-white">
-              {suggestions.map((suggestion) => (
-                <li
-                  key={suggestion.id}
-                  className="px-4 py-2 cursor-pointer hover:bg-gray-200"
-                  onClick={() => handleDestinationSelect(suggestion)}
-                >
-                  {suggestion.title}
-                </li>
-              ))}
-            </ul>
-          )}
+      
+  {distance && (
+        <div className="mb-4 p-4 bg-blue-100 text-blue-700 border border-blue-300 rounded">
+          Distance estimée: {distance} km
         </div>
+      )}
+
+    </div>
         <div className="mb-4">
           <label className="block text-gray-700">Numéro de vol</label>
           <input
