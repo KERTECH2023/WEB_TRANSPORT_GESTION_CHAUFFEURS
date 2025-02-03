@@ -78,20 +78,15 @@ const register = async (req, res) => {
     Prenom,
     email,
     fullPhoneNumber,
-    DateNaissance,
-    gender,
+    civilite,
     cnicNo,
     address,
-    postalCode,
-    ville,
-    pays,
     typeChauffeur,
   } = req.body;
 
   // Extract uploaded file URLs from req.uploadedFiles
   const photoAvatarUrl = req.uploadedFiles.photoAvatar || "";
-  const photoPermisRecUrl = req.uploadedFiles.photoPermisRec || "";
-  const photoPermisVerUrl = req.uploadedFiles.photoPermisVer || "";
+  
   const photoVtcUrl = req.uploadedFiles.photoVtc || "";
   const photoCinUrl = req.uploadedFiles.photoCin || "";
   const verifUtilisateur = await Chauffeur.findOne({ email });
@@ -117,18 +112,12 @@ const register = async (req, res) => {
     nouveauUtilisateur.password = mdpEncrypted;
     nouveauUtilisateur.photoAvatar = photoAvatarUrl;
     nouveauUtilisateur.photoCin = photoCinUrl;
-    nouveauUtilisateur.photoPermisRec = photoPermisRecUrl;
-    nouveauUtilisateur.photoPermisVer = photoPermisVerUrl;
     nouveauUtilisateur.photoVtc = photoVtcUrl;
-    nouveauUtilisateur.gender = gender;
+    nouveauUtilisateur.gender = civilite;
     nouveauUtilisateur.role = "Chauffeur";
     nouveauUtilisateur.Cstatus = "En_cours";
-    nouveauUtilisateur.DateNaissance = DateNaissance;
     nouveauUtilisateur.cnicNo = cnicNo;
     nouveauUtilisateur.address = address;
-    nouveauUtilisateur.postalCode = postalCode;
-    nouveauUtilisateur.Ville = ville;
-    nouveauUtilisateur.Pays = pays;
     nouveauUtilisateur.type = typeChauffeur;
     nouveauUtilisateur.isActive = true;
 
@@ -426,8 +415,6 @@ const login = (req, res) => {
 const update = (req, res, next) => {
   const { id } = req.params;
   const photoAvatarUrl = req.uploadedFiles.photoAvatar || "";
-  const photoPermisRecUrl = req.uploadedFiles.photoPermisRec;
-  const photoPermisVerUrl = req.uploadedFiles.photoPermisVer;
   const photoVtcUrl = req.uploadedFiles.photoVtc;
   const photoCinUrl = req.uploadedFiles.photoCin;
 
@@ -438,16 +425,12 @@ const update = (req, res, next) => {
     phone: req.body.phone,
     photoAvatar: photoAvatarUrl,
     photoCin: photoCinUrl,
-    photoPermisRec: photoPermisRecUrl,
-    photoPermisVer: photoPermisVerUrl,
     photoVtc: photoVtcUrl,
     gender: req.body.gender,
     role: req.body.role,
     Nationalite: req.body.Nationalite,
-    DateNaissance: req.body.DateNaissance,
     cnicNo: req.body.cnicNo,
     address: req.body.address,
-    postalCode: req.body.postalCode,
   };
   console.log(updateData);
 
