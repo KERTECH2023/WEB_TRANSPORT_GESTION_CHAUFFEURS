@@ -17,6 +17,13 @@ const AIRPORTS = {
 // Remplacez ceci par votre clé API OpenRouteService
 const ORS_API_KEY = '5b3ce3597851110001cf6248666a7544a8974e0ca4291ebd8e4095a8';
 
+const DESTINATIONS = [
+  "Hôtel Dar Djerba, Djerba",
+  "Hôtel Movenpick, Tunis",
+  "Hôtel Laico, Tunis",
+  "Hôtel Hasdrubal Thalassa, Djerba"
+];
+
 const SimpleForm = () => {
   const [formData, setFormData] = useState({
     nom: "",
@@ -72,22 +79,29 @@ const SimpleForm = () => {
 
   const calculateDistance = async (startCoords, endCoords) => {
     try {
+      // Vérification du format des coordonnées
+      if (!startCoords || !endCoords || startCoords.length !== 2 || endCoords.length !== 2) {
+        throw new Error('Les coordonnées doivent être sous la forme [longitude, latitude]');
+      }
+  
       const response = await axios.post(
-        'https://api.openrouteservice.org/v2/directions/driving-car',
+        'https://api.openrouteservice.org/v2/matrix/driving-car',
         {
-          coordinates: [startCoords, endCoords]
+          locations: [startCoords, endCoords], // Coordonnées sous forme [longitude, latitude]
+          metrics: ['distance'], // On ne récupère que la distance
         },
         {
           headers: {
             'Authorization': ORS_API_KEY,
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         }
       );
-
-      if (response.data.routes && response.data.routes.length > 0) {
-        const distanceKm = (response.data.routes[0].summary.distance / 1000).toFixed(2);
-        setDistance(distanceKm);
+  
+      if (response.data.distances && response.data.distances.length > 0) {
+        const distanceMeters = response.data.distances[0][1]; // Distance en mètres
+        const distanceKm = (distanceMeters / 1000).toFixed(2); // Conversion en km
+        setDistance(distanceKm); // Mise à jour de l'état distance
         return distanceKm;
       }
     } catch (error) {
@@ -104,7 +118,7 @@ const SimpleForm = () => {
         if (airport) {
           const destCoords = await geocodeDestination(formData.destination);
           if (destCoords) {
-            calculateDistance(airport.coordinates.reverse(), destCoords);
+            await calculateDistance(airport.coordinates.reverse(), destCoords);
           }
         }
       }
@@ -271,7 +285,13 @@ const SimpleForm = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-md"
             value={formData.destination}
             onChange={handleChange}
+            list="destinations"
           />
+          <datalist id="destinations">
+            {DESTINATIONS.map((dest, index) => (
+              <option key={index} value={dest} />
+            ))}
+          </datalist>
           {errors.destination && (
             <span className="text-red-500">{errors.destination}</span>
           )}
