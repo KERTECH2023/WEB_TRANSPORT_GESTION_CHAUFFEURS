@@ -36,7 +36,6 @@ const SimpleForm = () => {
   const [errors, setErrors] = useState({});
   const [submitStatus, setSubmitStatus] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const router = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,6 +43,11 @@ const SimpleForm = () => {
       ...prev,
       [name]: value
     }));
+
+    // Rechercher les suggestions dès que l'utilisateur tape dans l'input
+    if (name === 'destination') {
+      fetchSuggestions(value);
+    }
   };
 
   const fetchSuggestions = async (query) => {
@@ -80,7 +84,7 @@ const SimpleForm = () => {
       ...prev,
       destination: suggestion.title
     }));
-    setSuggestions([]);
+    setSuggestions([]);  // Ferme les suggestions une fois sélectionnée
     geocodeDestination(suggestion.title);
   };
 
@@ -298,24 +302,30 @@ const SimpleForm = () => {
         <div>
     
         {/* Champs de formulaire ici */}
-        <input
-          type="text"
-          name="destination"
-          value={formData.destination}
-          onChange={handleChange}
-          onBlur={() => fetchSuggestions(formData.destination)}
-          placeholder="Entrez votre destination"
-        />
-        {suggestions.length > 0 && (
-          <ul>
-            {suggestions.map((suggestion, index) => (
-              <li key={index} onClick={() => handleDestinationSelect(suggestion)}>
-                {suggestion.title}
-              </li>
-            ))}
-          </ul>
-        )}
-  
+        <div className="mb-4 relative">
+          <label className="block text-gray-700">Destination</label>
+          <input
+            type="text"
+            name="destination"
+            value={formData.destination}
+            onChange={handleChange}
+            placeholder="Entrez votre destination"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-md"
+          />
+          {suggestions.length > 0 && (
+            <ul className="bg-white border border-gray-300 rounded-lg shadow-md mt-1 absolute z-10 w-full">
+              {suggestions.map((suggestion, index) => (
+                <li
+                  key={index}
+                  className="p-2 cursor-pointer hover:bg-gray-200"
+                  onClick={() => handleDestinationSelect(suggestion)}
+                >
+                  {suggestion.title}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
       
   {distance && (
