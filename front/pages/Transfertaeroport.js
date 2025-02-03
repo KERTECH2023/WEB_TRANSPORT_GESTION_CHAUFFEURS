@@ -3,6 +3,51 @@ import axios from 'axios';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 
+
+
+const [destinationSuggestions, setDestinationSuggestions] = useState([]);
+const [suggestionLoading, setSuggestionLoading] = useState(false);
+
+// Existing handleChange method modified to include destination suggestions
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  setFormData(prev => ({
+    ...prev,
+    [name]: value
+  }));
+
+  // Add destination suggestion logic
+  if (name === 'destination' && value.length > 2) {
+    fetchDestinationSuggestions(value);
+  }
+};
+
+// New method to fetch destination suggestions
+const fetchDestinationSuggestions = async (query) => {
+  if (!query) return;
+
+  setSuggestionLoading(true);
+  try {
+    const response = await axios.get(
+      'https://autocomplete.search.hereapi.com/v1/autocomplete',
+      {
+        params: {
+          apiKey: HERE_API_KEY,
+          q: query,
+          limit: 5,
+          in: 'countryCode:TUN' // Limit to Tunisia
+        }
+      }
+    );
+
+    setDestinationSuggestions(response.data.items || []);
+  } catch (error) {
+    console.error('Erreur de recherche de destination:', error);
+  } finally {
+    setSuggestionLoading(false);
+  }
+};
+
 // Données des aéroports
 const AIRPORTS = {
   djerba: {
@@ -18,13 +63,7 @@ const AIRPORTS = {
 // Clé API HERE Maps
 const HERE_API_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
 
-// Exemples de destinations
-const DESTINATIONS = [
-  "Hôtel Dar Djerba, Djerba",
-  "Hôtel Movenpick, Tunis",
-  "Hôtel Laico, Tunis",
-  "Hôtel Hasdrubal Thalassa, Djerba"
-];
+
 
 const SimpleForm = () => {
   // États du formulaire
@@ -285,25 +324,51 @@ const SimpleForm = () => {
           )}
         </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700">Destination</label>
-          <input
-            type="text"
-            name="destination"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-md"
-            value={formData.destination}
-            onChange={handleChange}
-            list="destinations"
-          />
-          <datalist id="destinations">
-            {DESTINATIONS.map((dest, index) => (
-              <option key={index} value={dest} />
+        <div className="max-w-lg mx-auto mt-5 p-7 bg-white rounded-lg shadow-2xl">
+      {/* ... other form fields ... */}
+
+      <div className="mb-4 relative">
+        <label className="block text-gray-700">Destination</label>
+        <input
+          type="text"
+          name="destination"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-md"
+          value={formData.destination}
+          onChange={handleChange}
+          autoComplete="off"
+        />
+        {suggestionLoading && (
+          <div className="absolute top-full z-10 w-full bg-white border border-gray-300 rounded-b-lg shadow-md p-2">
+            Chargement...
+          </div>
+        )}
+        {destinationSuggestions.length > 0 && (
+          <ul className="absolute top-full z-10 w-full bg-white border border-gray-300 rounded-b-lg shadow-md">
+            {destinationSuggestions.map((suggestion) => (
+              <li
+                key={suggestion.id}
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => {
+                  setFormData(prev => ({
+                    ...prev,
+                    destination: suggestion.title
+                  }));
+                  setDestinationSuggestions([]);
+                }}
+              >
+                {suggestion.title}
+                <span className="text-gray-500 text-sm ml-2">
+                  {suggestion.address?.label}
+                </span>
+              </li>
             ))}
-          </datalist>
-          {errors.destination && (
-            <span className="text-red-500">{errors.destination}</span>
-          )}
-        </div>
+          </ul>
+        )}
+        {errors.destination && (
+          <span className="text-red-500">{errors.destination}</span>
+        )}
+      </div>
+      </div>
 
         <div className="mb-4">
           <label className="block text-gray-700">Numéro de vol</label>
