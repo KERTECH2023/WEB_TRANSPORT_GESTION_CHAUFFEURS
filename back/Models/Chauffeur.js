@@ -35,19 +35,11 @@ const ChauffSchema = new mongoose.Schema(
     password: {
       type: String,
     },
-    DateNaissance: {
-      type: Date,
-      required: [true, "Please provide a DateNaissance"],
-    },
+    
     type: {
       type: String,
     },
-    Ville: {
-      type: String,
-    },
-    Pays: {
-      type: String,
-    },
+    
     gender: {
       type: String,
       enum: {
@@ -73,15 +65,7 @@ const ChauffSchema = new mongoose.Schema(
 
       // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
     },
-    photoPermisRec: {
-      type: String,
-
-      // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
-    },
-    photoPermisVer: {
-      type: String,
-      // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
-    },
+   
     photoVtc: {
       type: String,
       // default: 'https://storage.googleapis.com/imagestor-768b5.appspot.com/1677485204106.jpg'
@@ -112,10 +96,7 @@ const ChauffSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    postalCode: {
-      type: String,
-      // validate: [validator.isPostalCodeLocales, 'Please provide valid postal code']
-    },
+  
     isActive: {
       type: Boolean,
       default: true,
