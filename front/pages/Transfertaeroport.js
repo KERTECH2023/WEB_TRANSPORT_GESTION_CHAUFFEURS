@@ -1,3 +1,6 @@
+
+
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
@@ -47,7 +50,6 @@ const fetchDestinationSuggestions = async (query) => {
     setSuggestionLoading(false);
   }
 };
-
 // Données des aéroports
 const AIRPORTS = {
   djerba: {
@@ -63,7 +65,13 @@ const AIRPORTS = {
 // Clé API HERE Maps
 const HERE_API_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
 
-
+// Exemples de destinations
+const DESTINATIONS = [
+  "Hôtel Dar Djerba, Djerba",
+  "Hôtel Movenpick, Tunis",
+  "Hôtel Laico, Tunis",
+  "Hôtel Hasdrubal Thalassa, Djerba"
+];
 
 const SimpleForm = () => {
   // États du formulaire
@@ -324,51 +332,25 @@ const SimpleForm = () => {
           )}
         </div>
 
-        <div className="max-w-lg mx-auto mt-5 p-7 bg-white rounded-lg shadow-2xl">
-      {/* ... other form fields ... */}
-
-      <div className="mb-4 relative">
-        <label className="block text-gray-700">Destination</label>
-        <input
-          type="text"
-          name="destination"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-md"
-          value={formData.destination}
-          onChange={handleChange}
-          autoComplete="off"
-        />
-        {suggestionLoading && (
-          <div className="absolute top-full z-10 w-full bg-white border border-gray-300 rounded-b-lg shadow-md p-2">
-            Chargement...
-          </div>
-        )}
-        {destinationSuggestions.length > 0 && (
-          <ul className="absolute top-full z-10 w-full bg-white border border-gray-300 rounded-b-lg shadow-md">
-            {destinationSuggestions.map((suggestion) => (
-              <li
-                key={suggestion.id}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setFormData(prev => ({
-                    ...prev,
-                    destination: suggestion.title
-                  }));
-                  setDestinationSuggestions([]);
-                }}
-              >
-                {suggestion.title}
-                <span className="text-gray-500 text-sm ml-2">
-                  {suggestion.address?.label}
-                </span>
-              </li>
+        <div className="mb-4">
+          <label className="block text-gray-700">Destination</label>
+          <input
+            type="text"
+            name="destination"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-md"
+            value={formData.destination}
+            onChange={handleChange}
+            list="destinations"
+          />
+          <datalist id="destinations">
+            {DESTINATIONS.map((dest, index) => (
+              <option key={index} value={dest} />
             ))}
-          </ul>
-        )}
-        {errors.destination && (
-          <span className="text-red-500">{errors.destination}</span>
-        )}
-      </div>
-      </div>
+          </datalist>
+          {errors.destination && (
+            <span className="text-red-500">{errors.destination}</span>
+          )}
+        </div>
 
         <div className="mb-4">
           <label className="block text-gray-700">Numéro de vol</label>
