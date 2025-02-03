@@ -14,8 +14,8 @@ const AIRPORTS = {
   }
 };
 
-// Remplacez ceci par votre clé API OpenRouteService
-const ORS_API_KEY = '5b3ce3597851110001cf6248666a7544a8974e0ca4291ebd8e4095a8';
+// Remplacez ceci par votre clé API HERE Maps
+const HERE_API_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
 
 const SimpleForm = () => {
   const [formData, setFormData] = useState({
@@ -48,18 +48,17 @@ const SimpleForm = () => {
   const geocodeDestination = async (destination) => {
     try {
       const response = await axios.get(
-        `https://api.openrouteservice.org/geocode/search`,
+        `https://geocode.search.hereapi.com/v1/geocode`,
         {
           params: {
-            api_key: ORS_API_KEY,
-            text: destination,
-            size: 1
+            apiKey: HERE_API_KEY,
+            q: destination
           }
         }
       );
 
-      if (response.data.features && response.data.features.length > 0) {
-        const coords = response.data.features[0].geometry.coordinates;
+      if (response.data.items && response.data.items.length > 0) {
+        const coords = [response.data.items[0].position.lat, response.data.items[0].position.lng];
         setDestinationCoords(coords);
         return coords;
       }
@@ -72,21 +71,21 @@ const SimpleForm = () => {
 
   const calculateDistance = async (startCoords, endCoords) => {
     try {
-      const response = await axios.post(
-        'https://api.openrouteservice.org/v2/directions/driving-car',
+      const response = await axios.get(
+        `https://router.hereapi.com/v8/routes`,
         {
-          coordinates: [startCoords, endCoords]
-        },
-        {
-          headers: {
-            'Authorization': ORS_API_KEY,
-            'Content-Type': 'application/json'
+          params: {
+            apiKey: HERE_API_KEY,
+            transportMode: 'car',
+            origin: `${startCoords[0]},${startCoords[1]}`,
+            destination: `${endCoords[0]},${endCoords[1]}`,
+            return: 'summary'
           }
         }
       );
 
       if (response.data.routes && response.data.routes.length > 0) {
-        const distanceKm = (response.data.routes[0].summary.distance / 1000).toFixed(2);
+        const distanceKm = (response.data.routes[0].sections[0].summary.length / 1000).toFixed(2);
         setDistance(distanceKm);
         return distanceKm;
       }
@@ -104,7 +103,7 @@ const SimpleForm = () => {
         if (airport) {
           const destCoords = await geocodeDestination(formData.destination);
           if (destCoords) {
-            calculateDistance(airport.coordinates.reverse(), destCoords);
+            calculateDistance(airport.coordinates, destCoords);
           }
         }
       }
