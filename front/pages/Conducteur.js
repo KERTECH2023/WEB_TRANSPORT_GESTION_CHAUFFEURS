@@ -72,11 +72,7 @@ const Conducteur = () => {
         !cnicNo ||
         !phone ||
         !civilite ||
-        !DateNaissance ||
         !address ||
-        !postalCode ||
-        !ville ||
-        !pays ||
         !typeChauffeur ||
         !phoneCode
       ) {
@@ -90,15 +86,11 @@ const Conducteur = () => {
         setCiviliteError(
           !civilite ? "Veuillez sélectionner votre Civilité" : ""
         );
-        setDateNaissanceError(
-          !DateNaissance ? "Veuillez entrer votre Date de Naissance" : ""
-        );
+    
         setAddressError(!address ? "Veuillez entrer votre Adresse" : "");
-        setPostalCodeError(
-          !postalCode ? "Veuillez entrer votre Code Postal" : ""
-        );
-        setVilleError(!ville ? "Veuillez entrer votre Ville" : "");
-        setPaysError(!pays ? "Veuillez entrer votre Pays" : "");
+       
+       
+      
         setTypeChauffeurError(
           !typeChauffeur ? "Veuillez sélectionner votre Type de Chauffeur" : ""
         );
@@ -140,13 +132,13 @@ const Conducteur = () => {
   const [chauffId, setChauffId] = useState();
   const [immatriculation, setImmatriculation] = useState();
   const [modelle, setModelle] = useState();
-  const [photoAssurance, setPhotoAssurance] = useState({ file: [] });
-  const [photoCartegrise, setPhotoCartegrise] = useState({ file: [] });
+
+ 
 
   const [immatriculationError, setImmatriculationError] = useState("");
   const [modelleError, setModelleError] = useState("");
-  const [photoAssuranceError, setPhotoAssuranceError] = useState("");
-  const [photoCartegriseError, setPhotoCartegriseError] = useState("");
+ 
+ 
 
   const [submitStatus, setSubmitStatus] = useState("");
   const [Nom, setNom] = useState();
@@ -154,20 +146,12 @@ const Conducteur = () => {
   const [email, setemail] = useState();
   const [phone, setphone] = useState();
   const [photoAvatar, setphotoAvatar] = useState({ file: [] });
-  const [photoPermisRec, setphotoPermisRec] = useState({ file: [] });
-  const [photoPermisVer, setphotoPermisVer] = useState({ file: [] });
   const [photoVtc, setphotoVtc] = useState({ file: [] });
   const [photoCin, setphotoCin] = useState({ file: [] });
   const [civilite, setCivilite] = useState();
-  const [ville, setVille] = useState();
-  const [pays, setPays] = useState();
   const [typeChauffeur, setTypeChauffeur] = useState();
-  const [DateNaissance, setDateNaissance] = useState();
-  const [Nationalite, setNationalite] = useState();
   const [cnicNo, setcnicNo] = useState();
   const [address, setaddress] = useState();
-  const [postalCode, setpostalCode] = useState();
-  const [villeError, setVilleError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [cinError, setCinError] = useState("");
   const [nomError, setNomError] = useState("");
@@ -175,44 +159,18 @@ const Conducteur = () => {
   const [typeChauffeurError, setTypeChauffeurError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [civiliteError, setCiviliteError] = useState("");
-  const [PaysError, setPaysError] = useState("");
-  const [dateNaissanceError, setDateNaissanceError] = useState("");
   const [addressError, setAddressError] = useState("");
-  const [postalCodeError, setPostalCodeError] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
   const [phoneCodeError, setPhoneCodeError] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingSubmit, setloadingSubmit] = useState(false);
-  const [countries, setCountries] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState(null);
   const router = useRouter();
 
 
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    fetch("https://restcountries.com/v3.1/all")
-      .then((response) => response.json())
-      .then((data) => {
-        const countriesData = data
-          .map((country) => ({
-            value: country.name.common, // Nom du pays
-            label: country.idd?.root
-              ? `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ""
-              }`
-              : "",
-            icon: country.flags?.png,
-          }))
-          .filter((country) => country.label);
-
-        const sortedData = countriesData.sort((a, b) =>
-          a.value.localeCompare(b.value)
-        );
-
-        setCountries(sortedData);
-      })
-      .catch((error) => console.error("Error fetching countries:", error));
-
+  
 
     let interval;
     if (loading && progress < 100) {
@@ -229,27 +187,7 @@ const Conducteur = () => {
     return () => clearInterval(interval); // Clear interval on component unmount
   }, [loading, progress]);
 
-  const calculateMaxDate = () => {
-    const today = new Date();
-    const minBirthDate = new Date(
-      today.getFullYear() - 18,
-      today.getMonth(),
-      today.getDate()
-    );
 
-    const year = minBirthDate.getFullYear();
-    let month = minBirthDate.getMonth() + 1;
-    if (month < 10) {
-      month = `0${month}`;
-    }
-
-    let day = minBirthDate.getDate();
-    if (day < 10) {
-      day = `0${day}`;
-    }
-
-    return `${year}-${month}-${day}`;
-  };
 
   useEffect(() => {
     console.log("Updated chauffId:", chauffId);
@@ -327,14 +265,8 @@ const Conducteur = () => {
         setModelleError("Le modèle est requis.");
         hasError = true;
       }
-      if (!photoCartegrise || !(photoCartegrise instanceof File) || photoCartegrise.size === 0) {
-        setPhotoCartegriseError("La photo de la carte grise est requise.");
-        hasError = true;
-      }
-      if (!photoAssurance || !(photoAssurance instanceof File) || photoAssurance.size === 0) {
-        setPhotoAssuranceError("La photo de l'assurance est requise.");
-        hasError = true;
-      }
+     
+     
        
       
 
@@ -353,17 +285,10 @@ const Conducteur = () => {
           fullPhoneNumber,
           photoAvatar,
           photoCin,
-          photoPermisRec,
-          photoPermisVer,
           photoVtc,
           civilite,
-          DateNaissance,
-          Nationalite,
           cnicNo,
           address,
-          postalCode,
-          ville,
-          pays,
           typeChauffeur,
         },
         {
@@ -380,11 +305,8 @@ const Conducteur = () => {
       setphone("");
       document.getElementById("login").reset();
       setCivilite("");
-      setDateNaissance("");
-      setNationalite("");
       setcnicNo("");
       setaddress("");
-      setpostalCode("");
       setEmailError("");
       setPhoneError("");
       setCinError("");
@@ -399,8 +321,8 @@ const Conducteur = () => {
       // Validation des champs voiture
       setImmatriculationError("");
       setModelleError("");
-      setPhotoAssuranceError("");
-      setPhotoCartegriseError("");
+      
+      
 
 
       setloadingSubmit(true); // Start loading
@@ -412,8 +334,8 @@ const Conducteur = () => {
       const response = await axiosClient.post(
         `/Voi/addvoiture/${userData}`,
         {
-          photoCartegrise,
-          photoAssurance,
+          
+          
           immatriculation,
           modelle,
         },
@@ -557,26 +479,7 @@ const Conducteur = () => {
                       )}
                     </div>
 
-                    {/* Date de Naissance */}
-                    <div className="col-span-1 row-span-1 p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900">
-                        Date de Naissance
-                      </label>
-                      <input
-                        type="date"
-                        id="dateNaissance"
-                        className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => setDateNaissance(e.target.value)}
-                        value={DateNaissance || ""}
-                        max={calculateMaxDate()}
-                        required
-                      />
-                      {dateNaissanceError && (
-                        <label className="text-red-500">
-                          {dateNaissanceError}
-                        </label>
-                      )}
-                    </div>
+                   
                     {/* Num permis */}
                     <div className="col-span-1 row-span-1  p-4 px-8 border">
                       <label className="block mb-2 text-gray-900">
@@ -676,62 +579,11 @@ const Conducteur = () => {
                       )}
                     </div>
 
-                    {/* Ville */}
-                    <div className="col-span-1 row-span-1 p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900">
-                        Ville
-                      </label>
-                      <input
-                        type="text"
-                        id="ville"
-                        className="text-gray-900 block w-full p-2.5"
-                        placeholder="Ville"
-                        onChange={(e) => setVille(e.target.value)}
-                        value={ville || ""}
-                        required
-                      />{" "}
-                      {villeError && (
-                        <label className="text-red-500">{villeError}</label>
-                      )}
-                    </div>
+                 
 
-                    {/* Pays */}
-                    <div className="col-span-1 row-span-1 p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900">Pays</label>
-                      <input
-                        type="text"
-                        id="pays"
-                        className="text-gray-900 block w-full p-2.5"
-                        placeholder="Pays"
-                        onChange={(e) => setPays(e.target.value)}
-                        value={pays || ""}
-                        required
-                      />
-                      {PaysError && (
-                        <label className="text-red-500">{PaysError}</label>
-                      )}
-                    </div>
+                  
 
-                    {/* Code Postal */}
-                    <div className="col-span-1 row-span-1 p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900">
-                        Code Postal
-                      </label>
-                      <input
-                        type="number"
-                        id="codePostal"
-                        className="text-gray-900 block w-full p-2.5"
-                        placeholder="Code Postal"
-                        onChange={(e) => setpostalCode(e.target.value)}
-                        value={postalCode || ""}
-                        required
-                      />{" "}
-                      {postalCodeError && (
-                        <label className="text-red-500">
-                          {postalCodeError}
-                        </label>
-                      )}
-                    </div>
+                    
 
                     {/* Type de Chauffeur */}
                     <div className="col-span-1 row-span-1  p-4 px-8 border">
@@ -816,39 +668,9 @@ const Conducteur = () => {
                       />
                     </div>
 
-                    <div className="col-span-1 row-span-1 p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900">Permis Recto</label>
-                      <input
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.pdf"
-                        id="permis_recto"
-                        className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          compressImage(file, (compressedFile) => {
-                            setphotoPermisVer(compressedFile);
-                          });
-                        }}
-                        required
-                      />
-                    </div>
+                  
 
-                    <div className="col-span-1 row-span-1 p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900">Permis Verso</label>
-                      <input
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.pdf"
-                        id="permis_verso"
-                        className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          compressImage(file, (compressedFile) => {
-                            setphotoPermisRec(compressedFile);
-                          });
-                        }}
-                        required
-                      />
-                    </div>
+                  
 
                     {/* Other attachment fields */}
                   </div>
@@ -894,54 +716,8 @@ const Conducteur = () => {
                         <label className="text-red-500 ">{modelleError}</label>
                       )}
                     </div>
-                    <div className="col-span-1 row-span-1  p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900">
-                        {" "}
-                        Cartegrise
-                      </label>
-                      <input
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.pdf"
-                        id="categrise"
-                        className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          compressImage(file, (compressedFile) => {
-                            setPhotoCartegrise(compressedFile);
-                          });
-                        }}
-
-                        required
-                      />
-                      {photoCartegriseError && (
-                        <label className="text-red-500 ">
-                          {photoCartegriseError}
-                        </label>
-                      )}
-                    </div>
-                    <div className="col-span-1 row-span-1  p-4 px-8 border">
-                      <label className="block mb-2 text-gray-900">
-                        Assurance
-                      </label>
-                      <input
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.pdf"
-                        id="assurance"
-                        className="text-gray-900 block w-full p-2.5"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          compressImage(file, (compressedFile) => {
-                            setPhotoAssurance(compressedFile);
-                          });
-                        }}
-                        required
-                      />
-                      {photoAssuranceError && (
-                        <label className="text-red-500 ">
-                          {photoAssuranceError}
-                        </label>
-                      )}
-                    </div>
+                    
+                   
 
                     <div className="col-span-1 row-span-1 p-4 px-8 border">
                       <div className="flex items-start">
