@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { axios } from "../config/axios";
 import { toast } from "react-toastify";
 
-
+import { axiosClient } from "../config/axios";
 
 
 
@@ -121,31 +121,15 @@ const SimpleForm = () => {
    
 
     try {
-      
+      const formData = new FormData();
+      Object.keys(form).forEach(key => formData.append(key, form[key]));
+      formData.append('price', price);
 
-        // Envoi des détails du chauffeur
-            const airports = await axios.post(
-              "/transfert/add",
-              {
-                firstName,
-                lastName,
-                email,
-                phone,
-                airport,
-                destination,
-                passengers,
-                price,
-
-                
-              },
-              {
-                headers: {
-                  "Content-Type": "multipart/form-data",
-                },
-              }
-            );
-
-    
+      await axiosClient.post("/transfert/add", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       console.log("Transfert ajouté avec succès");
       toast.success("Transfert ajouté avec succès");
       
