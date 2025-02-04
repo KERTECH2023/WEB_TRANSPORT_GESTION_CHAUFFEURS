@@ -116,36 +116,64 @@ const SimpleForm = () => {
     }
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-   
-
+  
+    // Vérifier si tous les champs sont remplis
+    if (
+      !form.firstName.trim() ||
+      !form.lastName.trim() ||
+      !form.email.trim() ||
+      !form.phone.trim() ||
+      !form.airport.trim() ||
+      !form.destination.trim() ||
+      !form.passengers ||
+      !price
+    ) {
+      toast.error("Tous les champs sont requis !");
+      return;
+    }
+  
     try {
-      
-    
-
-      await axiosClient.post("/transfert/add",  {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        phone: form.phone,
-        airport: form.airport,
-        destination: form.destination,
-        passengers: form.passengers,
-        price: price // Assurez-vous d'ajouter le prix
-      },  {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      await axiosClient.post(
+        "/transfert/add",
+        {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone,
+          airport: form.airport,
+          destination: form.destination,
+          passengers: form.passengers,
+          price: price, // Ajout du prix
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
       console.log("Transfert ajouté avec succès");
       toast.success("Transfert ajouté avec succès");
-      
+  
+      // Réinitialisation du formulaire après soumission réussie
+      setForm({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        airport: '',
+        destination: '',
+        passengers: '',
+      });
+      setPrice(null);
     } catch (error) {
       console.error("Erreur lors de l'ajout du transfert :", error);
-      toast.sucess("Erreur lors de l'ajout du transfert");
+      toast.error("Erreur lors de l'ajout du transfert");
     }
   };
+  
 
   return (
     <div className="max-w-xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
