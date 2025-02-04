@@ -14,6 +14,7 @@ const Agentchauff = require("./routes/ChauffeurRoute");
 const con = require("./routes/ContactRoute");
 const Voi = require("./routes/VoitureRoutes");
 const his = require("./routes/HistoRoute");
+const transfert = require("./routes/TransfertRoute");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -60,6 +61,7 @@ app.use("/Chauff", Agentchauff);
 app.use("/Voi", Voi);
 app.use("/Con", con);
 app.use("/hist", his);
+app.use("/transfert", transfert);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
