@@ -124,8 +124,19 @@ const SimpleForm = () => {
       const formData = new FormData();
       Object.keys(form).forEach(key => formData.append(key, form[key]));
       formData.append('price', price);
+    
+      
 
-      await axiosClient.post("/transfert/add", formData, {
+      await axiosClient.post("/transfert/add",  {
+        firstName,
+        lastName,
+        email,
+        phone,
+        airport,
+        destination,
+        passengers,
+       
+      }, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -214,31 +225,38 @@ const SimpleForm = () => {
           )}
         </div>
 
-        <div>
-          <label className="block mb-1 font-medium">{t('passengers')}</label>
-          <input
-            type="number"
-            name="passengers"
-            value={form.passengers}
-            onChange={handleChange}
-            min="1"
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
+        
 
-        {price !== null && (
+        <div>
+        <label htmlFor="passengers" className="block mb-1 font-medium">
+          {t('passengers')}
+        </label>
+        <input
+          id="passengers"
+          type="number"
+          name="passengers"
+          value={form.passengers}
+          onChange={handleChange}
+          min="1"
+          className="w-full p-2 border rounded"
+          required
+        />
+      </div>
+
+      {price !== null && (
+        <div>
           <div className="p-3 bg-blue-50 text-blue-700 rounded">
             {t('price')}: {price.toFixed(2)} €
           </div>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          {t('submit')}
-        </button>
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            {t('submit')}
+          </button>
+        </div>
+      )}
+       
       </form>
     </div>
   );
