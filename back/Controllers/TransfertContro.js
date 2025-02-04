@@ -1,6 +1,6 @@
 // controllers/transferController.js
 
-const Transfer = require('../Models/Transfer'); // Assurez-vous que le chemin est correct
+const Transfer = require('../Models/Transfert'); // Assurez-vous que le chemin est correct
 
 exports.createTransfer = async (req, res) => {
   try {
