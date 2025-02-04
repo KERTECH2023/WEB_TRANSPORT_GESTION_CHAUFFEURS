@@ -1,4 +1,3 @@
-
 // models/Transfer.js
 
 const mongoose = require('mongoose');
@@ -10,8 +9,8 @@ const TransferSchema = new mongoose.Schema({
   phone: { type: String },
   airport: { type: String },
   destination: { type: String },
-  passengers: { type: Number },
-  price: { type: Number },
+  passengers: { type: String},
+  price: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
