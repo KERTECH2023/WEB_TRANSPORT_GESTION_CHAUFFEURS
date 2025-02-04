@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { axios } from "../config/axios";
 import { toast } from "react-toastify";
-import { useRouter } from "next/router";
+
 
 
 
@@ -118,7 +118,7 @@ const SimpleForm = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    const router = useRouter(); // Hook pour la redirection
+   
 
     try {
       const formData = new FormData();
@@ -132,7 +132,7 @@ const SimpleForm = () => {
       });
       console.log("Transfert ajouté avec succès");
       toast.success("Transfert ajouté avec succès");
-      setTimeout(() => router.push("/Conducteur"), 2000); // Attente pour afficher le toast
+      
     } catch (error) {
       console.error("Erreur lors de l'ajout du transfert :", error);
       toast.sucess("Erreur lors de l'ajout du transfert");
