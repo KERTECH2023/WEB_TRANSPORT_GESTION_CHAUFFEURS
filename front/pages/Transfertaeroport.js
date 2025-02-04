@@ -121,15 +121,31 @@ const SimpleForm = () => {
    
 
     try {
-      const formData = new FormData();
-      Object.keys(form).forEach(key => formData.append(key, form[key]));
-      formData.append('price', price);
+      
 
-      await axios.post("/transfert/add", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+        // Envoi des détails du chauffeur
+            const airports = await axios.post(
+              "/transfert/add",
+              {
+                firstName,
+                lastName,
+                email,
+                phone,
+                airport,
+                destination,
+                passengers,
+                price,
+
+                
+              },
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+
+    
       console.log("Transfert ajouté avec succès");
       toast.success("Transfert ajouté avec succès");
       
