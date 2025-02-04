@@ -121,22 +121,19 @@ const SimpleForm = () => {
    
 
     try {
-      const formData = new FormData();
-      Object.keys(form).forEach(key => formData.append(key, form[key]));
-      formData.append('price', price);
-    
       
+    
 
       await axiosClient.post("/transfert/add",  {
-        firstName,
-        lastName,
-        email,
-        phone,
-        airport,
-        destination,
-        passengers,
-       
-      }, {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        airport: form.airport,
+        destination: form.destination,
+        passengers: form.passengers,
+        price: price // Assurez-vous d'ajouter le prix
+      },  {
         headers: {
           "Content-Type": "multipart/form-data",
         },
