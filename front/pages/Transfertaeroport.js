@@ -56,12 +56,26 @@ const SimpleForm = () => {
   const [cache, setCache] = useState({}); // Cache pour les résultats de recherche
   const [pricingData, setPricingData] = useState({ prixdepersonne: 0, prixdebase: 0 });
 
+
+ 
+
+  const calculatePrice = (numPassengers, distance) => {
+    return (distance * numPassengers * pricingData.prixdepersonne) + pricingData.prixdebase;
+  };
+
+ 
+ 
   // Récupérer les tarifs depuis l'API
   useEffect(() => {
     const fetchPricingData = async () => {
       try {
         const response = await axiosClient.get("/tariftransfert");
-        setPricingData(response.dat); // Assurez-vous que la structure des données est correcte
+        if (response.data && response.data.length > 0) {
+          setPricingData({
+            prixdepersonne: response.data[0].prixdepersonne,
+            prixdebase: response.data[0].prixdebase
+          });
+        }
       } catch (error) {
         console.error("Erreur lors de la récupération des tarifs :", error);
       }
@@ -78,8 +92,8 @@ const SimpleForm = () => {
 
     if (name === 'passengers') {
       const numPassengers = parseInt(value) || 1;
-      const calculatedPrice = (distance * numPassengers * pricingData.prixdepersonne) + pricingData.prixdebase;
-      setPrice(calculatedPrice);
+      const newPrice = calculatePrice(numPassengers, distance);
+      setPrice(newPrice);
     }
 
     if (name === 'destination') {
@@ -131,9 +145,9 @@ const SimpleForm = () => {
       const data = await res.json();
       const newDistance = data?.routes?.[0]?.sections?.[0]?.summary?.length / 1000 || 0;
       const numPassengers = parseInt(form.passengers) || 1;
-      const calculatedPrice = (distance * numPassengers * pricingData.prixdepersonne) + pricingData.prixdebase;
-      setDistance(newDistance);
-      setPrice(calculatedPrice);
+      const newPrice = calculatePrice(numPassengers, newDistance);
+      setPrice(newPrice);
+     
     } catch (err) {
       console.error(err);
     }
