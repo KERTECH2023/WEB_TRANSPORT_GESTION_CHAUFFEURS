@@ -15,6 +15,7 @@ const con = require("./routes/ContactRoute");
 const Voi = require("./routes/VoitureRoutes");
 const his = require("./routes/HistoRoute");
 const transfert = require("./routes/TransfertRoute");
+const tariftransfert = require("./routes/TariftransfertRoute");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -62,6 +63,7 @@ app.use("/Voi", Voi);
 app.use("/Con", con);
 app.use("/hist", his);
 app.use("/transfert", transfert);
+app.use("/tariftransfert", tariftransfert);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
