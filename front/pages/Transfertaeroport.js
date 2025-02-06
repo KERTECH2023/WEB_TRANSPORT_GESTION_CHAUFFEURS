@@ -16,7 +16,11 @@ const LANGS = {
     destination: "Destination",
     passengers: "Nombre de passagers",
     price: "Prix",
-    submit: "Réserver"
+    submit: "Réserver",
+    datevol: "Date du vol",     // Traduction ajoutée
+    heurvol: "Heure du vol",     // Traduction ajoutée
+    numvol: "Numéro du vol",     // Traduction ajoutée
+   
   },
   en: {
     firstName: "First Name",
@@ -27,7 +31,11 @@ const LANGS = {
     destination: "Destination",
     passengers: "Passengers",
     price: "Price",
-    submit: "Book"
+    submit: "Book",
+    datevol: "Flight Date",      
+    heurvol: "Flight Time",       // Traduction ajoutée
+    numvol: "Flight Number",      // Traduction ajoutée
+
   }
 };
 
@@ -40,12 +48,27 @@ const HERE_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
 
 const SimpleForm = () => {
   const [lang, setLang] = useState('fr');
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', airport: '', destination: '', passengers: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '' ,   datevol: '',   heurvol: '',    numvol: '',    airport: '', destination: '', passengers: '' });
   const [suggestions, setSuggestions] = useState([]);
   const [price, setPrice] = useState(null);
   const [distance, setDistance] = useState(0);
   const [debounceTimer, setDebounceTimer] = useState(null);
   const [cache, setCache] = useState({}); // Cache pour les résultats de recherche
+  const [pricingData, setPricingData] = useState({ prixdepersonne: 0, prixdebase: 0 });
+
+  // Récupérer les tarifs depuis l'API
+  useEffect(() => {
+    const fetchPricingData = async () => {
+      try {
+        const response = await axiosClient.get("/tariftransfert");
+        setPricingData(response.data); // Assurez-vous que la structure des données est correcte
+      } catch (error) {
+        console.error("Erreur lors de la récupération des tarifs :", error);
+      }
+    };
+
+    fetchPricingData();
+  }, []);
 
   const t = key => LANGS[lang][key];
 
@@ -55,7 +78,7 @@ const SimpleForm = () => {
 
     if (name === 'passengers') {
       const numPassengers = parseInt(value) || 1;
-      const calculatedPrice = distance * numPassengers * 1.5;
+      const calculatedPrice = (distance * numPassengers * pricingData.prixdepersonne) + pricingData.prixdebase;
       setPrice(calculatedPrice);
     }
 
@@ -108,7 +131,7 @@ const SimpleForm = () => {
       const data = await res.json();
       const newDistance = data?.routes?.[0]?.sections?.[0]?.summary?.length / 1000 || 0;
       const numPassengers = parseInt(form.passengers) || 1;
-      const calculatedPrice = newDistance * numPassengers * 1.5;
+      const calculatedPrice = (distance * numPassengers * pricingData.prixdepersonne) + pricingData.prixdebase;
       setDistance(newDistance);
       setPrice(calculatedPrice);
     } catch (err) {
@@ -125,6 +148,9 @@ const SimpleForm = () => {
       !form.lastName.trim() ||
       !form.email.trim() ||
       !form.phone.trim() ||
+      !form.datevol.trim() || 
+      !form.heurvol.trim() || 
+      !form.numvol.trim() ||  
       !form.airport.trim() ||
       !form.destination.trim() ||
       !form.passengers ||
@@ -142,6 +168,9 @@ const SimpleForm = () => {
           lastName: form.lastName,
           email: form.email,
           phone: form.phone,
+          datevol: form.datevol,   
+          heurvol: form.heurvol,   
+          numvol: form.numvol,    
           airport: form.airport,
           destination: form.destination,
           passengers: form.passengers,
@@ -163,6 +192,9 @@ const SimpleForm = () => {
         lastName: '',
         email: '',
         phone: '',
+        datevol: '',   
+        heurvol: '',   
+        numvol: '',    
         airport: '',
         destination: '',
         passengers: '',
@@ -207,6 +239,43 @@ const SimpleForm = () => {
               />
             </div>
           ))}
+        </div>
+
+
+        <div>
+          <label className="block mb-1 font-medium">{t('datevol')}</label>
+          <input
+            type="date"
+            name="datevol"
+            value={form.datevol}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block mb-1 font-medium">{t('heurvol')}</label>
+          <input
+            type="time"
+            name="heurvol"
+            value={form.heurvol}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">{t('numvol')}</label>
+          <input
+            type="text"
+            name="numvol"
+            value={form.numvol}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          />
         </div>
 
         <div>
@@ -271,7 +340,7 @@ const SimpleForm = () => {
       {price !== null && (
         <div>
           <div className="p-3 bg-blue-50 text-blue-700 rounded">
-            {t('price')}: {price.toFixed(2)} €
+            {t('price')}: {price.toFixed(2)} DT
           </div>
           <button
             type="submit"
