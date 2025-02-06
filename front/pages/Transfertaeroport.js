@@ -92,9 +92,8 @@ const SimpleForm = () => {
 
     if (name === 'passengers') {
       const numPassengers = parseInt(value) || 1;
-      const calculatedPrice = (distance * numPassengers * pricingData.prixdepersonne) + pricingData.prixdebase;
-      setPrice(calculatedPrice);
-      setPrice(calculatedPrice);
+      const newPrice = calculatePrice(numPassengers, distance);
+      setPrice(newPrice);
     }
 
     if (name === 'destination') {
@@ -145,6 +144,7 @@ const SimpleForm = () => {
       );
       const data = await res.json();
       const newDistance = data?.routes?.[0]?.sections?.[0]?.summary?.length / 1000 || 0;
+      setDistance(newDistance);
       const numPassengers = parseInt(form.passengers) || 1;
       const newPrice = calculatePrice(numPassengers, newDistance);
       setPrice(newPrice);
