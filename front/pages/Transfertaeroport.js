@@ -92,8 +92,9 @@ const SimpleForm = () => {
 
     if (name === 'passengers') {
       const numPassengers = parseInt(value) || 1;
-      const newPrice = calculatePrice(numPassengers, distance);
-      setPrice(newPrice);
+      const calculatedPrice = (distance * numPassengers * pricingData.prixdepersonne) + pricingData.prixdebase;
+      setPrice(calculatedPrice);
+      setPrice(calculatedPrice);
     }
 
     if (name === 'destination') {
