@@ -20,6 +20,9 @@ const LANGS = {
     datevol: "Date du vol",     // Traduction ajoutée
     heurvol: "Heure du vol",     // Traduction ajoutée
     numvol: "Numéro du vol",     // Traduction ajoutée
+    bagageCabine: "Bagage en cabine",
+    bagageSoute: "Bagage en soute",
+    bagageHorsFormat: "Bagage hors format"
    
   },
   en: {
@@ -35,6 +38,9 @@ const LANGS = {
     datevol: "Flight Date",      
     heurvol: "Flight Time",       // Traduction ajoutée
     numvol: "Flight Number",      // Traduction ajoutée
+    bagageCabine: "Cabin Baggage",
+    bagageSoute: "Checked Baggage",
+    bagageHorsFormat: "Oversized Baggage"
 
   }
 };
@@ -48,7 +54,7 @@ const HERE_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
 
 const SimpleForm = () => {
   const [lang, setLang] = useState('fr');
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '' ,   datevol: '',   heurvol: '',    numvol: '',    airport: '', destination: '', passengers: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '' ,bagageCabine:'', bagageSoute:'',bagageHorsFormat:'',  datevol: '',   heurvol: '',    numvol: '',    airport: '', destination: '', passengers: '' });
   const [suggestions, setSuggestions] = useState([]);
   const [price, setPrice] = useState(null);
   const [distance, setDistance] = useState(0);
@@ -163,6 +169,9 @@ const SimpleForm = () => {
       !form.lastName.trim() ||
       !form.email.trim() ||
       !form.phone.trim() ||
+      !form.bagageCabine.trim() ||
+      !form.bagageSoute.trim() ||
+      !form.bagageHorsFormat.trim() ||
       !form.datevol.trim() || 
       !form.heurvol.trim() || 
       !form.numvol.trim() ||  
@@ -183,6 +192,9 @@ const SimpleForm = () => {
           lastName: form.lastName,
           email: form.email,
           phone: form.phone,
+          bagageCabine: form.bagageCabine,
+          bagageSoute: form.bagageSoute,
+          bagageHorsFormat: form.bagageHorsFormat,
           datevol: form.datevol,   
           heurvol: form.heurvol,   
           numvol: form.numvol,    
@@ -207,6 +219,9 @@ const SimpleForm = () => {
         lastName: '',
         email: '',
         phone: '',
+        bagageCabine: '',
+        bagageSoute: '',
+        bagageHorsFormat: '',
         datevol: '',   
         heurvol: '',   
         numvol: '',    
@@ -291,6 +306,22 @@ const SimpleForm = () => {
             className="w-full p-2 border rounded"
             required
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          {['bagageCabine', 'bagageSoute', 'bagageHorsFormat'].map(field => (
+            <div key={field}>
+              <label className="block mb-1 font-medium">{t(field)}</label>
+              <input
+                type={field === 'bagageHorsFormat' ? 'text' : 'number'}
+                name={field}
+                value={form[field]}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+          ))}
         </div>
 
         <div>
