@@ -61,7 +61,7 @@ const SimpleForm = () => {
     const fetchPricingData = async () => {
       try {
         const response = await axiosClient.get("/tariftransfert");
-        setPricingData(response.data); // Assurez-vous que la structure des données est correcte
+        setPricingData(response.dat); // Assurez-vous que la structure des données est correcte
       } catch (error) {
         console.error("Erreur lors de la récupération des tarifs :", error);
       }
