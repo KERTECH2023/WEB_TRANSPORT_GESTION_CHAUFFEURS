@@ -6,10 +6,10 @@ const nodemailer = require("nodemailer");
 exports.createTransfer = async (req, res) => {
 
   try {
-    const { firstName, lastName, email, phone,datevol,heurvol,numvol, airport, destination, passengers, price } = req.body;
+    const { firstName, lastName, email, phone,bagageCabine,bagageSoute,bagageHorsFormat,datevol,heurvol,numvol, airport, destination, passengers, price } = req.body;
 
     // Validation simple des données
-    if (!firstName || !lastName || !email || !phone|| !datevol|| !heurvol|| !numvol || !airport || !destination || !passengers || !price) {
+    if (!firstName || !lastName || !email || !phone||!bagageCabine||!bagageSoute||!bagageHorsFormat|| !datevol|| !heurvol|| !numvol || !airport || !destination || !passengers || !price) {
       return res.status(400).json({ message: 'All fields are required.' });
     }
 
@@ -18,6 +18,9 @@ exports.createTransfer = async (req, res) => {
       lastName,
       email,
       phone,
+      bagageCabine,
+      bagageSoute,
+      bagageHorsFormat,
       datevol,
       heurvol,
       numvol,
@@ -40,14 +43,14 @@ exports.createTransfer = async (req, res) => {
       const mailOptions = {
         from: "Flash Driver <noreplyflashdriver@gmail.com>",
         to: email,
-        subject: "Flash Driver - Réservation Acceptée",
+        subject: "Flash Driver - Réservation Enregitrée",
         html: `
           <!DOCTYPE html>
           <html lang="fr">
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Réservation Acceptée</title>
+              <title>Réservation Enregitrée</title>
               <style>
                   body {
                       font-family: 'Poppins', Arial, sans-serif;
