@@ -7,9 +7,13 @@ const TransferSchema = new mongoose.Schema({
   lastName: { type: String},
   email: { type: String},
   phone: { type: String },
+  datevol: { type: String },
+  heurvol: { type: String },
+  numvol: { type: String },
   airport: { type: String },
   destination: { type: String },
   passengers: { type: String},
+  accepter: { type: String, default: 'non_accepter' },
   price: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
