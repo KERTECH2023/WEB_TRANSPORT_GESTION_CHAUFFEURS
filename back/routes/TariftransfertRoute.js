@@ -3,6 +3,6 @@ const router = express.Router();
 const tarifController = require('../Controllers/TariftransfertConto');
 
 router.get('/', tarifController.getAllTarifs);
-router.put('/:id', tarifController.updateTarif);
+
 
 module.exports = router;
