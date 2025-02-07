@@ -238,178 +238,233 @@ const SimpleForm = () => {
   
 
   return (
-    <div className="max-w-xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
-
-
-    <h1 className="text-2xl font-bold text-center mb-6">
-      {lang === 'fr' ? 'Transfert Aéroport' : 'Airport Transfer'}
-    </h1>
-    <div className="flex justify-end gap-2 mb-6">
-      {['fr', 'en'].map(l => (
-        <button
-          key={l}
-          onClick={() => setLang(l)}
-          className={`px-3 py-1 rounded ${lang === l ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-        >
-          {l.toUpperCase()}
-        </button>
-      ))}
-    </div>
-
-    <form className="space-y-4" onSubmit={handleSubmit}>
-      <table>
-        <tr><td>
-
-
-          <div className="grid grid-cols-2 gap-4">
-            {['firstName', 'lastName', 'email', 'phone'].map(field => (
-              <div key={field}>
-                <label className="block mb-1 font-medium">{t(field)}</label>
-                <input
-                  type={field === 'email' ? 'email' : 'text'}
-                  name={field}
-                  value={form[field]}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  required
-                />
-              </div>
-            ))}
-          </div>
-
-
-          <div>
-            <label className="block mb-1 font-medium">{t('datevol')}</label>
-            <input
-              type="date"
-              name="datevol"
-              value={form.datevol}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">{t('heurvol')}</label>
-            <input
-              type="time"
-              name="heurvol"
-              value={form.heurvol}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">{t('numvol')}</label>
-            <input
-              type="text"
-              name="numvol"
-              value={form.numvol}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {['bagageCabine', 'bagageSoute', 'bagageHorsFormat'].map(field => (
-              <div key={field}>
-                <label className="block mb-1 font-medium">{t(field)}</label>
-                <input
-                  type={field === 'bagageHorsFormat' ? 'text' : 'number'}
-                  name={field}
-                  value={form[field]}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  required
-                />
-              </div>
-            ))}
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">{t('airport')}</label>
-            <select
-              name="airport"
-              value={form.airport}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+    <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+      {/* Language Selector */}
+      <div className="flex justify-between items-center p-6 bg-blue-600 text-white">
+        <h1 className="text-3xl font-bold">
+          {lang === 'fr' ? 'Transfert Aéroport' : 'Airport Transfer'}
+        </h1>
+        <div className="flex gap-2">
+          {['en', 'fr'].map(l => (
+            <button
+              key={l}
+              onClick={() => setLang(l)}
+              className={`px-4 py-2 rounded-full transition-all ${
+                lang === l 
+                  ? 'bg-white text-blue-600 shadow-md' 
+                  : 'hover:bg-blue-500'
+              }`}
             >
-              <option value="">--</option>
-              {Object.entries(AIRPORTS).map(([key, { name }]) => (
-                <option key={key} value={key}>{name[lang]}</option>
-              ))}
-            </select>
+              {l.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="p-8 grid md:grid-cols-2 gap-8">
+        {/* Left Column */}
+        <div className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              { name: 'firstName', icon: User },
+              { name: 'lastName', icon: User },
+              { name: 'email', icon: Mail },
+              { name: 'phone', icon: Phone }
+            ].map(({ name, icon: Icon }) => (
+              <div key={name} className="relative">
+                <label className="block mb-2 text-gray-700 font-medium">
+                  {t(name)}
+                </label>
+                <div className="relative">
+                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type={name === 'email' ? 'email' : 'text'}
+                    name={name}
+                    value={form[name]}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+            ))}
           </div>
 
+          {/* Flight Details */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="relative">
+              <label className="block mb-2 text-gray-700 font-medium">
+                {t('datevol')}
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="date"
+                  name="datevol"
+                  value={form.datevol}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </div>
+            <div className="relative">
+              <label className="block mb-2 text-gray-700 font-medium">
+                {t('heurvol')}
+              </label>
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="time"
+                  name="heurvol"
+                  value={form.heurvol}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Flight Number */}
           <div className="relative">
-            <label className="block mb-1 font-medium">{t('destination')}</label>
-            <input
-              type="text"
-              name="destination"
-              value={form.destination}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-            {suggestions.length > 0 && (
-              <ul className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
-                {suggestions.map((s, i) => (
-                  <li
-                    key={i}
-                    onClick={() => selectDestination(s)}
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    {s.address.label}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <label className="block mb-2 text-gray-700 font-medium">
+              {t('numvol')}
+            </label>
+            <div className="relative">
+              <Plane className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                name="numvol"
+                value={form.numvol}
+                onChange={handleChange}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Luggage */}
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              { name: 'bagageCabine', type: 'number', icon: Luggage },
+              { name: 'bagageSoute', type: 'number', icon: Luggage },
+              { name: 'bagageHorsFormat', type: 'text', icon: Luggage }
+            ].map(({ name, type, icon: Icon }) => (
+              <div key={name} className="relative">
+                <label className="block mb-2 text-gray-700 font-medium">
+                  {t(name)}
+                </label>
+                <div className="relative">
+                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type={type}
+                    name={name}
+                    value={form[name]}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+            ))}
           </div>
 
+          {/* Airport and Destination */}
+          <div className="space-y-4">
+            <div className="relative">
+              <label className="block mb-2 text-gray-700 font-medium">
+                {t('airport')}
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <select
+                  name="airport"
+                  value={form.airport}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="">--</option>
+                  {Object.entries(AIRPORTS).map(([key, { name }]) => (
+                    <option key={key} value={key}>{name[lang]}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
+            <div className="relative">
+              <label className="block mb-2 text-gray-700 font-medium">
+                {t('destination')}
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  name="destination"
+                  value={form.destination}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                {suggestions.length > 0 && (
+                  <ul className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
+                    {suggestions.map((s, i) => (
+                      <li
+                        key={i}
+                        onClick={() => selectDestination(s)}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        {s.address.label}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
 
-          <div>
-            <label htmlFor="passengers" className="block mb-1 font-medium">
+          {/* Passengers */}
+          <div className="relative">
+            <label className="block mb-2 text-gray-700 font-medium">
               {t('passengers')}
             </label>
-            <input
-              id="passengers"
-              type="number"
-              name="passengers"
-              value={form.passengers}
-              onChange={handleChange}
-              min="1"
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div className="relative">
+              <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="number"
+                name="passengers"
+                value={form.passengers}
+                onChange={handleChange}
+                min="1"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
           </div>
-        </td>
-          <td>
 
-            {price !== null && price !== undefined && (
-              <div>
-                <div className="p-5 bg-green-100 text-green-800 rounded-lg text-xl font-semibold shadow-md border border-green-300">
-                  <strong>{t('price')}</strong>: {Number(price).toFixed(2)} DT
-                </div>
-                <button
-                  type="submit"
-                  className="w-full mt-4 py-3 px-5 bg-green-600 text-white text-lg font-medium rounded-lg hover:bg-green-700 transition-all shadow-md"
-                >
-                  {t('submit')}
-                </button>
-              </div>
-            )}
-
-          </td>
-        </tr>
-      </table>
-
-    </form>
+          {/* Price and Submit */}
+          {price !== null && price !== undefined && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+              <p className="text-2xl font-bold text-green-700 mb-4">
+                {t('price')}: {Number(price).toFixed(2)} DT
+              </p>
+              <button
+                type="submit"
+                className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-md text-lg font-semibold"
+              >
+                {t('submit')}
+              </button>
+            </div>
+          )}
+        </div>
+      </form>
+    </div>
   </div>
   );
 };
