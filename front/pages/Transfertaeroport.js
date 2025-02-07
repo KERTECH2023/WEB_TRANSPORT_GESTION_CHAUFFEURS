@@ -3,7 +3,7 @@ import { axios } from "../config/axios";
 import { toast } from "react-toastify";
 
 import { axiosClient } from "../config/axios";
-
+import { Helmet } from 'react-helmet'; // Import de react-helmet
 
 
 const LANGS = {
@@ -239,6 +239,19 @@ const SimpleForm = () => {
 
   return (
     <div className="max-w-3xl mx-auto mt-12 p-8 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-xl">
+    <Helmet>
+    <title>Transfert Aéroport Djerba, Tunis - Réservez votre transfert privé</title>
+    <meta name="description" content="Réservez votre transfert privé à l'aéroport de Djerba, Tunis, Zarzis, et Carthage. Transfert confortable, rapide et abordable pour vos voyages d'affaires ou de loisirs." />
+    <meta name="keywords" content="transfert aéroport Djerba, transfert aéroport Tunis, transfert aéroport Djerba Zarzis, transport aéroport Carthage, transfert privé Tunis, transport aéroport Djerba, réservation aéroport Carthage, taxi privé Djerba, navette aéroport Tunis, transfert direct Djerba Tunis, transport aéroport Tunisie" />
+    <meta name="author" content="tunisieuber.com" />
+    <meta property="og:title" content="Transfert Aéroport Djerba, Tunis, Zarzis - Réservez votre transfert privé" />
+    <meta property="og:description" content="Réservez votre transfert privé à l'aéroport de Djerba, Tunis, Zarzis, et Carthage. Service rapide et fiable pour un transport confortable à travers la Tunisie." />
+    <meta property="og:url" content="https://www.tunisieuber.com/Transfertaeroport" />
+    <meta property="og:type" content="tunisieuber" />
+    <meta name="twitter:title" content="Transfert Aéroport Djerba, Tunis, Zarzis - Réservez votre transfert privé" />
+    <meta name="twitter:description" content="Profitez de nos services de transfert à l'aéroport de Djerba, Tunis, Zarzis, et Carthage. Réservez facilement en ligne pour un transport privé et sécurisé." />
+    <link rel="canonical" href="https://www.tunisieuber.com/Transfertaeroport" />
+   </Helmet>
     <h1 className="text-3xl font-extrabold text-center text-blue-800 mb-8">
       {lang === 'fr' ? 'Transfert Aéroport' : 'Airport Transfer'}
     </h1>
@@ -326,46 +339,45 @@ const SimpleForm = () => {
         </div>
   
         <div className="flex flex-col">
-        <label className="text-lg font-medium mb-2">{t('airport')}</label>
-        <select
-          name="airport"
-          value={form.airport}
-          onChange={handleChange}
-          className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-          required
-        >
-          <option value="">--</option>
-          {Object.entries(AIRPORTS).map(([key, { name }]) => (
-            <option key={key} value={key}>{name[lang]}</option>
-          ))}
-        </select>
-      </div>
-      
-      <div className="relative flex flex-col">
-        <label className="text-lg font-medium mb-2">{t('destination')}</label>
-        <input
-          type="text"
-          name="destination"
-          value={form.destination}
-          onChange={handleChange}
-          className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-          required
-        />
-        {suggestions.length > 0 && (
-          <ul className="absolute top-full z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-            {suggestions.map((s, i) => (
-              <li
-                key={i}
-                onClick={() => selectDestination(s)}
-                className="px-4 py-3 hover:bg-blue-100 cursor-pointer transition-all duration-200"
-              >
-                {s.address.label}
-              </li>
+          <label className="text-lg font-medium mb-2">{t('airport')}</label>
+          <select
+            name="airport"
+            value={form.airport}
+            onChange={handleChange}
+            className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+            required
+          >
+            <option value="">--</option>
+            {Object.entries(AIRPORTS).map(([key, { name }]) => (
+              <option key={key} value={key}>{name[lang]}</option>
             ))}
-          </ul>
-        )}
-      </div>
-      
+          </select>
+        </div>
+  
+        <div className="relative flex flex-col">
+          <label className="text-lg font-medium mb-2">{t('destination')}</label>
+          <input
+            type="text"
+            name="destination"
+            value={form.destination}
+            onChange={handleChange}
+            className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+            required
+          />
+          {suggestions.length > 0 && (
+            <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+              {suggestions.map((s, i) => (
+                <li
+                  key={i}
+                  onClick={() => selectDestination(s)}
+                  className="px-4 py-3 hover:bg-blue-100 cursor-pointer transition-all duration-200"
+                >
+                  {s.address.label}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
   
         <div className="flex flex-col">
           <label htmlFor="passengers" className="text-lg font-medium mb-2">{t('passengers')}</label>
