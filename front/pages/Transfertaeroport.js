@@ -3,6 +3,7 @@ import { axios } from "../config/axios";
 import { toast } from "react-toastify";
 
 import { axiosClient } from "../config/axios";
+import { Helmet } from 'react-helmet'; // Import de react-helmet
 
 
 
@@ -239,6 +240,20 @@ const SimpleForm = () => {
 
   return (
 <div className="max-w-3xl mx-auto mt-12 p-8 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-xl">
+<Helmet>
+    <title>Transfert Aéroport Djerba, Tunis - Réservez votre transfert privé</title>
+    <meta name="google-site-verification" content="ZkLdwUYGAa68OYJ1x53yQLm9q6-8CdZkGwnoleG6agg" />
+    <meta name="description" content="Réservez votre transfert privé à l'aéroport de Djerba, Tunis, Zarzis, et Carthage. Transfert confortable, rapide et abordable pour vos voyages d'affaires ou de loisirs." />
+    <meta name="keywords" content="transfert aéroport Djerba, transfert aéroport Tunis, transfert aéroport Djerba Zarzis, transport aéroport Carthage, transfert privé Tunis, transport aéroport Djerba, réservation aéroport Carthage, taxi privé Djerba, navette aéroport Tunis, transfert direct Djerba Tunis, transport aéroport Tunisie" />
+    <meta name="author" content="tunisieuber.com" />
+    <meta property="og:title" content="Transfert Aéroport Djerba, Tunis, Zarzis - Réservez votre transfert privé" />
+    <meta property="og:description" content="Réservez votre transfert privé à l'aéroport de Djerba, Tunis, Zarzis, et Carthage. Service rapide et fiable pour un transport confortable à travers la Tunisie." />
+    <meta property="og:url" content="https://www.tunisieuber.com/Transfertaeroport" />
+    <meta property="og:type" content="tunisieuber" />
+    <meta name="twitter:title" content="Transfert Aéroport Djerba, Tunis, Zarzis - Réservez votre transfert privé" />
+    <meta name="twitter:description" content="Profitez de nos services de transfert à l'aéroport de Djerba, Tunis, Zarzis, et Carthage. Réservez facilement en ligne pour un transport privé et sécurisé." />
+    <link rel="canonical" href="https://www.tunisieuber.com/Transfertaeroport" />
+   </Helmet>
   <h1 className="text-3xl font-extrabold text-center text-blue-800 mb-8">
     {lang === 'fr' ? 'Transfert Aéroport' : 'Airport Transfer'}
   </h1>
@@ -383,7 +398,7 @@ const SimpleForm = () => {
 
     {price !== null && price !== undefined && (
       <div className="mt-8 bg-green-100 text-green-800 p-6 rounded-xl shadow-xl text-xl font-semibold border border-green-300">
-        <strong>{t('price')}</strong>: {Number(price).toFixed(2)} DT
+        <strong>{t('price')}</strong>: {Number(price).toFixed(2)} €
       </div>
     )}
 
