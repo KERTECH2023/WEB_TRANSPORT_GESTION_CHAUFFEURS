@@ -412,7 +412,9 @@ const SimpleForm = () => {
       </div>
     
 
-    <div className="mt-8 flex justify-center">
+    
+  )}
+  <div className="mt-8 flex justify-center">
       <button
         type="submit"
         className="py-3 px-8 bg-green-600 text-white text-lg font-semibold rounded-full hover:bg-green-700 transition-all duration-300 shadow-lg"
@@ -420,7 +422,6 @@ const SimpleForm = () => {
         {t('submit')}
       </button>
     </div>
-  )}
   </form>
 </div>
 
