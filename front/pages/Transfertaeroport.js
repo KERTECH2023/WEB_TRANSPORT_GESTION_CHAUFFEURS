@@ -3,6 +3,7 @@ import { axios } from "../config/axios";
 import { toast } from "react-toastify";
 
 import { axiosClient } from "../config/axios";
+import { Helmet } from 'react-helmet';
 
 
 
@@ -22,7 +23,10 @@ const LANGS = {
     numvol: "Numéro du vol",     // Traduction ajoutée
     bagageCabine: "Bagages en cabine",
     bagageSoute: "Bagages en soute",
-    bagageHorsFormat: "Bagages hors format"
+    bagageHorsFormat: "Bagages hors format",
+    pageTitle: "Réservation de Transfert Aéroport en Tunisie | Service de Transport",
+    metaDescription: "Réservez votre transfert aéroport en Tunisie. Service professionnel de transport depuis/vers les aéroports de Djerba-Zarzis et Tunis-Carthage. Prix transparents et réservation simple.",
+    h1Title: "Réservation de Transfert Aéroport en Tunisie"
 
   },
   en: {
@@ -40,14 +44,91 @@ const LANGS = {
     numvol: "Flight Number",      // Traduction ajoutée
     bagageCabine: "Cabin Baggage",
     bagageSoute: "Checked Baggage",
-    bagageHorsFormat: "Oversized Baggage"
+    bagageHorsFormat: "Oversized Baggage",
+    pageTitle: "Airport Transfer Booking in Tunisia | Transport Service",
+    metaDescription: "Book your airport transfer in Tunisia. Professional transport service from/to Djerba-Zarzis and Tunis-Carthage airports. Transparent pricing and easy booking.",
+    h1Title: "Airport Transfer Booking in Tunisia"
 
   }
 };
 
 const AIRPORTS = {
-  djerba: { name: { fr: "Aéroport de Djerba-Zarzis", en: "Djerba-Zarzis Airport" }, coords: [33.875031, 10.775278] },
-  tunis: { name: { fr: "Aéroport de Tunis-Carthage", en: "Tunis-Carthage Airport" }, coords: [36.851111, 10.227222] }
+  djerba: {
+    name: {
+      fr: "Aéroport de Djerba-Zarzis",
+      en: "Djerba-Zarzis Airport"
+    },
+    coords: [33.875031, 10.775278],
+    schema: {
+      fr: {
+        "@type": "Airport",
+        "name": "Aéroport de Djerba-Zarzis",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Djerba",
+          "addressCountry": "TN"
+        }
+      },
+      en: {
+        "@type": "Airport",
+        "name": "Djerba-Zarzis Airport",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Djerba",
+          "addressCountry": "TN"
+        }
+      }
+    }
+  },
+  tunis: {
+    name: {
+      fr: "Aéroport de Tunis-Carthage",
+      en: "Tunis-Carthage Airport"
+    },
+    coords: [36.851111, 10.227222],
+    schema: {
+      fr: {
+        "@type": "Airport",
+        "name": "Aéroport de Tunis-Carthage",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Tunis",
+          "addressCountry": "TN"
+        }
+      },
+      en: {
+        "@type": "Airport",
+        "name": "Tunis-Carthage Airport",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Tunis",
+          "addressCountry": "TN"
+        }
+      }
+    }
+  }
+};
+
+const getJsonLd = () => {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": t('pageTitle'),
+    "description": t('metaDescription'),
+    "provider": {
+      "@type": "LocalBusiness",
+      "name": "Airport Transfer Tunisia",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "TN"
+      }
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "Tunisia"
+    },
+    "availableLanguage": ["fr", "en"]
+  };
 };
 
 const HERE_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
@@ -238,169 +319,193 @@ const SimpleForm = () => {
 
 
   return (
-    <div className="max-w-xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
 
-      <h1 className="text-2xl font-bold text-center mb-6">
-        {lang === 'fr' ? 'Transfert Aéroport' : 'Airport Transfer'}
-      </h1>
-      <div className="flex justify-end gap-2 mb-6">
-        {['fr', 'en'].map(l => (
-          <button
-            key={l}
-            onClick={() => setLang(l)}
-            className={`px-3 py-1 rounded ${lang === l ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-          >
-            {l.toUpperCase()}
-          </button>
-        ))}
-      </div>
-
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-4">
-          {['firstName', 'lastName', 'email', 'phone'].map(field => (
-            <div key={field}>
-              <label className="block mb-1 font-medium">{t(field)}</label>
-              <input
-                type={field === 'email' ? 'email' : 'text'}
-                name={field}
-                value={form[field]}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-                required
-              />
-            </div>
-          ))}
-        </div>
+    <>
+      <Helmet>
+        <title>{t('pageTitle')}</title>
+        <meta name="description" content={t('metaDescription')} />
+        <meta name="robots" content="index, follow" />
+        <link rel="alternate" hrefLang="fr" href="/fr/airport-transfer" />
+        <link rel="alternate" hrefLang="en" href="/en/airport-transfer" />
+        <link rel="canonical" href={`/${lang}/airport-transfer`} />
+        <script type="application/ld+json">
+          {JSON.stringify(getJsonLd())}
+        </script>
+      </Helmet>
+      <div className="max-w-xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
 
 
-        <div>
-          <label className="block mb-1 font-medium">{t('datevol')}</label>
-          <input
-            type="date"
-            name="datevol"
-            value={form.datevol}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">{t('heurvol')}</label>
-          <input
-            type="time"
-            name="heurvol"
-            value={form.heurvol}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">{t('numvol')}</label>
-          <input
-            type="text"
-            name="numvol"
-            value={form.numvol}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {['bagageCabine', 'bagageSoute', 'bagageHorsFormat'].map(field => (
-            <div key={field}>
-              <label className="block mb-1 font-medium">{t(field)}</label>
-              <input
-                type={field === 'bagageHorsFormat' ? 'text' : 'number'}
-                name={field}
-                value={form[field]}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-                required
-              />
-            </div>
-          ))}
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">{t('airport')}</label>
-          <select
-            name="airport"
-            value={form.airport}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          >
-            <option value="">--</option>
-            {Object.entries(AIRPORTS).map(([key, { name }]) => (
-              <option key={key} value={key}>{name[lang]}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="relative">
-          <label className="block mb-1 font-medium">{t('destination')}</label>
-          <input
-            type="text"
-            name="destination"
-            value={form.destination}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-          {suggestions.length > 0 && (
-            <ul className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
-              {suggestions.map((s, i) => (
-                <li
-                  key={i}
-                  onClick={() => selectDestination(s)}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  {s.address.label}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-
-
-        <div>
-          <label htmlFor="passengers" className="block mb-1 font-medium">
-            {t('passengers')}
-          </label>
-          <input
-            id="passengers"
-            type="number"
-            name="passengers"
-            value={form.passengers}
-            onChange={handleChange}
-            min="1"
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-
-        {price !== null && price !== undefined && (
-          <div>
-            <div className="p-3 bg-blue-50 text-blue-700 rounded">
-              <strong>{t('price')}</strong>: {Number(price).toFixed(2)} DT
-            </div>
+        <h1 className="text-2xl font-bold text-center mb-6">
+          {lang === 'fr' ? 'Transfert Aéroport' : 'Airport Transfer'}
+        </h1>
+        <div className="flex justify-end gap-2 mb-6">
+          {['fr', 'en'].map(l => (
             <button
-              type="submit"
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              key={l}
+              onClick={() => setLang(l)}
+              className={`px-3 py-1 rounded ${lang === l ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
             >
-              {t('submit')}
+              {l.toUpperCase()}
             </button>
-          </div>
-        )}
+          ))}
+        </div>
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <table>
+            <tr><td>
 
 
-      </form>
-    </div>
+              <div className="grid grid-cols-2 gap-4">
+                {['firstName', 'lastName', 'email', 'phone'].map(field => (
+                  <div key={field}>
+                    <label className="block mb-1 font-medium">{t(field)}</label>
+                    <input
+                      type={field === 'email' ? 'email' : 'text'}
+                      name={field}
+                      value={form[field]}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded"
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+
+
+              <div>
+                <label className="block mb-1 font-medium">{t('datevol')}</label>
+                <input
+                  type="date"
+                  name="datevol"
+                  value={form.datevol}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">{t('heurvol')}</label>
+                <input
+                  type="time"
+                  name="heurvol"
+                  value={form.heurvol}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">{t('numvol')}</label>
+                <input
+                  type="text"
+                  name="numvol"
+                  value={form.numvol}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {['bagageCabine', 'bagageSoute', 'bagageHorsFormat'].map(field => (
+                  <div key={field}>
+                    <label className="block mb-1 font-medium">{t(field)}</label>
+                    <input
+                      type={field === 'bagageHorsFormat' ? 'text' : 'number'}
+                      name={field}
+                      value={form[field]}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded"
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">{t('airport')}</label>
+                <select
+                  name="airport"
+                  value={form.airport}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                  required
+                >
+                  <option value="">--</option>
+                  {Object.entries(AIRPORTS).map(([key, { name }]) => (
+                    <option key={key} value={key}>{name[lang]}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="relative">
+                <label className="block mb-1 font-medium">{t('destination')}</label>
+                <input
+                  type="text"
+                  name="destination"
+                  value={form.destination}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+                {suggestions.length > 0 && (
+                  <ul className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
+                    {suggestions.map((s, i) => (
+                      <li
+                        key={i}
+                        onClick={() => selectDestination(s)}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        {s.address.label}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+
+
+              <div>
+                <label htmlFor="passengers" className="block mb-1 font-medium">
+                  {t('passengers')}
+                </label>
+                <input
+                  id="passengers"
+                  type="number"
+                  name="passengers"
+                  value={form.passengers}
+                  onChange={handleChange}
+                  min="1"
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+            </td>
+              <td>
+
+                {price !== null && price !== undefined && (
+                  <div>
+                    <div className="p-5 bg-green-100 text-green-800 rounded-lg text-xl font-semibold shadow-md border border-green-300">
+                      <strong>{t('price')}</strong>: {Number(price).toFixed(2)} DT
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full mt-4 py-3 px-5 bg-green-600 text-white text-lg font-medium rounded-lg hover:bg-green-700 transition-all shadow-md"
+                    >
+                      {t('submit')}
+                    </button>
+                  </div>
+                )}
+
+              </td>
+            </tr>
+          </table>
+
+        </form>
+      </div>
+    </>
   );
 };
 
