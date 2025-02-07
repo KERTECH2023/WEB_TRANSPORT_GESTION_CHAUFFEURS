@@ -386,7 +386,7 @@ const SimpleForm = () => {
       {price !== null && (
         <div>
           <div className="p-3 bg-blue-50 text-blue-700 rounded">
-            {t('price')}: {price.toFixed(2)} DT
+            {t('price')}: {price.toFixed(2)} €
           </div>
           <button
             type="submit"
