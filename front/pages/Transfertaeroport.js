@@ -341,46 +341,46 @@ const SimpleForm = () => {
         ))}
       </div>
 
-      <div className="relative flex flex-col">
-      <label className="text-lg font-medium mb-2">{t('airport')}</label>
-      <select
-        name="airport"
-        value={form.airport}
-        onChange={handleChange}
-        className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-        required
-      >
-        <option value="">--</option>
-        {Object.entries(AIRPORTS).map(([key, { name }]) => (
-          <option key={key} value={key}>{name[lang]}</option>
-        ))}
-      </select>
-    </div>
-    
-    <div className="relative flex flex-col">
-      <label className="text-lg font-medium mb-2">{t('destination')}</label>
-      <input
-        type="text"
-        name="destination"
-        value={form.destination}
-        onChange={handleChange}
-        className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-        required
-      />
-      {suggestions.length > 0 && (
-        <ul className="absolute top-full z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-          {suggestions.map((s, i) => (
-            <li
-              key={i}
-              onClick={() => selectDestination(s)}
-              className="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors duration-200 text-gray-700"
-            >
-              {s.address.label}
-            </li>
+      <div className="flex flex-col">
+        <label className="text-lg font-medium mb-2">{t('airport')}</label>
+        <select
+          name="airport"
+          value={form.airport}
+          onChange={handleChange}
+          className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+          required
+        >
+          <option value="">--</option>
+          {Object.entries(AIRPORTS).map(([key, { name }]) => (
+            <option key={key} value={key}>{name[lang]}</option>
           ))}
-        </ul>
-      )}
-    </div>
+        </select>
+      </div>
+
+      <div className="relative flex flex-col">
+        <label className="text-lg font-medium mb-2">{t('destination')}</label>
+        <input
+          type="text"
+          name="destination"
+          value={form.destination}
+          onChange={handleChange}
+          className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+          required
+        />
+        {suggestions.length > 0 && (
+          <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+            {suggestions.map((s, i) => (
+              <li
+                key={i}
+                onClick={() => selectDestination(s)}
+                className="px-4 py-3 hover:bg-blue-100 cursor-pointer transition-all duration-200"
+              >
+                {s.address.label}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className="flex flex-col">
         <label htmlFor="passengers" className="text-lg font-medium mb-2">{t('passengers')}</label>
