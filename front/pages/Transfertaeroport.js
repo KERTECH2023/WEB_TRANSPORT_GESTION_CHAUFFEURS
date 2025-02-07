@@ -20,10 +20,10 @@ const LANGS = {
     datevol: "Date du vol",     // Traduction ajoutée
     heurvol: "Heure du vol",     // Traduction ajoutée
     numvol: "Numéro du vol",     // Traduction ajoutée
-    bagageCabine: "Bagage en cabine",
-    bagageSoute: "Bagage en soute",
-    bagageHorsFormat: "Bagage hors format"
-   
+    bagageCabine: "Bagages en cabine",
+    bagageSoute: "Bagages en soute",
+    bagageHorsFormat: "Bagages hors format"
+
   },
   en: {
     firstName: "First Name",
@@ -35,7 +35,7 @@ const LANGS = {
     passengers: "Passengers",
     price: "Price",
     submit: "Book",
-    datevol: "Flight Date",      
+    datevol: "Flight Date",
     heurvol: "Flight Time",       // Traduction ajoutée
     numvol: "Flight Number",      // Traduction ajoutée
     bagageCabine: "Cabin Baggage",
@@ -54,7 +54,7 @@ const HERE_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
 
 const SimpleForm = () => {
   const [lang, setLang] = useState('fr');
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '' ,bagageCabine:'', bagageSoute:'',bagageHorsFormat:'',  datevol: '',   heurvol: '',    numvol: '',    airport: '', destination: '', passengers: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', bagageCabine: '', bagageSoute: '', bagageHorsFormat: '', datevol: '', heurvol: '', numvol: '', airport: '', destination: '', passengers: '' });
   const [suggestions, setSuggestions] = useState([]);
   const [price, setPrice] = useState(null);
   const [distance, setDistance] = useState(0);
@@ -63,14 +63,14 @@ const SimpleForm = () => {
   const [pricingData, setPricingData] = useState({ prixdepersonne: 0, prixdebase: 0 });
 
 
- 
+
 
   const calculatePrice = (numPassengers, distance) => {
     return (distance * numPassengers * pricingData.prixdepersonne) + pricingData.prixdebase;
   };
 
- 
- 
+
+
   // Récupérer les tarifs depuis l'API
   useEffect(() => {
     const fetchPricingData = async () => {
@@ -154,7 +154,7 @@ const SimpleForm = () => {
       const numPassengers = parseInt(form.passengers) || 1;
       const newPrice = calculatePrice(numPassengers, newDistance);
       setPrice(newPrice);
-     
+
     } catch (err) {
       console.error(err);
     }
@@ -162,7 +162,7 @@ const SimpleForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Vérifier si tous les champs sont remplis
     if (
       !form.firstName.trim() ||
@@ -172,9 +172,9 @@ const SimpleForm = () => {
       !form.bagageCabine.trim() ||
       !form.bagageSoute.trim() ||
       !form.bagageHorsFormat.trim() ||
-      !form.datevol.trim() || 
-      !form.heurvol.trim() || 
-      !form.numvol.trim() ||  
+      !form.datevol.trim() ||
+      !form.heurvol.trim() ||
+      !form.numvol.trim() ||
       !form.airport.trim() ||
       !form.destination.trim() ||
       !form.passengers ||
@@ -183,7 +183,7 @@ const SimpleForm = () => {
       toast.error("Tous les champs sont requis !");
       return;
     }
-  
+
     try {
       await axiosClient.post(
         "/transfert/add",
@@ -195,9 +195,9 @@ const SimpleForm = () => {
           bagageCabine: form.bagageCabine,
           bagageSoute: form.bagageSoute,
           bagageHorsFormat: form.bagageHorsFormat,
-          datevol: form.datevol,   
-          heurvol: form.heurvol,   
-          numvol: form.numvol,    
+          datevol: form.datevol,
+          heurvol: form.heurvol,
+          numvol: form.numvol,
           airport: form.airport,
           destination: form.destination,
           passengers: form.passengers,
@@ -209,10 +209,10 @@ const SimpleForm = () => {
           },
         }
       );
-  
+
       console.log("Transfert ajouté avec succès");
       toast.success("Transfert ajouté avec succès");
-  
+
       // Réinitialisation du formulaire après soumission réussie
       setForm({
         firstName: '',
@@ -222,9 +222,9 @@ const SimpleForm = () => {
         bagageCabine: '',
         bagageSoute: '',
         bagageHorsFormat: '',
-        datevol: '',   
-        heurvol: '',   
-        numvol: '',    
+        datevol: '',
+        heurvol: '',
+        numvol: '',
         airport: '',
         destination: '',
         passengers: '',
@@ -235,11 +235,12 @@ const SimpleForm = () => {
       toast.error("Erreur lors de l'ajout du transfert");
     }
   };
-  
+
 
   return (
     <div className="max-w-xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
-       <h1 className="text-2xl font-bold text-center mb-6">
+
+      <h1 className="text-2xl font-bold text-center mb-6">
         {lang === 'fr' ? 'Transfert Aéroport' : 'Airport Transfer'}
       </h1>
       <div className="flex justify-end gap-2 mb-6">
@@ -283,7 +284,7 @@ const SimpleForm = () => {
             required
           />
         </div>
-        
+
         <div>
           <label className="block mb-1 font-medium">{t('heurvol')}</label>
           <input
@@ -365,38 +366,39 @@ const SimpleForm = () => {
           )}
         </div>
 
-        
+
 
         <div>
-        <label htmlFor="passengers" className="block mb-1 font-medium">
-          {t('passengers')}
-        </label>
-        <input
-          id="passengers"
-          type="number"
-          name="passengers"
-          value={form.passengers}
-          onChange={handleChange}
-          min="1"
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-
-      {price !== null && (
-        <div>
-          <div className="p-3 bg-blue-50 text-blue-700 rounded">
-            {t('price')}: {price.toFixed(2)} €
-          </div>
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            {t('submit')}
-          </button>
+          <label htmlFor="passengers" className="block mb-1 font-medium">
+            {t('passengers')}
+          </label>
+          <input
+            id="passengers"
+            type="number"
+            name="passengers"
+            value={form.passengers}
+            onChange={handleChange}
+            min="1"
+            className="w-full p-2 border rounded"
+            required
+          />
         </div>
-      )}
-       
+
+        {price !== null && price !== undefined && (
+          <div>
+            <div className="p-3 bg-blue-50 text-blue-700 rounded">
+              <strong>{t('price')}</strong>: {Number(price).toFixed(2)} DT
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              {t('submit')}
+            </button>
+          </div>
+        )}
+
+
       </form>
     </div>
   );
