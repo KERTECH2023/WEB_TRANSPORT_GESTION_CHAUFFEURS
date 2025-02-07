@@ -243,6 +243,7 @@ const SimpleForm = () => {
 <Helmet>
     <title>Transfert Aéroport Djerba, Tunis - Réservez votre transfert privé</title>
     <meta name="google-site-verification" content="ZkLdwUYGAa68OYJ1x53yQLm9q6-8CdZkGwnoleG6agg" />
+    <meta charset="UTF-8" />
     <meta name="description" content="Réservez votre transfert privé à l'aéroport de Djerba, Tunis, Zarzis, et Carthage. Transfert confortable, rapide et abordable pour vos voyages d'affaires ou de loisirs." />
     <meta name="keywords" content="transfert aéroport Djerba, transfert aéroport Tunis, transfert aéroport Djerba Zarzis, transport aéroport Carthage, transfert privé Tunis, transport aéroport Djerba, réservation aéroport Carthage, taxi privé Djerba, navette aéroport Tunis, transfert direct Djerba Tunis, transport aéroport Tunisie" />
     <meta name="author" content="tunisieuber.com" />
@@ -340,46 +341,47 @@ const SimpleForm = () => {
         ))}
       </div>
 
-      <div className="flex flex-col">
-        <label className="text-lg font-medium mb-2">{t('airport')}</label>
-        <select
-          name="airport"
-          value={form.airport}
-          onChange={handleChange}
-          className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-          required
-        >
-          <option value="">--</option>
-          {Object.entries(AIRPORTS).map(([key, { name }]) => (
-            <option key={key} value={key}>{name[lang]}</option>
+      <div className="mb-3">
+      <label htmlFor="airport" className="form-label">{t('airport')}</label>
+      <select
+        name="airport"
+        value={form.airport}
+        onChange={handleChange}
+        className="form-select px-4 py-3 rounded-lg shadow-sm"
+        required
+      >
+        <option value="">--</option>
+        {Object.entries(AIRPORTS).map(([key, { name }]) => (
+          <option key={key} value={key}>{name[lang]}</option>
+        ))}
+      </select>
+    </div>
+    
+    <div className="mb-3 position-relative">
+      <label htmlFor="destination" className="form-label">{t('destination')}</label>
+      <input
+        type="text"
+        name="destination"
+        value={form.destination}
+        onChange={handleChange}
+        className="form-control px-4 py-3 rounded-lg shadow-sm"
+        required
+      />
+      {suggestions.length > 0 && (
+        <ul className="position-absolute w-100 mt-1 bg-white border rounded-lg shadow-lg max-height-60 overflow-auto">
+          {suggestions.map((s, i) => (
+            <li
+              key={i}
+              onClick={() => selectDestination(s)}
+              className="px-4 py-3 hover:bg-primary cursor-pointer transition-all duration-200"
+            >
+              {s.address.label}
+            </li>
           ))}
-        </select>
-      </div>
-
-      <div className="relative flex flex-col">
-        <label className="text-lg font-medium mb-2">{t('destination')}</label>
-        <input
-          type="text"
-          name="destination"
-          value={form.destination}
-          onChange={handleChange}
-          className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-          required
-        />
-        {suggestions.length > 0 && (
-          <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-            {suggestions.map((s, i) => (
-              <li
-                key={i}
-                onClick={() => selectDestination(s)}
-                className="px-4 py-3 hover:bg-blue-100 cursor-pointer transition-all duration-200"
-              >
-                {s.address.label}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+        </ul>
+      )}
+    </div>
+    
 
       <div className="flex flex-col">
         <label htmlFor="passengers" className="text-lg font-medium mb-2">{t('passengers')}</label>
@@ -400,9 +402,8 @@ const SimpleForm = () => {
       <div className="mt-8 bg-green-100 text-green-800 p-6 rounded-xl shadow-xl text-xl font-semibold border border-green-300">
         <strong>{t('price')}</strong>: {Number(price).toFixed(2)} €
       </div>
-    )}
 
-    <div className="mt-8 flex justify-center">
+      <div className="mt-8 flex justify-center">
       <button
         type="submit"
         className="py-3 px-8 bg-green-600 text-white text-lg font-semibold rounded-full hover:bg-green-700 transition-all duration-300 shadow-lg"
@@ -410,6 +411,9 @@ const SimpleForm = () => {
         {t('submit')}
       </button>
     </div>
+    )}
+
+   
   </form>
 </div>
 
