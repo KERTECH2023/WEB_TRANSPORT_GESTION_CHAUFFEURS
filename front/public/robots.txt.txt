@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /private
+
+Sitemap: https://www.tunisieuber.com/sitemap.xml
+google-site-verification: google8423b247749155df.html
