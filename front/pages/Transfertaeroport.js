@@ -341,13 +341,13 @@ const SimpleForm = () => {
         ))}
       </div>
 
-      <div className="mb-3">
-      <label htmlFor="airport" className="form-label">{t('airport')}</label>
+      <div className="relative flex flex-col">
+      <label className="text-lg font-medium mb-2">{t('airport')}</label>
       <select
         name="airport"
         value={form.airport}
         onChange={handleChange}
-        className="form-select px-4 py-3 rounded-lg shadow-sm"
+        className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
         required
       >
         <option value="">--</option>
@@ -357,23 +357,23 @@ const SimpleForm = () => {
       </select>
     </div>
     
-    <div className="mb-3 position-relative">
-      <label htmlFor="destination" className="form-label">{t('destination')}</label>
+    <div className="relative flex flex-col">
+      <label className="text-lg font-medium mb-2">{t('destination')}</label>
       <input
         type="text"
         name="destination"
         value={form.destination}
         onChange={handleChange}
-        className="form-control px-4 py-3 rounded-lg shadow-sm"
+        className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
         required
       />
       {suggestions.length > 0 && (
-        <ul className="position-absolute w-100 mt-1 bg-white border rounded-lg shadow-lg max-height-60 overflow-auto">
+        <ul className="absolute top-full z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
           {suggestions.map((s, i) => (
             <li
               key={i}
               onClick={() => selectDestination(s)}
-              className="px-4 py-3 hover:bg-primary cursor-pointer transition-all duration-200"
+              className="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors duration-200 text-gray-700"
             >
               {s.address.label}
             </li>
@@ -381,7 +381,6 @@ const SimpleForm = () => {
         </ul>
       )}
     </div>
-    
 
       <div className="flex flex-col">
         <label htmlFor="passengers" className="text-lg font-medium mb-2">{t('passengers')}</label>
