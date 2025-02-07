@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { axios } from "../config/axios";
 import { toast } from "react-toastify";
+import { FaPlaneAlt, FaGlobe, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaUsers, FaSuitcase } from 'react-icons/fa';
 
 import { axiosClient } from "../config/axios";
 
@@ -238,23 +239,22 @@ const SimpleForm = () => {
   
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
-    <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
-      {/* Language Selector */}
-      <div className="flex justify-between items-center p-6 bg-blue-600 text-white">
-        <h1 className="text-3xl font-bold">
+    <div className="max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-2xl border border-gray-100">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 flex items-center">
+          <FaPlaneAlt className="mr-3 text-blue-600" />
           {lang === 'fr' ? 'Transfert Aéroport' : 'Airport Transfer'}
         </h1>
-        <div className="flex gap-2">
+        <div className="flex items-center space-x-2">
+          <FaGlobe className="text-gray-500" />
           {['en', 'fr'].map(l => (
             <button
               key={l}
               onClick={() => setLang(l)}
-              className={`px-4 py-2 rounded-full transition-all ${
-                lang === l 
-                  ? 'bg-white text-blue-600 shadow-md' 
-                  : 'hover:bg-blue-500'
-              }`}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 
+                ${lang === l 
+                  ? 'bg-blue-600 text-white shadow-md' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             >
               {l.toUpperCase()}
             </button>
@@ -262,29 +262,21 @@ const SimpleForm = () => {
         </div>
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="p-8 grid md:grid-cols-2 gap-8">
-        {/* Left Column */}
+      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-8">
         <div className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-4">
-            {[
-              { name: 'firstName', icon: User },
-              { name: 'lastName', icon: User },
-              { name: 'email', icon: Mail },
-              { name: 'phone', icon: Phone }
-            ].map(({ name, icon: Icon }) => (
-              <div key={name} className="relative">
-                <label className="block mb-2 text-gray-700 font-medium">
-                  {t(name)}
+          <div className="grid grid-cols-2 gap-4">
+            {['firstName', 'lastName', 'email', 'phone'].map(field => (
+              <div key={field}>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  {t(field)}
                 </label>
                 <div className="relative">
-                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                   <input
-                    type={name === 'email' ? 'email' : 'text'}
-                    name={name}
-                    value={form[name]}
+                    type={field === 'email' ? 'email' : 'text'}
+                    name={field}
+                    value={form[field]}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 pl-10 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                     required
                   />
                 </div>
@@ -292,171 +284,151 @@ const SimpleForm = () => {
             ))}
           </div>
 
-          {/* Flight Details */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="relative">
-              <label className="block mb-2 text-gray-700 font-medium">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700 flex items-center">
+                <FaCalendarAlt className="mr-2 text-gray-500" />
                 {t('datevol')}
               </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="date"
-                  name="datevol"
-                  value={form.datevol}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-            </div>
-            <div className="relative">
-              <label className="block mb-2 text-gray-700 font-medium">
-                {t('heurvol')}
-              </label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="time"
-                  name="heurvol"
-                  value={form.heurvol}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Flight Number */}
-          <div className="relative">
-            <label className="block mb-2 text-gray-700 font-medium">
-              {t('numvol')}
-            </label>
-            <div className="relative">
-              <Plane className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
-                type="text"
-                name="numvol"
-                value={form.numvol}
+                type="date"
+                name="datevol"
+                value={form.datevol}
                 onChange={handleChange}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700 flex items-center">
+                <FaClock className="mr-2 text-gray-500" />
+                {t('heurvol')}
+              </label>
+              <input
+                type="time"
+                name="heurvol"
+                value={form.heurvol}
+                onChange={handleChange}
+                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 flex items-center">
+              <FaPlaneAlt className="mr-2 text-gray-500" />
+              {t('numvol')}
+            </label>
+            <input
+              type="text"
+              name="numvol"
+              value={form.numvol}
+              onChange={handleChange}
+              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {['bagageCabine', 'bagageSoute', 'bagageHorsFormat'].map(field => (
+              <div key={field}>
+                <label className="block mb-2 text-sm font-medium text-gray-700 flex items-center">
+                  <FaSuitcase className="mr-2 text-gray-500" />
+                  {t(field)}
+                </label>
+                <input
+                  type={field === 'bagageHorsFormat' ? 'text' : 'number'}
+                  name={field}
+                  value={form[field]}
+                  onChange={handleChange}
+                  className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            ))}
+          </div>
+
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 flex items-center">
+              <FaMapMarkerAlt className="mr-2 text-gray-500" />
+              {t('airport')}
+            </label>
+            <select
+              name="airport"
+              value={form.airport}
+              onChange={handleChange}
+              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">--</option>
+              {Object.entries(AIRPORTS).map(([key, { name }]) => (
+                <option key={key} value={key}>{name[lang]}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative">
+            <label className="block mb-2 text-sm font-medium text-gray-700 flex items-center">
+              <FaMapMarkerAlt className="mr-2 text-gray-500" />
+              {t('destination')}
+            </label>
+            <input
+              type="text"
+              name="destination"
+              value={form.destination}
+              onChange={handleChange}
+              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            {suggestions.length > 0 && (
+              <ul className="absolute z-10 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                {suggestions.map((s, i) => (
+                  <li
+                    key={i}
+                    onClick={() => selectDestination(s)}
+                    className="p-3 hover:bg-gray-100 cursor-pointer transition-colors"
+                  >
+                    {s.address.label}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700 flex items-center">
+              <FaUsers className="mr-2 text-gray-500" />
+              {t('passengers')}
+            </label>
+            <input
+              type="number"
+              name="passengers"
+              value={form.passengers}
+              onChange={handleChange}
+              min="1"
+              className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
-          {/* Luggage */}
-          <div className="grid md:grid-cols-2 gap-4">
-            {[
-              { name: 'bagageCabine', type: 'number', icon: Luggage },
-              { name: 'bagageSoute', type: 'number', icon: Luggage },
-              { name: 'bagageHorsFormat', type: 'text', icon: Luggage }
-            ].map(({ name, type, icon: Icon }) => (
-              <div key={name} className="relative">
-                <label className="block mb-2 text-gray-700 font-medium">
-                  {t(name)}
-                </label>
-                <div className="relative">
-                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type={type}
-                    name={name}
-                    value={form[name]}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Airport and Destination */}
-          <div className="space-y-4">
-            <div className="relative">
-              <label className="block mb-2 text-gray-700 font-medium">
-                {t('airport')}
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <select
-                  name="airport"
-                  value={form.airport}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">--</option>
-                  {Object.entries(AIRPORTS).map(([key, { name }]) => (
-                    <option key={key} value={key}>{name[lang]}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="relative">
-              <label className="block mb-2 text-gray-700 font-medium">
-                {t('destination')}
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  name="destination"
-                  value={form.destination}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                {suggestions.length > 0 && (
-                  <ul className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
-                    {suggestions.map((s, i) => (
-                      <li
-                        key={i}
-                        onClick={() => selectDestination(s)}
-                        className="p-2 hover:bg-gray-100 cursor-pointer"
-                      >
-                        {s.address.label}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Passengers */}
-          <div className="relative">
-            <label className="block mb-2 text-gray-700 font-medium">
-              {t('passengers')}
-            </label>
-            <div className="relative">
-              <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="number"
-                name="passengers"
-                value={form.passengers}
-                onChange={handleChange}
-                min="1"
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Price and Submit */}
+        <div className="flex flex-col justify-between">
           {price !== null && price !== undefined && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-              <p className="text-2xl font-bold text-green-700 mb-4">
-                {t('price')}: {Number(price).toFixed(2)} DT
-              </p>
+            <div className="sticky top-8 space-y-6">
+              <div className="bg-gradient-to-br from-green-100 to-green-200 p-6 rounded-2xl shadow-lg border border-green-200 text-center">
+                <h2 className="text-xl font-bold text-green-800 mb-4">
+                  {t('price')}
+                </h2>
+                <p className="text-3xl font-extrabold text-green-700">
+                  {Number(price).toFixed(2)} DT
+                </p>
+              </div>
               <button
                 type="submit"
-                className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-md text-lg font-semibold"
+                className="w-full py-4 bg-blue-600 text-white text-lg font-bold rounded-lg 
+                  hover:bg-blue-700 transition-all duration-300 
+                  shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
                 {t('submit')}
               </button>
@@ -465,7 +437,6 @@ const SimpleForm = () => {
         </div>
       </form>
     </div>
-  </div>
   );
 };
 
