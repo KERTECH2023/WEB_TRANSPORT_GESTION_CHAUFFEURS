@@ -245,7 +245,7 @@ const SimpleForm = () => {
     <meta name="google-site-verification" content="ZkLdwUYGAa68OYJ1x53yQLm9q6-8CdZkGwnoleG6agg" />
     <meta charset="UTF-8" />
     <meta name="description" content="Réservez votre transfert privé à l'aéroport de Djerba, Tunis, Zarzis, et Carthage. Transfert confortable, rapide et abordable pour vos voyages d'affaires ou de loisirs." />
-    <meta name="keywords" content="transfert aéroport Djerba, transfert aéroport Tunis, transfert aéroport Djerba Zarzis, transport aéroport Carthage, transfert privé Tunis, transport aéroport Djerba, réservation aéroport Carthage, taxi privé Djerba, navette aéroport Tunis, transfert direct Djerba Tunis, transport aéroport Tunisie" />
+    <meta name="keywords" content="transfert aéroport Djerba, transfert aéroport Tunis, transfert aéroport Djerba Zarzis, transport aéroport Carthage, transfert privé Tunis, transport aéroport Djerba, réservation aéroport Carthage, taxi privé Djerba, navette aéroport Tunis, transfert direct Djerba Tunis, transport aéroport Tunisie,Transfer to Djerba airport, transfer to Tunis airport, transfer to Djerba Zarzis airport, transport to Carthage airport, private transfer to Tunis, transport to Djerba airport, reservation for Carthage airport, private taxi to Djerba, shuttle to Tunis airport, direct transfer from Djerba to Tunis, transport to Tunisia airport,trasfe djerba ,transfert tunis ,tax privé ,taxintaxi aéroport djerba ,aeropoort djerba ,aeroport tunis ,transfert ,aéroport djerba jarziz," />
     <meta name="author" content="tunisieuber.com" />
     <meta property="og:title" content="Transfert Aéroport Djerba, Tunis, Zarzis - Réservez votre transfert privé" />
     <meta property="og:description" content="Réservez votre transfert privé à l'aéroport de Djerba, Tunis, Zarzis, et Carthage. Service rapide et fiable pour un transport confortable à travers la Tunisie." />
@@ -347,7 +347,7 @@ const SimpleForm = () => {
     name="airport"
     value={form.airport}
     onChange={handleChange}
-    className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 bg-white"
+    className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 "
     required
   >
     <option value="" className="text-gray-400">--</option>
