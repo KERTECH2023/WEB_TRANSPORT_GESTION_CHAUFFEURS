@@ -347,7 +347,7 @@ const SimpleForm = () => {
     name="airport"
     value={form.airport}
     onChange={handleChange}
-    className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 w-full"
+    
     required
   >
     <option value="" className="text-gray-400">--</option>
@@ -376,12 +376,12 @@ const SimpleForm = () => {
     required
   />
   {suggestions.length > 0 && (
-    <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 ">
+    <ul >
       {suggestions.map((s, i) => (
         <li
           key={i}
           onClick={() => selectDestination(s)}
-          className="px-4 py-3 hover:bg-blue-200 cursor-pointer transition-all duration-200"
+          
         >
           {s.address.label}
         </li>
