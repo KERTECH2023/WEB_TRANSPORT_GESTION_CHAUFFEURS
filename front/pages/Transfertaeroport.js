@@ -347,7 +347,6 @@ const SimpleForm = () => {
     name="airport"
     value={form.airport}
     onChange={handleChange}
-    
     required
   >
     <option value="" className="text-gray-400">--</option>
@@ -381,7 +380,7 @@ const SimpleForm = () => {
         <li
           key={i}
           onClick={() => selectDestination(s)}
-          
+          className="px-4 py-3 hover:bg-blue-200 cursor-pointer transition-all duration-200"
         >
           {s.address.label}
         </li>
