@@ -347,7 +347,7 @@ const SimpleForm = () => {
     name="airport"
     value={form.airport}
     onChange={handleChange}
-    className="px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 "
+    className="w-64 px-4 py-3 rounded-xl border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 "
     required
   >
     <option value="" className="text-gray-400">--</option>
