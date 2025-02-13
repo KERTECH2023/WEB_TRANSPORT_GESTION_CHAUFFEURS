@@ -66,11 +66,12 @@ const SimpleForm = () => {
 
  
 
-  const calculatePrice = (numPassengers, distance) => {
-    if(numPassengers==1){
-    return (distance * pricingData.prixdebase );
-    }else{return( (distance * pricingData.prixdebase ) + (numPassengers * pricingData.prixdepersonne));}
-  };
+const calculatePrice = (numPassengers, distance) => {
+  
+    
+    return (distance * pricingData.prixdebase) + ((numPassengers - 1) * pricingData.prixdepersonne);
+};
+
 
  
  
