@@ -42,7 +42,7 @@ exports.createTransfer = async (req, res) => {
   
       const mailOptions = {
         from: "Flash Driver <noreplyflashdriver@gmail.com>",
-        to: email,
+        to: [email, "khaled.erjili@kertechnologie.fr"],
         subject: "Flash Driver - Réservation Enregitrée",
         html: `
           <!DOCTYPE html>
