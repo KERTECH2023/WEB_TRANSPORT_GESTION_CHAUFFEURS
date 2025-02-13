@@ -91,7 +91,7 @@ exports.createTransfer = async (req, res) => {
                       <p><strong>Aéroport :</strong> ${airport}</p>
                       <p><strong>Destination :</strong> ${destination}</p>
                       <p><strong>Passagers :</strong> ${passengers}</p>
-                      <p><strong>Prix :</strong> ${parseFloat(price).toFixed(2)} TND</p>
+                      <p><strong>Prix :</strong> ${parseFloat(price).toFixed(2)} €</p>
                       <div class="footer">
                           <p>Cordialement,<br>L'équipe Flash Driver</p>
                           <p style="font-size: 10px; color: #888;">
