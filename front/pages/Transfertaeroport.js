@@ -67,7 +67,7 @@ const SimpleForm = () => {
  
 
   const calculatePrice = (numPassengers, distance) => {
-    return (distance * numPassengers * pricingData.prixdepersonne) + pricingData.prixdebase;
+    return (distance * pricingData.prixdebase ) + numPassengers * pricingData.prixdepersonne;
   };
 
  
