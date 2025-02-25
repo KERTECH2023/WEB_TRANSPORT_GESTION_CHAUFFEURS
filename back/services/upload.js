@@ -7,7 +7,8 @@ require("dotenv").config();
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASSWORD = process.env.FTP_PASSWORD;
-const FTP_DIR = process.env.FTP_DIR || '/uploads';
+const FTP_DIR =  'ftpuser';
+const BASE_URL =  'http://77.37.124.206:3000/images';
 
 /**
  * Fonction pour télécharger un fichier avec réessais automatiques
@@ -38,31 +39,37 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
         secure: false
       });
       
-      // Vérification de l'existence du répertoire - en supprimant le leading slash si présent
-      const dirToUse = FTP_DIR.startsWith('/') ? FTP_DIR.substring(1) : FTP_DIR;
+      // Essayer de naviguer vers le répertoire racine d'abord
+      await client.cd('/');
       
+      // Vérifier si le répertoire existe et y accéder
       try {
-        // Tenter de naviguer vers le répertoire
-        await client.cd(dirToUse);
+        await client.cd(FTP_DIR);
+        console.log(`Répertoire ${FTP_DIR} accessible avec succès`);
       } catch (err) {
-        console.log(`Le répertoire "${dirToUse}" n'existe pas, tentative de création...`);
+        // Si le répertoire n'existe pas, essayer de le créer
+        console.log(`Impossible d'accéder au répertoire ${FTP_DIR}, tentative de création...`);
         try {
-          // Créer le répertoire - utiliser mkdir au lieu de makeDir
-          await client.send("MKD " + dirToUse);
-          await client.cd(dirToUse);
+          await client.send(`MKD ${FTP_DIR}`);
+          await client.cd(FTP_DIR);
+          console.log(`Répertoire ${FTP_DIR} créé avec succès`);
         } catch (mkdirErr) {
-          console.log(`Impossible de créer le répertoire: ${mkdirErr.message}`);
-          // Tenter d'uploader dans le répertoire racine si la création échoue
+          console.log(`Erreur lors de la création du répertoire: ${mkdirErr.message}`);
+          // Continuer avec le répertoire racine
         }
       }
       
-      // Upload du fichier
-      await client.uploadFrom(tempFilePath, fileName);
+      // Afficher le répertoire courant pour déboguer
+      const currentDir = await client.pwd();
+      console.log(`Répertoire courant: ${currentDir}`);
       
-      // Construire l'URL (utilisez plutôt HTTP si disponible)
-      const baseUrl = process.env.FTP_BASE_URL || `ftp://${FTP_HOST}/`;
-      const filePath = path.posix.join(dirToUse, fileName).replace(/\\/g, '/');
-      const fileUrl = new URL(filePath, baseUrl).toString();
+      // Upload du fichier dans le répertoire courant
+      console.log(`Téléchargement du fichier: ${fileName}`);
+      await client.uploadFrom(tempFilePath, fileName);
+      console.log(`Fichier ${fileName} téléchargé avec succès`);
+      
+      // Construire l'URL selon le format demandé
+      const fileUrl = `${BASE_URL}/${FTP_DIR}/${fileName}`;
       
       // Succès - nettoyer et retourner l'URL
       fs.unlinkSync(tempFilePath);
@@ -105,8 +112,8 @@ const UploadImage = (req, res, next) => {
     const file = files[fieldName][0];
     const fileName = Date.now() + "." + file.originalname.split(".").pop();
     
-    return uploadFileWithRetry(file, fileName).then((ftpUrl) => {
-      uploadedFiles[fieldName] = ftpUrl;
+    return uploadFileWithRetry(file, fileName).then((fileUrl) => {
+      uploadedFiles[fieldName] = fileUrl;
     });
   });
 
