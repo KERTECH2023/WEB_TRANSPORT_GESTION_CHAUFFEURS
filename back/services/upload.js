@@ -38,21 +38,36 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
         secure: false
       });
       
-      // S'assurer que le répertoire existe
+      // Vérification de l'existence du répertoire - en supprimant le leading slash si présent
+      const dirToUse = FTP_DIR.startsWith('/') ? FTP_DIR.substring(1) : FTP_DIR;
+      
       try {
-        await client.ensureDir(FTP_DIR);
+        // Tenter de naviguer vers le répertoire
+        await client.cd(dirToUse);
       } catch (err) {
-        console.log(`Création du répertoire: ${err.message}`);
-        await client.makeDir(FTP_DIR);
+        console.log(`Le répertoire "${dirToUse}" n'existe pas, tentative de création...`);
+        try {
+          // Créer le répertoire - utiliser mkdir au lieu de makeDir
+          await client.send("MKD " + dirToUse);
+          await client.cd(dirToUse);
+        } catch (mkdirErr) {
+          console.log(`Impossible de créer le répertoire: ${mkdirErr.message}`);
+          // Tenter d'uploader dans le répertoire racine si la création échoue
+        }
       }
       
       // Upload du fichier
-      await client.uploadFrom(tempFilePath, path.join(FTP_DIR, fileName));
+      await client.uploadFrom(tempFilePath, fileName);
+      
+      // Construire l'URL (utilisez plutôt HTTP si disponible)
+      const baseUrl = process.env.FTP_BASE_URL || `ftp://${FTP_HOST}/`;
+      const filePath = path.posix.join(dirToUse, fileName).replace(/\\/g, '/');
+      const fileUrl = new URL(filePath, baseUrl).toString();
       
       // Succès - nettoyer et retourner l'URL
       fs.unlinkSync(tempFilePath);
       client.close();
-      return `${process.env.FTP_BASE_URL || 'ftp://'}${path.join(FTP_DIR, fileName)}`;
+      return fileUrl;
     } catch (error) {
       lastError = error;
       attempt++;
