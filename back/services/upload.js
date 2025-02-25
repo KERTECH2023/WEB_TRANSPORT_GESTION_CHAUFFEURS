@@ -7,13 +7,13 @@ require("dotenv").config();
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASSWORD = process.env.FTP_PASSWORD;
-const FTP_BASE_DIR = 'upload'; // Dossier racine FTP
-const BASE_URL = 'http://77.37.124.206:3000/images/ftpuser';
+const FTP_DIR =  'upload';
+const BASE_URL =  'http://77.37.124.206:3000/images/ftpuser';
 
 /**
- * Fonction pour télécharger un fichier avec création de dossier et réessais automatiques
+ * Fonction pour télécharger un fichier avec réessais automatiques
  */
-const uploadFileWithRetry = async (file, fileName, subDir, retries = 3) => {
+const uploadFileWithRetry = async (file, fileName, retries = 3) => {
   const client = new ftp.Client();
   client.ftp.verbose = process.env.NODE_ENV !== 'production';
 
@@ -39,24 +39,26 @@ const uploadFileWithRetry = async (file, fileName, subDir, retries = 3) => {
         secure: false,
       });
 
-      // Chemin complet de stockage (ex: "upload/NOM_UTILISATEUR")
-      const fullFtpPath = `${FTP_BASE_DIR}/${subDir}`;
-
-      // Vérifier si le répertoire existe et le créer si nécessaire
+      // Vérifier si le répertoire existe
+      let directoryExists = true;
       try {
-        await client.cd(fullFtpPath);
+        await client.cd(FTP_DIR);
       } catch (err) {
-        console.log(`📁 Création du dossier: ${fullFtpPath}`);
-        await client.ensureDir(fullFtpPath);
+        directoryExists = false;
+      }
+
+      if (!directoryExists) {
+        console.log(⚠️ Le répertoire ${FTP_DIR} n'existe pas. Assurez-vous qu'il est créé manuellement.);
+        throw new Error(Répertoire ${FTP_DIR} introuvable);
       }
 
       // Upload du fichier
-      console.log(`🚀 Téléchargement du fichier: ${fileName}`);
-      await client.uploadFrom(tempFilePath, `${fullFtpPath}/${fileName}`);
-      console.log(`✅ Fichier ${fileName} téléchargé avec succès`);
+      console.log(🚀 Téléchargement du fichier: ${fileName});
+      await client.uploadFrom(tempFilePath, fileName);
+      console.log(✅ Fichier ${fileName} téléchargé avec succès);
 
-      // Construire l'URL finale
-      const fileUrl = `${BASE_URL}/${fullFtpPath}/${fileName}`;
+      // Construire l'URL selon le format demandé
+      const fileUrl = ${BASE_URL}/${FTP_DIR}/${fileName};
 
       // Nettoyage
       fs.unlinkSync(tempFilePath);
@@ -65,7 +67,7 @@ const uploadFileWithRetry = async (file, fileName, subDir, retries = 3) => {
     } catch (error) {
       lastError = error;
       attempt++;
-      console.error(`❌ Tentative ${attempt}/${retries} échouée: ${error.message}`);
+      console.error(❌ Tentative ${attempt}/${retries} échouée: ${error.message});
 
       // Attendre avant de réessayer
       if (attempt < retries) {
@@ -85,22 +87,19 @@ const uploadFileWithRetry = async (file, fileName, subDir, retries = 3) => {
 };
 
 /**
- * Middleware pour gérer l'upload d'images vers un serveur FTP avec sous-dossier dynamique
+ * Middleware pour gérer l'upload d'images vers un serveur FTP
  */
 const UploadImage = (req, res, next) => {
-  if (!req.files || !req.nom) {
-    return res.status(400).send({ error: "Fichiers ou nom manquant" });
-  }
+  if (!req.files) return next();
 
   const files = req.files;
   const uploadedFiles = {};
-  const subDir = req.nom; // Dossier personnalisé basé sur req.nom
 
   const uploadPromises = Object.keys(files).map((fieldName) => {
     const file = files[fieldName][0];
     const fileName = Date.now() + "." + file.originalname.split(".").pop();
 
-    return uploadFileWithRetry(file, fileName, subDir).then((fileUrl) => {
+    return uploadFileWithRetry(file, fileName).then((fileUrl) => {
       uploadedFiles[fieldName] = fileUrl;
     });
   });
