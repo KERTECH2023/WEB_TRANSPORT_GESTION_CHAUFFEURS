@@ -7,8 +7,8 @@ require("dotenv").config();
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASSWORD = process.env.FTP_PASSWORD;
-const FTP_DIR = process.env.FTP_DIR || 'ftpuser';
-const BASE_URL = process.env.BASE_URL || 'http://77.37.124.206:3000/images';
+const FTP_DIR =  'ftpuser';
+const BASE_URL =  'http://77.37.124.206:3000/images';
 
 /**
  * Fonction pour télécharger un fichier avec réessais automatiques
