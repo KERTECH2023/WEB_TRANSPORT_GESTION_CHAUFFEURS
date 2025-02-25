@@ -7,8 +7,8 @@ require("dotenv").config();
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASSWORD = process.env.FTP_PASSWORD;
-const FTP_DIR =  'upload';
-const BASE_URL =  'http://77.37.124.206:3000/images/ftpuser';
+const FTP_DIR = 'upload';
+const BASE_URL = 'http://77.37.124.206:3000/images/ftpuser';
 
 /**
  * Fonction pour télécharger un fichier avec réessais automatiques
@@ -31,7 +31,7 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
 
   while (attempt < retries) {
     try {
-      // Connexion au serveur FTP
+      // Connexion FTP
       await client.access({
         host: FTP_HOST,
         user: FTP_USER,
@@ -40,24 +40,23 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
       });
 
       // Vérifier si le répertoire existe
-      let directoryExists = true;
       try {
         await client.cd(FTP_DIR);
       } catch (err) {
-        directoryExists = false;
-      }
-
-      if (!directoryExists) {
-        console.log(`⚠️ Le répertoire ${FTP_DIR} n'existe pas. Assurez-vous qu'il est créé manuellement.`);
-        throw new Error(`Répertoire ${FTP_DIR} introuvable`);
+        await client.send(`MKD ${FTP_DIR}`);
+        await client.cd(FTP_DIR);
       }
 
       // Upload du fichier
       console.log(`🚀 Téléchargement du fichier: ${fileName}`);
       await client.uploadFrom(tempFilePath, fileName);
+
+      // Modifier les permissions pour rendre le fichier public
+      await client.send(`SITE CHMOD 644 ${FTP_DIR}/${fileName}`);
+
       console.log(`✅ Fichier ${fileName} téléchargé avec succès`);
 
-      // Construire l'URL selon le format demandé
+      // Construire l'URL publique
       const fileUrl = `${BASE_URL}/${FTP_DIR}/${fileName}`;
 
       // Nettoyage
