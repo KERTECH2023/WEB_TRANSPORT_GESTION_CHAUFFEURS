@@ -48,17 +48,17 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
       }
 
       if (!directoryExists) {
-        console.log(⚠️ Le répertoire ${FTP_DIR} n'existe pas. Assurez-vous qu'il est créé manuellement.);
-        throw new Error(Répertoire ${FTP_DIR} introuvable);
+        console.log(`⚠️ Le répertoire ${FTP_DIR} n'existe pas. Assurez-vous qu'il est créé manuellement.`);
+        throw new Error(`Répertoire ${FTP_DIR} introuvable`);
       }
 
       // Upload du fichier
-      console.log(🚀 Téléchargement du fichier: ${fileName});
+      console.log(`🚀 Téléchargement du fichier: ${fileName}`);
       await client.uploadFrom(tempFilePath, fileName);
-      console.log(✅ Fichier ${fileName} téléchargé avec succès);
+      console.log(`✅ Fichier ${fileName} téléchargé avec succès`);
 
       // Construire l'URL selon le format demandé
-      const fileUrl = ${BASE_URL}/${FTP_DIR}/${fileName};
+      const fileUrl = `${BASE_URL}/${FTP_DIR}/${fileName}`;
 
       // Nettoyage
       fs.unlinkSync(tempFilePath);
@@ -67,7 +67,7 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
     } catch (error) {
       lastError = error;
       attempt++;
-      console.error(❌ Tentative ${attempt}/${retries} échouée: ${error.message});
+      console.error(`❌ Tentative ${attempt}/${retries} échouée: ${error.message}`);
 
       // Attendre avant de réessayer
       if (attempt < retries) {
