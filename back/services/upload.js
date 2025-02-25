@@ -3,28 +3,34 @@ const path = require('path');
 const fs = require('fs');
 require("dotenv").config();
 
+// Configuration FTP
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASSWORD = process.env.FTP_PASSWORD;
 const FTP_DIR = process.env.FTP_DIR || '/uploads';
 
-const UploadImage = async (req, res, next) => {
-  if (!req.files || !req.nom) return next();
-
-  const files = req.files;
-  const uploadedFiles = {};
-
-  // Créer un nouveau dossier avec le nom de req.nom
-  const folderPath = path.join(__dirname, 'tmp', req.nom);
-  if (!fs.existsSync(folderPath)) {
-    fs.mkdirSync(folderPath, { recursive: true });
+/**
+ * Fonction pour télécharger un fichier avec réessais automatiques
+ */
+const uploadFileWithRetry = async (file, fileName, retries = 3) => {
+  const client = new ftp.Client();
+  client.ftp.verbose = process.env.NODE_ENV !== 'production';
+  
+  // Créer un fichier temporaire pour l'upload
+  const tempDir = path.join(__dirname, 'tmp');
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
   }
-
-  try {
-    const client = new ftp.Client();
-    client.ftp.verbose = process.env.NODE_ENV !== 'production';
-    
+  
+  const tempFilePath = path.join(tempDir, fileName);
+  fs.writeFileSync(tempFilePath, file.buffer);
+  
+  let attempt = 0;
+  let lastError = null;
+  
+  while (attempt < retries) {
     try {
+      // Connexion au serveur FTP
       await client.access({
         host: FTP_HOST,
         user: FTP_USER,
@@ -32,52 +38,72 @@ const UploadImage = async (req, res, next) => {
         secure: false
       });
       
-      // Vérifier et créer le dossier distant si nécessaire
+      // S'assurer que le répertoire existe
       try {
-        await client.ensureDir(path.join(FTP_DIR, req.nom));
+        await client.ensureDir(FTP_DIR);
       } catch (err) {
-        console.log(`Création du dossier distant: ${err.message}`);
-        await client.makeDir(path.join(FTP_DIR, req.nom));
+        console.log(`Création du répertoire: ${err.message}`);
+        await client.makeDir(FTP_DIR);
       }
       
-      // Traiter chaque fichier
-      for (const fieldName in files) {
-        const file = files[fieldName][0];
-        const fileName = Date.now() + '.' + file.originalname.split('.').pop();
-        const filePath = path.join(folderPath, fileName);
-        
-        // Enregistrer le fichier temporairement
-        fs.writeFileSync(filePath, file.buffer);
-        
-        // Télécharger le fichier avec retry
-        try {
-          await client.uploadFrom(
-            filePath, 
-            path.join(FTP_DIR, req.nom, fileName)
-          );
-          
-          const ftpUrl = `${req.nom}/${fileName}`;
-          uploadedFiles[fieldName] = ftpUrl;
-        } catch (uploadError) {
-          console.error("Erreur lors du téléchargement:", uploadError);
-          throw uploadError;
-        } finally {
-          // Supprimer le fichier temporaire
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        }
+      // Upload du fichier
+      await client.uploadFrom(tempFilePath, path.join(FTP_DIR, fileName));
+      
+      // Succès - nettoyer et retourner l'URL
+      fs.unlinkSync(tempFilePath);
+      client.close();
+      return `${process.env.FTP_BASE_URL || 'ftp://'}${path.join(FTP_DIR, fileName)}`;
+    } catch (error) {
+      lastError = error;
+      attempt++;
+      console.log(`Tentative d'upload échouée (${attempt}/${retries}): ${error.message}`);
+      
+      // Attendre avant de réessayer
+      if (attempt < retries) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
     } finally {
-      client.close();
+      if (client.closed === false) {
+        client.close();
+      }
     }
-    
-    req.uploadedFiles = uploadedFiles;
-    next();
-  } catch (error) {
-    console.error("Échec du téléchargement des fichiers:", error);
-    res.status(500).send({ error: "Le téléchargement des fichiers a échoué" });
   }
+  
+  // Échec après tous les essais
+  if (fs.existsSync(tempFilePath)) {
+    fs.unlinkSync(tempFilePath);
+  }
+  
+  throw lastError || new Error("Échec de l'upload après plusieurs tentatives");
+};
+
+/**
+ * Middleware pour gérer l'upload d'images vers un serveur FTP
+ */
+const UploadImage = (req, res, next) => {
+  if (!req.files) return next();
+
+  const files = req.files;
+  const uploadedFiles = {};
+
+  const uploadPromises = Object.keys(files).map((fieldName) => {
+    const file = files[fieldName][0];
+    const fileName = Date.now() + "." + file.originalname.split(".").pop();
+    
+    return uploadFileWithRetry(file, fileName).then((ftpUrl) => {
+      uploadedFiles[fieldName] = ftpUrl;
+    });
+  });
+
+  Promise.all(uploadPromises)
+    .then(() => {
+      req.uploadedFiles = uploadedFiles;
+      next();
+    })
+    .catch((error) => {
+      console.error("Échec de l'upload des fichiers:", error);
+      res.status(500).send({ error: "L'upload des fichiers a échoué" });
+    });
 };
 
 module.exports = UploadImage;
