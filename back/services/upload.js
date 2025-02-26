@@ -9,7 +9,7 @@ const FTP_PASSWORD = process.env.FTP_PASSWORD;
 
 const BASE_URL = 'https://backend.tunisieuber.com/afficheimage/image';  
 
-const uploadFileWithRetry = async (file, remotePath, retries = 3) => {
+const uploadFileWithRetry = async (file, fileName, retries = 3) => {
   const client = new ftp.Client();
   client.ftp.verbose = process.env.NODE_ENV !== 'production';
 
@@ -18,7 +18,7 @@ const uploadFileWithRetry = async (file, remotePath, retries = 3) => {
     fs.mkdirSync(tempDir, { recursive: true });
   }
 
-  const tempFilePath = path.join(tempDir, file.originalname);
+  const tempFilePath = path.join(tempDir, fileName);
   fs.writeFileSync(tempFilePath, file.buffer);
 
   let attempt = 0;
@@ -33,11 +33,12 @@ const uploadFileWithRetry = async (file, remotePath, retries = 3) => {
         secure: false,
       });
 
-      // Vérifier si le dossier utilisateur existe, sinon le créer
-      const dirPath = path.dirname(remotePath);
-      await client.ensureDir(dirPath); // Assurer que le répertoire existe sur le serveur
+      // Créer un répertoire dynamique basé sur le nom et le téléphone si nécessaire
+      const remoteDir = `${req.body.nom}_${req.body.tel}`;
+      await client.ensureDir(remoteDir); // S'assurer que le répertoire existe
 
-      // Upload du fichier dans le dossier utilisateur
+      // Upload du fichier dans le répertoire cible
+      const remotePath = `${remoteDir}/${fileName}`;
       console.log(`🚀 Téléchargement du fichier: ${remotePath}`);
       await client.uploadFrom(tempFilePath, remotePath);
 
@@ -73,6 +74,7 @@ const uploadFileWithRetry = async (file, remotePath, retries = 3) => {
 
   throw lastError || new Error("Échec de l'upload après plusieurs tentatives");
 };
+
 
 
 const UploadImage = (req, res, next) => {
