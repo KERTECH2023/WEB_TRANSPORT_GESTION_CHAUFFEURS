@@ -22,6 +22,8 @@ const getContentType = (filename) => {
             return "image/jpeg";
         case ".png":
             return "image/png";
+        case ".pdf":
+            return "application/pdf";    
         case ".gif":
             return "image/gif";
         default:
