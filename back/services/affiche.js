@@ -24,13 +24,15 @@ const getContentType = (filename) => {
             return "image/png";
         case ".gif":
             return "image/gif";
+        case ".pdf":
+            return "application/pdf";
         default:
             return "application/octet-stream"; // Par défaut
     }
 };
 
-// Route pour récupérer et afficher une image
-router.get("/image/:filename", async (req, res) => {
+// Route pour récupérer et afficher un fichier (image ou PDF)
+router.get("/file/:filename", async (req, res) => {
     const client = new ftp.Client();
     client.ftp.verbose = true; // Active les logs FTP pour debug (optionnel)
 
@@ -53,9 +55,9 @@ router.get("/image/:filename", async (req, res) => {
         await client.downloadTo(res, filename);
 
     } catch (error) {
-        console.error("Erreur lors du chargement de l'image :", error.message);
+        console.error("Erreur lors du chargement du fichier :", error.message);
         if (!res.headersSent) {
-            res.status(500).send("Impossible d'afficher l'image.");
+            res.status(500).send("Impossible d'afficher le fichier.");
         }
     } finally {
         client.close();
