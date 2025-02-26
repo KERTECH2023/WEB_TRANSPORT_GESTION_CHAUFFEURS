@@ -35,5 +35,6 @@ router.get("/image/:filename", async (req, res) => {
         client.close();
     }
 });
+module.exports = router;
 
 
