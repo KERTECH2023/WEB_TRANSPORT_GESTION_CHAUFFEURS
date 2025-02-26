@@ -35,7 +35,7 @@ const uploadFileWithRetry = async (file, remotePath, retries = 3) => {
 
       // Vérifier si le dossier utilisateur existe, sinon le créer
       const dirPath = path.dirname(remotePath);
-      await client.ensureDir(dirPath);
+      await client.ensureDir(dirPath); // Assurer que le répertoire existe sur le serveur
 
       // Upload du fichier dans le dossier utilisateur
       console.log(`🚀 Téléchargement du fichier: ${remotePath}`);
@@ -73,6 +73,7 @@ const uploadFileWithRetry = async (file, remotePath, retries = 3) => {
 
   throw lastError || new Error("Échec de l'upload après plusieurs tentatives");
 };
+
 
 const UploadImage = (req, res, next) => {
   if (!req.files || !req.body.Nom || !req.body.fullPhoneNumber) {console.log("kjdkjsdkj"+req.body.Nom+req.body.fullPhoneNumber); return next();}
