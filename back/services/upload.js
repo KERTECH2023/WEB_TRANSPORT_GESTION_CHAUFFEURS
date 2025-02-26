@@ -75,9 +75,9 @@ const uploadFileWithRetry = async (file, remotePath, retries = 3) => {
 };
 
 const UploadImage = (req, res, next) => {
-  if (!req.files || !req.body.nom || !req.body.phone) {console.log("kjdkjsdkj"+req.body.nom+req.body.phone); return next();}
+  if (!req.files || !req.body.Nom || !req.body.fullPhoneNumber) {console.log("kjdkjsdkj"+req.body.Nom+req.body.fullPhoneNumber); return next();}
 
-  const userDir = `${req.body.nom}_${req.body.phone}`;
+  const userDir = `${req.body.Nom}_${req.body.fullPhoneNumber}`;
   const files = req.files;
   const uploadedFiles = {};
 
