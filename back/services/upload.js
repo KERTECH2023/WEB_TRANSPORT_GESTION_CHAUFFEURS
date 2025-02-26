@@ -8,7 +8,7 @@ const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASSWORD = process.env.FTP_PASSWORD;
 const FTP_DIR = 'upload';  // Conservé comme dans le code original
-const BASE_URL = 'https://backend.tunisieuber.com/afficheimage/image/';  // Conservé comme dans le code original
+const BASE_URL = 'https://backend.tunisieuber.com/afficheimage/image';  // Conservé comme dans le code original
 
 /**
  * Fonction pour télécharger un fichier avec réessais automatiques
@@ -39,24 +39,7 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
         secure: false,
       });
 
-      // Vérifier si le répertoire existe
-      let directoryExists = true;
-      try {
-        await client.cd(FTP_DIR);
-      } catch (err) {
-        directoryExists = false;
-      }
-
-      if (!directoryExists) {
-        console.log(`⚠️ Le répertoire ${FTP_DIR} n'existe pas. Tentative de création...`);
-        try {
-          await client.ensureDir(FTP_DIR);
-          console.log(`✅ Répertoire ${FTP_DIR} créé avec succès`);
-        } catch (createErr) {
-          console.error(`❌ Impossible de créer le répertoire ${FTP_DIR}: ${createErr.message}`);
-          throw new Error(`Impossible de créer le répertoire ${FTP_DIR}`);
-        }
-      }
+      
 
       // Upload du fichier
       console.log(`🚀 Téléchargement du fichier: ${fileName}`);
@@ -74,7 +57,7 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
       console.log(`✅ Fichier ${fileName} téléchargé avec succès et accessible publiquement`);
 
       // Construire l'URL selon le format original
-      const fileUrl = `${BASE_URL}/${FTP_DIR}/${fileName}`;
+      const fileUrl = `${BASE_URL}/${fileName}`;
 
       // Nettoyage
       fs.unlinkSync(tempFilePath);
