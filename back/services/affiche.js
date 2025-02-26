@@ -3,13 +3,15 @@ const ftp = require("basic-ftp");
 
 var express = require('express');
 var router = express.Router();
+require("dotenv").config();
 
 
 // Configuration du serveur FTP
 const ftpConfig = {
-    host: "ftp.example.com",  // Remplace par l'adresse du serveur FTP
-    user: "username",         // Remplace par ton nom d'utilisateur
-    password: "password",     // Remplace par ton mot de passe
+    host: process.env.FTP_HOST,
+    user: process.env.FTP_USER,
+    password: process.env.FTP_PASSWORD,
+    secure: false,
 };
 
 // Route pour récupérer et afficher une image
