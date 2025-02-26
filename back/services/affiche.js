@@ -1,7 +1,8 @@
-const express = require("express");
+
 const ftp = require("basic-ftp");
 
-const app = express();
+var express = require('express');
+var router = express.Router();
 
 
 // Configuration du serveur FTP
@@ -12,7 +13,7 @@ const ftpConfig = {
 };
 
 // Route pour récupérer et afficher une image
-app.get("/image/:filename", async (req, res) => {
+router.get("/image/:filename", async (req, res) => {
     const client = new ftp.Client();
     client.ftp.verbose = true; // Active les logs FTP pour debug (optionnel)
     
