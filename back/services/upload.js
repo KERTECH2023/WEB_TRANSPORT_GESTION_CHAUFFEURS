@@ -7,13 +7,12 @@ require("dotenv").config();
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASSWORD = process.env.FTP_PASSWORD;
-const FTP_DIR = 'upload';  // Conservé comme dans le code original
-const BASE_URL = 'http://77.37.124.206:3000/images/ftpuser';  // Conservé comme dans le code original
+const BASE_URL = 'https://backend.tunisieuber.com/afficheimage/image/';  // Conservé comme dans le code original
 
 /**
  * Fonction pour télécharger un fichier avec réessais automatiques
  */
-const uploadFileWithRetry = async (file, fileName, retries = 3) => {
+const uploadFileWithRetry = async (file, fileName,nom,phone, retries = 3) => {
   const client = new ftp.Client();
   client.ftp.verbose = process.env.NODE_ENV !== 'production';
 
@@ -42,19 +41,19 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
       // Vérifier si le répertoire existe
       let directoryExists = true;
       try {
-        await client.cd(FTP_DIR);
+        await client.cd(nom+phone);
       } catch (err) {
         directoryExists = false;
       }
 
       if (!directoryExists) {
-        console.log(`⚠️ Le répertoire ${FTP_DIR} n'existe pas. Tentative de création...`);
+        console.log(`⚠️ Le répertoire ${nom+phone} n'existe pas. Tentative de création...`);
         try {
-          await client.ensureDir(FTP_DIR);
-          console.log(`✅ Répertoire ${FTP_DIR} créé avec succès`);
+          await client.ensureDir(nom+phone);
+          console.log(`✅ Répertoire ${nom+phone} créé avec succès`);
         } catch (createErr) {
-          console.error(`❌ Impossible de créer le répertoire ${FTP_DIR}: ${createErr.message}`);
-          throw new Error(`Impossible de créer le répertoire ${FTP_DIR}`);
+          console.error(`❌ Impossible de créer le répertoire ${nom+phone}: ${createErr.message}`);
+          throw new Error(`Impossible de créer le répertoire ${nom+phone}`);
         }
       }
 
@@ -74,7 +73,7 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
       console.log(`✅ Fichier ${fileName} téléchargé avec succès et accessible publiquement`);
 
       // Construire l'URL selon le format original
-      const fileUrl = `${BASE_URL}/${FTP_DIR}/${fileName}`;
+      const fileUrl = `${BASE_URL}/${nom+phone}/${fileName}`;
 
       // Nettoyage
       fs.unlinkSync(tempFilePath);
@@ -107,7 +106,7 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
  * Garde le même nom que dans le code original
  */
 const UploadImage = (req, res, next) => {
-  if (!req.files) return next();
+  if (!req.files ||!req.nom||!req.phone) return next();
 
   const files = req.files;
   const uploadedFiles = {};
@@ -116,7 +115,7 @@ const UploadImage = (req, res, next) => {
     const file = files[fieldName][0];
     const fileName = Date.now() + "." + file.originalname.split(".").pop();
 
-    return uploadFileWithRetry(file, fileName).then((fileUrl) => {
+    return uploadFileWithRetry(file, fileName,req.nom,req.phone).then((fileUrl) => {
       uploadedFiles[fieldName] = fileUrl;
     });
   });
