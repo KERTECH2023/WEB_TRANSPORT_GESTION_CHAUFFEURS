@@ -7,53 +7,43 @@ require("dotenv").config();
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASSWORD = process.env.FTP_PASSWORD;
-const BASE_URL = 'https://backend.tunisieuber.com/afficheimage/image/';  // Conservé comme dans le code original
+const FTP_DIR = 'upload';
+const BASE_URL = 'http://77.37.124.206:3000/images/ftpuser';
+const FTP_DIR = 'upload';  // Conservé comme dans le code original
+const BASE_URL = 'http://77.37.124.206:3000/images/ftpuser';  // Conservé comme dans le code original
 
 /**
  * Fonction pour télécharger un fichier avec réessais automatiques
- */
-const uploadFileWithRetry = async (file, fileName,nom,phone, retries = 3) => {
-  const client = new ftp.Client();
-  client.ftp.verbose = process.env.NODE_ENV !== 'production';
 
-  // Créer un fichier temporaire pour l'upload
-  const tempDir = path.join(__dirname, 'tmp');
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-  }
-
-  const tempFilePath = path.join(tempDir, fileName);
-  fs.writeFileSync(tempFilePath, file.buffer);
-
-  let attempt = 0;
-  let lastError = null;
 
   while (attempt < retries) {
     try {
+      // Connexion FTP
       // Connexion au serveur FTP
       await client.access({
         host: FTP_HOST,
         user: FTP_USER,
-        password: FTP_PASSWORD,
-        secure: false,
+
       });
 
       // Vérifier si le répertoire existe
       let directoryExists = true;
       try {
-        await client.cd(nom+phone);
+        await client.cd(FTP_DIR);
       } catch (err) {
+        await client.send(`MKD ${FTP_DIR}`);
+        await client.cd(FTP_DIR);
         directoryExists = false;
       }
 
       if (!directoryExists) {
-        console.log(`⚠️ Le répertoire ${nom+phone} n'existe pas. Tentative de création...`);
+        console.log(`⚠️ Le répertoire ${FTP_DIR} n'existe pas. Tentative de création...`);
         try {
-          await client.ensureDir(nom+phone);
-          console.log(`✅ Répertoire ${nom+phone} créé avec succès`);
+          await client.ensureDir(FTP_DIR);
+          console.log(`✅ Répertoire ${FTP_DIR} créé avec succès`);
         } catch (createErr) {
-          console.error(`❌ Impossible de créer le répertoire ${nom+phone}: ${createErr.message}`);
-          throw new Error(`Impossible de créer le répertoire ${nom+phone}`);
+          console.error(`❌ Impossible de créer le répertoire ${FTP_DIR}: ${createErr.message}`);
+          throw new Error(`Impossible de créer le répertoire ${FTP_DIR}`);
         }
       }
 
@@ -72,53 +62,24 @@ const uploadFileWithRetry = async (file, fileName,nom,phone, retries = 3) => {
       
       console.log(`✅ Fichier ${fileName} téléchargé avec succès et accessible publiquement`);
 
+      // Modifier les permissions pour rendre le fichier public
+      await client.send(`SITE CHMOD 644 ${FTP_DIR}/${fileName}`);
+
+      console.log(`✅ Fichier ${fileName} téléchargé avec succès`);
+
+      // Construire l'URL publique
       // Construire l'URL selon le format original
-      const fileUrl = `${BASE_URL}/${nom+phone}/${fileName}`;
+      const fileUrl = `${BASE_URL}/${FTP_DIR}/${fileName}`;
 
       // Nettoyage
-      fs.unlinkSync(tempFilePath);
-      client.close();
-      return fileUrl;
-    } catch (error) {
-      lastError = error;
-      attempt++;
-      console.error(`❌ Tentative ${attempt}/${retries} échouée: ${error.message}`);
 
-      // Attendre avant de réessayer
-      if (attempt < retries) {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-      }
-    } finally {
-      client.close();
-    }
-  }
-
-  // Échec après tous les essais
-  if (fs.existsSync(tempFilePath)) {
-    fs.unlinkSync(tempFilePath);
-  }
-
-  throw lastError || new Error("Échec de l'upload après plusieurs tentatives");
-};
 
 /**
  * Middleware pour gérer l'upload d'images vers un serveur FTP
  * Garde le même nom que dans le code original
  */
 const UploadImage = (req, res, next) => {
-  if (!req.files ||!req.nom||!req.phone) return next();
-
-  const files = req.files;
-  const uploadedFiles = {};
-
-  const uploadPromises = Object.keys(files).map((fieldName) => {
-    const file = files[fieldName][0];
-    const fileName = Date.now() + "." + file.originalname.split(".").pop();
-
-    return uploadFileWithRetry(file, fileName,req.nom,req.phone).then((fileUrl) => {
-      uploadedFiles[fieldName] = fileUrl;
-    });
-  });
+  if (!req.files) return next();
 
   Promise.all(uploadPromises)
     .then(() => {
