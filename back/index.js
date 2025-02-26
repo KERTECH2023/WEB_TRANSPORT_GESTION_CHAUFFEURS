@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const config = require("./config.json");
+const afficheimage = require("./services/affiche");
 
 const Agentchauff = require("./routes/ChauffeurRoute");
 const con = require("./routes/ContactRoute");
@@ -57,7 +58,7 @@ app.use(bodyParser.json());
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-
+app.use("/afficheimage", afficheimage);
 app.use("/Chauff", Agentchauff);
 app.use("/Voi", Voi);
 app.use("/Con", con);
