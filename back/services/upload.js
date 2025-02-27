@@ -3,15 +3,68 @@ const path = require('path');
 const fs = require('fs');
 require("dotenv").config();
 
+// Configuration FTP
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASSWORD = process.env.FTP_PASSWORD;
+const FTP_DIR = 'upload';  // Répertoire principal
+const BASE_URL = 'http://77.37.124.206:3000/images/ftpuser';
 
-const BASE_URL = 'https://backend.tunisieuber.com/afficheimage/image';  
+/**
+ * Fonction pour créer un répertoire distant de manière récursive
+ * (crée tous les répertoires parents si nécessaire)
+ */
+const createDirectoryRecursive = async (client, dirPath) => {
+  const parts = dirPath.split('/').filter(part => part !== '');
+  let currentPath = '';
 
+  for (const part of parts) {
+    currentPath += (currentPath ? '/' : '') + part;
+    
+    try {
+      // Tenter de naviguer vers le répertoire pour vérifier s'il existe
+      await client.cd('/');  // Revenir à la racine
+      await client.cd(currentPath);
+    } catch (err) {
+      // Le répertoire n'existe pas, on le crée
+      try {
+        await client.cd('/');  // Revenir à la racine
+        
+        // Si le répertoire parent existe, on peut créer le sous-répertoire
+        if (currentPath.includes('/')) {
+          const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+          await client.cd(parentPath);
+        }
+        
+        console.log(`🔨 Création du répertoire: ${part}`);
+        await client.send(`MKD ${part}`);
+        
+        // Vérifier que le répertoire a bien été créé
+        await client.cd('/');
+        await client.cd(currentPath);
+      } catch (mkdErr) {
+        console.error(`❌ Impossible de créer le répertoire ${part}: ${mkdErr.message}`);
+        throw new Error(`Échec de création du répertoire ${part}`);
+      }
+    }
+  }
+  
+  // Revenir à la racine puis au chemin complet pour être sûr d'y être
+  await client.cd('/');
+  await client.cd(dirPath);
+  console.log(`✅ Répertoire distant vérifié/créé: ${dirPath}`);
+};
+
+/**
+ * Fonction pour télécharger un fichier avec réessais automatiques
+ */
 const uploadFileWithRetry = async (file, filePath, retries = 3) => {
   const client = new ftp.Client();
   client.ftp.verbose = process.env.NODE_ENV !== 'production';
+
+  // Extraire le nom du fichier et le chemin du répertoire
+  const fileName = path.basename(filePath);
+  const dirPath = path.dirname(filePath);
 
   // Créer un fichier temporaire pour l'upload
   const tempDir = path.join(__dirname, 'tmp');
@@ -19,8 +72,6 @@ const uploadFileWithRetry = async (file, filePath, retries = 3) => {
     fs.mkdirSync(tempDir, { recursive: true });
   }
 
-  // Extraire juste le nom du fichier sans le chemin du dossier pour le fichier temporaire
-  const fileName = path.basename(filePath);
   const tempFilePath = path.join(tempDir, fileName);
   fs.writeFileSync(tempFilePath, file.buffer);
 
@@ -37,43 +88,26 @@ const uploadFileWithRetry = async (file, filePath, retries = 3) => {
         secure: false,
       });
 
-      // Extraire le répertoire à partir du chemin du fichier
-      const remoteDir = path.dirname(filePath);
-      
-      // Créer le répertoire distant s'il n'existe pas
-      if (remoteDir && remoteDir !== '.') {
-        console.log(`🚀 Création/vérification du répertoire distant: ${remoteDir}`);
-        try {
-          await client.ensureDir(remoteDir);
-        } catch (err) {
-          console.error(`❌ Erreur lors de la création du répertoire ${remoteDir}: ${err.message}`);
-          // Tentative alternative de création du répertoire
-          try {
-            await client.send(`MKD ${remoteDir}`);
-            console.log(`✅ Répertoire ${remoteDir} créé via commande MKD`);
-          } catch (mkdErr) {
-            // Si le répertoire existe déjà, on continue
-            console.warn(`⚠️ Erreur MKD (peut-être que le répertoire existe déjà): ${mkdErr.message}`);
-          }
-        }
-      }
+      // Créer/vérifier le répertoire de destination
+      console.log(`🚀 Création/vérification du répertoire distant: ${dirPath}`);
+      await createDirectoryRecursive(client, dirPath);
 
       // Upload du fichier
       console.log(`🚀 Téléchargement du fichier vers: ${filePath}`);
-      await client.uploadFrom(tempFilePath, filePath);
+      await client.uploadFrom(tempFilePath, fileName);
       
-      // Définir les permissions pour un accès public (644 = rw-r--r--)
+      // Définir les permissions du fichier (644 = rw-r--r--)
       try {
-        await client.send(`SITE CHMOD 644 ${filePath}`);
-        console.log(`✅ Permissions du fichier ${filePath} définies comme publiques`);
+        await client.send(`SITE CHMOD 644 ${fileName}`);
+        console.log(`🔒 Permissions du fichier définies: ${fileName}`);
       } catch (chmodErr) {
         console.warn(`⚠️ Impossible de définir les permissions: ${chmodErr.message}`);
         // Continuer même si CHMOD échoue
       }
       
-      console.log(`✅ Fichier ${filePath} téléchargé avec succès et accessible publiquement`);
+      console.log(`✅ Fichier ${filePath} téléchargé avec succès`);
 
-      // Construire l'URL selon le format original
+      // Construire l'URL
       const fileUrl = `${BASE_URL}/${filePath}`;
 
       // Nettoyage
@@ -92,8 +126,8 @@ const uploadFileWithRetry = async (file, filePath, retries = 3) => {
     } finally {
       try {
         client.close();
-      } catch (err) {
-        console.warn("Erreur lors de la fermeture du client FTP", err.message);
+      } catch (e) {
+        // Ignorer les erreurs lors de la fermeture
       }
     }
   }
@@ -102,55 +136,49 @@ const uploadFileWithRetry = async (file, filePath, retries = 3) => {
   if (fs.existsSync(tempFilePath)) {
     fs.unlinkSync(tempFilePath);
   }
-
+  
+  console.error(`❌ Erreur lors de l'upload de ${path.basename(filePath)}: ${lastError?.message || 'Erreur inconnue'}`);
   throw lastError || new Error("Échec de l'upload après plusieurs tentatives");
 };
 
-
+/**
+ * Middleware pour gérer l'upload d'images vers un serveur FTP
+ */
 const UploadImage = (req, res, next) => {
-  // Vérifier la présence des fichiers et des données utilisateur
-  if (!req.files || Object.keys(req.files).length === 0) {
-    console.log("❌ Aucun fichier n'a été fourni");
-    return next();
-  }
-  
-  if (!req.body.Nom || !req.body.fullPhoneNumber) {
-    console.log(`❌ Données utilisateur manquantes: Nom=${req.body.Nom}, Tel=${req.body.fullPhoneNumber}`);
-    return next();
-  }
+  if (!req.files) return next();
 
-  // Créer un nom de répertoire pour l'utilisateur
-  const userDir = `${req.body.Nom}_${req.body.fullPhoneNumber}`;
   const files = req.files;
   const uploadedFiles = {};
-
-  // Préparer les promesses d'upload pour chaque fichier
+  
+  // Obtenir le préfixe de dossier (par exemple: ID utilisateur)
+  const folderPrefix = req.body.folderPrefix || req.body.userId || req.params.userId || '';
+  
   const uploadPromises = Object.keys(files).map((fieldName) => {
     const file = files[fieldName][0];
-    // Obtenir l'extension du fichier original
-    const extension = file.originalname.split(".").pop();
-    // Construire le chemin distant avec le dossier utilisateur
-    const remotePath = `${userDir}/${fieldName}.${extension}`;
-
-    console.log(`📂 Préparation de l'upload: ${fieldName} -> ${remotePath}`);
+    const fileExtension = file.originalname.split(".").pop();
     
-    return uploadFileWithRetry(file, remotePath)
-      .then((fileUrl) => {
-        uploadedFiles[fieldName] = fileUrl;
-        console.log(`✅ URL générée pour ${fieldName}: ${fileUrl}`);
-      })
-      .catch(err => {
-        console.error(`❌ Erreur lors de l'upload de ${fieldName}: ${err.message}`);
-        throw err; // Propager l'erreur pour être attrapée par Promise.all
-      });
+    // Construire le chemin du fichier avec sous-dossier si nécessaire
+    let filePath;
+    if (folderPrefix) {
+      // Utiliser le nom de fichier original ou générer un nom basé sur le champ
+      const fileName = `${fieldName}.${fileExtension}`;
+      filePath = `${FTP_DIR}/${folderPrefix}/${fileName}`;
+    } else {
+      // Sans préfixe, utiliser simplement un timestamp
+      const fileName = `${Date.now()}.${fileExtension}`;
+      filePath = `${FTP_DIR}/${fileName}`;
+    }
+    
+    console.log(`📂 Préparation de l'upload: ${fieldName} -> ${filePath}`);
+    
+    return uploadFileWithRetry(file, filePath).then((fileUrl) => {
+      uploadedFiles[fieldName] = fileUrl;
+    });
   });
 
-  // Exécuter tous les uploads en parallèle
   Promise.all(uploadPromises)
     .then(() => {
-      console.log(`✅ Tous les fichiers ont été uploadés avec succès dans ${userDir}`);
       req.uploadedFiles = uploadedFiles;
-      res.locals.uploadedFiles = uploadedFiles;
       next();
     })
     .catch((error) => {
