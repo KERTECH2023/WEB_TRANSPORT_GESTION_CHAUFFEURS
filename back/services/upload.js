@@ -3,24 +3,24 @@ const path = require('path');
 const fs = require('fs');
 require("dotenv").config();
 
-// Configuration FTP
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASSWORD = process.env.FTP_PASSWORD;
-const FTP_DIR = 'upload';  // Conservé comme dans le code original
-const BASE_URL = 'https://backend.tunisieuber.com/afficheimage/image';  // Conservé comme dans le code original
 
-/**
- * Fonction pour télécharger un fichier avec réessais automatiques
- */
-const uploadFileWithRetry = async (file, fileName, retries = 3) => {
+const BASE_URL = 'https://backend.tunisieuber.com/afficheimage/image';  
+
+const uploadFileWithRetry = async (file, fileName, userData, retries = 3) => {
   const client = new ftp.Client();
   client.ftp.verbose = process.env.NODE_ENV !== 'production';
 
-  // Créer un fichier temporaire pour l'upload
   const tempDir = path.join(__dirname, 'tmp');
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
+  }
+
+  // Vérifier que le fichier contient un buffer
+  if (!file.buffer) {
+    throw new Error("Le fichier ne contient pas de données (buffer manquant)");
   }
 
   const tempFilePath = path.join(tempDir, fileName);
@@ -31,7 +31,6 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
 
   while (attempt < retries) {
     try {
-      // Connexion au serveur FTP
       await client.access({
         host: FTP_HOST,
         user: FTP_USER,
@@ -39,27 +38,26 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
         secure: false,
       });
 
-      
+      // Créer un répertoire dynamique basé sur le nom et le téléphone si nécessaire
+      const remoteDir = `${userData.nom}_${userData.tel}`;
+      console.log(`🚀 Création/vérification du répertoire: ${remoteDir}`);
+      await client.ensureDir(remoteDir); // S'assurer que le répertoire existe
 
-      // Upload du fichier
-      console.log(`🚀 Téléchargement du fichier: ${fileName}`);
-      await client.uploadFrom(tempFilePath, fileName);
-      
-      // Définir les permissions pour un accès public (644 = rw-r--r--)
+      // Upload du fichier dans le répertoire cible
+      const remotePath = `${remoteDir}/${fileName}`;
+      console.log(`🚀 Téléchargement du fichier: ${remotePath}`);
+      await client.uploadFrom(tempFilePath, remotePath);
+
       try {
-        await client.send(`SITE CHMOD 644 ${fileName}`);
-        console.log(`✅ Permissions du fichier ${fileName} définies comme publiques`);
+        await client.send(`SITE CHMOD 644 ${remotePath}`);
+        console.log(`✅ Permissions du fichier ${remotePath} définies comme publiques`);
       } catch (chmodErr) {
         console.warn(`⚠️ Impossible de définir les permissions: ${chmodErr.message}`);
-        // Continuer même si CHMOD échoue
       }
-      
-      console.log(`✅ Fichier ${fileName} téléchargé avec succès et accessible publiquement`);
 
-      // Construire l'URL selon le format original
-      const fileUrl = `${BASE_URL}/${fileName}`;
+      console.log(`✅ Fichier ${remotePath} téléchargé avec succès`);
 
-      // Nettoyage
+      const fileUrl = `${BASE_URL}/${remotePath}`;
       fs.unlinkSync(tempFilePath);
       client.close();
       return fileUrl;
@@ -68,16 +66,18 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
       attempt++;
       console.error(`❌ Tentative ${attempt}/${retries} échouée: ${error.message}`);
 
-      // Attendre avant de réessayer
       if (attempt < retries) {
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     } finally {
-      client.close();
+      try {
+        client.close();
+      } catch (err) {
+        console.warn("Erreur lors de la fermeture du client FTP", err.message);
+      }
     }
   }
 
-  // Échec après tous les essais
   if (fs.existsSync(tempFilePath)) {
     fs.unlinkSync(tempFilePath);
   }
@@ -85,21 +85,20 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
   throw lastError || new Error("Échec de l'upload après plusieurs tentatives");
 };
 
-/**
- * Middleware pour gérer l'upload d'images vers un serveur FTP
- * Garde le même nom que dans le code original
- */
-const UploadImage = (req, res, next) => {
-  if (!req.files) return next();
 
+
+const UploadImage = (req, res, next) => {
+  if (!req.files || !req.body.Nom || !req.body.fullPhoneNumber) {console.log("kjdkjsdkj"+req.body.Nom+req.body.fullPhoneNumber); return next();}
+
+  const userDir = `${req.body.Nom}_${req.body.fullPhoneNumber}`;
   const files = req.files;
   const uploadedFiles = {};
 
   const uploadPromises = Object.keys(files).map((fieldName) => {
     const file = files[fieldName][0];
-    const fileName = Date.now() + "." + file.originalname.split(".").pop();
+    const remotePath = `${userDir}/${fieldName}.${file.originalname.split(".").pop()}`;
 
-    return uploadFileWithRetry(file, fileName).then((fileUrl) => {
+    return uploadFileWithRetry(file, remotePath).then((fileUrl) => {
       uploadedFiles[fieldName] = fileUrl;
     });
   });
@@ -107,11 +106,7 @@ const UploadImage = (req, res, next) => {
   Promise.all(uploadPromises)
     .then(() => {
       req.uploadedFiles = uploadedFiles;
-      
-      // Ajouter les informations des fichiers à la réponse également
-      // pour faciliter l'accès direct
       res.locals.uploadedFiles = uploadedFiles;
-      
       next();
     })
     .catch((error) => {
