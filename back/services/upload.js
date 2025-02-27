@@ -13,6 +13,7 @@ const uploadFileWithRetry = async (file, fileName, userData, retries = 3) => {
   const client = new ftp.Client();
   client.ftp.verbose = process.env.NODE_ENV !== 'production';
 
+  // Créer le répertoire temporaire
   const tempDir = path.join(__dirname, 'tmp');
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
@@ -23,68 +24,74 @@ const uploadFileWithRetry = async (file, fileName, userData, retries = 3) => {
     throw new Error("Le fichier ne contient pas de données (buffer manquant)");
   }
 
+  // Utiliser simplement le dossier temporaire pour stocker le fichier - PAS de sous-dossier
   const tempFilePath = path.join(tempDir, fileName);
-  fs.writeFileSync(tempFilePath, file.buffer);
+  
+  try {
+    // Écrire le fichier temporaire
+    fs.writeFileSync(tempFilePath, file.buffer);
+    console.log(`✅ Fichier temporaire créé: ${tempFilePath}`);
+    
+    let attempt = 0;
+    let lastError = null;
 
-  let attempt = 0;
-  let lastError = null;
-
-  while (attempt < retries) {
-    try {
-      await client.access({
-        host: FTP_HOST,
-        user: FTP_USER,
-        password: FTP_PASSWORD,
-        secure: false,
-      });
-
-      // Créer un répertoire dynamique basé sur le nom et le téléphone si nécessaire
-      const remoteDir = `${userData.nom}_${userData.tel}`;
-      console.log(`🚀 Création/vérification du répertoire: ${remoteDir}`);
-      await client.ensureDir(remoteDir); // S'assurer que le répertoire existe
-
-      // Upload du fichier dans le répertoire cible
-      const remotePath = `${remoteDir}/${fileName}`;
-      console.log(`🚀 Téléchargement du fichier: ${remotePath}`);
-      await client.uploadFrom(tempFilePath, remotePath);
-
+    while (attempt < retries) {
       try {
-        await client.send(`SITE CHMOD 644 ${remotePath}`);
-        console.log(`✅ Permissions du fichier ${remotePath} définies comme publiques`);
-      } catch (chmodErr) {
-        console.warn(`⚠️ Impossible de définir les permissions: ${chmodErr.message}`);
-      }
+        await client.access({
+          host: FTP_HOST,
+          user: FTP_USER,
+          password: FTP_PASSWORD,
+          secure: false,
+        });
 
-      console.log(`✅ Fichier ${remotePath} téléchargé avec succès`);
+        // Créer un répertoire dynamique sur le serveur FTP basé sur le nom et le téléphone
+        const remoteDir = `${userData.nom}_${userData.tel}`;
+        console.log(`🚀 Création/vérification du répertoire distant: ${remoteDir}`);
+        await client.ensureDir(remoteDir);
 
-      const fileUrl = `${BASE_URL}/${remotePath}`;
-      fs.unlinkSync(tempFilePath);
-      client.close();
-      return fileUrl;
-    } catch (error) {
-      lastError = error;
-      attempt++;
-      console.error(`❌ Tentative ${attempt}/${retries} échouée: ${error.message}`);
+        // Upload du fichier dans le répertoire cible distant
+        const remotePath = `${remoteDir}/${fileName}`;
+        console.log(`🚀 Téléchargement du fichier: ${remotePath}`);
+        await client.uploadFrom(tempFilePath, remotePath);
 
-      if (attempt < retries) {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-      }
-    } finally {
-      try {
+        try {
+          await client.send(`SITE CHMOD 644 ${remotePath}`);
+          console.log(`✅ Permissions du fichier ${remotePath} définies comme publiques`);
+        } catch (chmodErr) {
+          console.warn(`⚠️ Impossible de définir les permissions: ${chmodErr.message}`);
+        }
+
+        console.log(`✅ Fichier ${remotePath} téléchargé avec succès`);
+
+        const fileUrl = `${BASE_URL}/${remotePath}`;
         client.close();
-      } catch (err) {
-        console.warn("Erreur lors de la fermeture du client FTP", err.message);
+        return fileUrl;
+      } catch (error) {
+        lastError = error;
+        attempt++;
+        console.error(`❌ Tentative ${attempt}/${retries} échouée: ${error.message}`);
+
+        if (attempt < retries) {
+          await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        }
+      } finally {
+        try {
+          client.close();
+        } catch (err) {
+          console.warn("Erreur lors de la fermeture du client FTP", err.message);
+        }
       }
     }
-  }
 
-  if (fs.existsSync(tempFilePath)) {
-    fs.unlinkSync(tempFilePath);
+    throw lastError || new Error("Échec de l'upload après plusieurs tentatives");
+  } finally {
+    // Nettoyer le fichier temporaire à la fin, qu'importe le résultat
+    if (fs.existsSync(tempFilePath)) {
+      fs.unlinkSync(tempFilePath);
+      console.log(`🧹 Fichier temporaire supprimé: ${tempFilePath}`);
+    }
   }
-
-  throw lastError || new Error("Échec de l'upload après plusieurs tentatives");
 };
-
 
 
 const UploadImage = (req, res, next) => {
