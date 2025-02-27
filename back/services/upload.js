@@ -99,7 +99,7 @@ const UploadImage = (req, res, next) => {
   const uploadPromises = Object.keys(files).map((fieldName) => {
     const file = files[fieldName][0];
     
-    const remotePath = `${req.body.Nom}_${req.body.fullPhoneNumber}${fieldName}.`+Date.now()+`${file.originalname.split(".").pop()}`;
+    const remotePath = `${req.body.Nom}_${req.body.fullPhoneNumber}${fieldName}`+Date.now()+`.${file.originalname.split(".").pop()}`;
 
     return uploadFileWithRetry(file, remotePath).then((fileUrl) => {
       uploadedFiles[fieldName] = fileUrl;
