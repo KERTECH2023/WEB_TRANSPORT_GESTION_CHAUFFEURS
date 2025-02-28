@@ -42,19 +42,19 @@ const uploadFileWithRetry = async (file, fileName, retries = 3) => {
       
 
       // Upload du fichier
-      console.log(`🚀 Téléchargement du fichier: ${fileName}`);
+    
       await client.uploadFrom(tempFilePath, fileName);
       
       // Définir les permissions pour un accès public (644 = rw-r--r--)
       try {
         await client.send(`SITE CHMOD 644 ${fileName}`);
-        console.log(`✅ Permissions du fichier ${fileName} définies comme publiques`);
+       
       } catch (chmodErr) {
         console.warn(`⚠️ Impossible de définir les permissions: ${chmodErr.message}`);
         // Continuer même si CHMOD échoue
       }
       
-      console.log(`✅ Fichier ${fileName} téléchargé avec succès et accessible publiquement`);
+    
 
       // Construire l'URL selon le format original
       const fileUrl = `${BASE_URL}/${fileName}`;
