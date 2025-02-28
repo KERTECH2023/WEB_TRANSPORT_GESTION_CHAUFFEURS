@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const ChauffContro = require("../Controllers/ChauffContro");
+const ChauffContro = require("../Controllers/ChauffControfrance");
 
 const UploadImage = require("../services/upload");
 
@@ -26,8 +26,14 @@ router.post(
   "/AjoutChauf",
   Multer.fields([
     { name: "photoAvatar", maxCount: 1 },
-    { name: "photoVtc", maxCount: 1 },
     { name: "photoCin", maxCount: 1 },
+    { name: "photoVtc", maxCount: 1 },
+    { name: "AssurancePro", maxCount: 1 },
+    { name: "Kbis", maxCount: 1 },
+    { name: "RIB", maxCount: 1 },
+    { name: "AssuranceVoiture", maxCount: 1 },
+    { name: "CarteGrise", maxCount: 1 },
+   
   ]),
   UploadImage,
   ChauffContro.register
@@ -37,10 +43,14 @@ router.put(
   "/updatechauf/:id",
   Multer.fields([
     { name: "photoAvatar", maxCount: 1 },
-    { name: "photoPermisRec", maxCount: 1 },
-    { name: "photoPermisVer", maxCount: 1 },
-    { name: "photoVtc", maxCount: 1 },
     { name: "photoCin", maxCount: 1 },
+    { name: "photoVtc", maxCount: 1 },
+    { name: "AssurancePro", maxCount: 1 },
+    { name: "Kbis", maxCount: 1 },
+    { name: "RIB", maxCount: 1 },
+    { name: "AssuranceVoiture", maxCount: 1 },
+    { name: "CarteGrise", maxCount: 1 },
+   
   ]),
   UploadImage,
   ChauffContro.update
