@@ -4,7 +4,7 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var cors = require("cors");
-
+const { db2france } = require("./configbasefrance");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
@@ -20,7 +20,8 @@ const tariftransfert = require("./routes/TariftransfertRoute");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
-
+const Voifr = require("./routes/Voiturefranceroute");
+const chaufffr = require("./routes/chauffeurfrranceRoute");
 mongoose.connect(process.env.DATABASE, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -34,6 +35,10 @@ db.on("error", (err) => {
 db.once("open", () => {
   console.log("DB Connection Estabblished !");
 });
+
+
+
+
 
 var app = express();
 
@@ -61,6 +66,8 @@ app.use("/users", usersRouter);
 app.use("/afficheimage", afficheimage);
 app.use("/Chauff", Agentchauff);
 app.use("/Voi", Voi);
+app.use("/Chaufffrance", chaufffr);
+app.use("/Voifrance", Voifr);
 app.use("/Con", con);
 app.use("/hist", his);
 app.use("/transfert", transfert);
