@@ -14,10 +14,6 @@ exports.addvoiture = async (req, res) => {
 
 
 
-
-
-
-
     const verifUtilisateur = await Voiture.findOne({ immatriculation });
     if (verifUtilisateur) {
       res.status(403).send({ message: "Voiture existe deja !" });
@@ -30,7 +26,6 @@ exports.addvoiture = async (req, res) => {
 
       nouveauUtilisateur.modelle = modelle;
       nouveauUtilisateur.immatriculation = immatriculation;
-
       nouveauUtilisateur.chauffeur = chauffeurId;
 
    
