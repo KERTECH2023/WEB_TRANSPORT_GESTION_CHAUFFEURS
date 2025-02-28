@@ -2,7 +2,7 @@ const express = require('express')
 const  router = express.Router()
 
 
-const VoitureCon  = require('../Controllers/VoitureContro')
+const VoitureCon  = require('../Controllers/VoiturefranceController')
 
 const UploadImage = require ("../services/upload");
 
