@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const ChauffContro = require("../Controllers/ChauffContro");
+const ChauffContro = require("../Controllers/ChauffControfrance");
 
 const UploadImage = require("../services/upload");
 
