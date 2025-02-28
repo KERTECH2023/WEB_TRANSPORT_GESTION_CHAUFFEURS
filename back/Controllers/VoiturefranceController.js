@@ -12,9 +12,7 @@ exports.addvoiture = async (req, res) => {
 
 
 
-const cartegriseUrl = req.uploadedFiles.photoCartegrise || '';
-const assuranceUrl = req.uploadedFiles.photoAssurance || '';
-console.log("cate:",cartegriseUrl)
+
 
 
 
@@ -32,8 +30,7 @@ console.log("cate:",cartegriseUrl)
 
       nouveauUtilisateur.modelle = modelle;
       nouveauUtilisateur.immatriculation = immatriculation;
-      nouveauUtilisateur.cartegrise = cartegriseUrl;
-      nouveauUtilisateur.assurance = assuranceUrl;
+
       nouveauUtilisateur.chauffeur = chauffeurId;
 
    
