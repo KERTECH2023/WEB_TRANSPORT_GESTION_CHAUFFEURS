@@ -1,87 +1,57 @@
-const Voiture = require ("../Models/Voiturefrance")
-
-
+const Voiture = require("../Models/Voiturefrance");
 
 exports.addvoiture = async (req, res) => {
-    const { modelle , immatriculation} = req.body;
-    const chauffeurId = req.params.id;
-    
- 
-// const {firebaseUrl} =req.file ? req.file : "";
+    try {
+        const { modelle, immatriculation } = req.body;
+        const chauffeurId = req.params.id;
 
-
-
-
-const cartegriseUrl = req.uploadedFiles.photoCartegrise || '';
-const assuranceUrl = req.uploadedFiles.photoAssurance || '';
-console.log("cate:",cartegriseUrl)
-
-
-
-
-
-    const verifUtilisateur = await Voiture.findOne({ immatriculation });
-    if (verifUtilisateur) {
-      res.status(403).send({ message: "Voiture existe deja !" });
-    } else {
-      const nouveauUtilisateur = new Voiture();
-
-  
-
-
-
-      nouveauUtilisateur.modelle = modelle;
-      nouveauUtilisateur.immatriculation = immatriculation;
-      nouveauUtilisateur.cartegrise = cartegriseUrl;
-      nouveauUtilisateur.assurance = assuranceUrl;
-      nouveauUtilisateur.chauffeur = chauffeurId;
-
-   
-  
-      console.log (
-        nouveauUtilisateur
-    )
-
-
-    
-      nouveauUtilisateur.save();
-  
-     
-      // token creation
-      res.status(201).send({ message: "success" });
-    }
-  };
-
-//   exports.getBychauff = async (req, res) => {
-//     res.send({
-//         rec: await Voiture.find({chauffeur: req.params.id})
-            
-//     })
-// }
-
-// exports.getBychauff = async(req,res,data) =>{
-   
-//     Voiture.find({ chauffeur: req.params.id },(err, data)=>{
-      
-//         res.send(data);
-//         console.log(data)
+        // Vérification de l'existence des fichiers uploadés
+        const cartegriseUrl = req.uploadedFiles?.photoCartegrise || '';
+        const assuranceUrl = req.uploadedFiles?.photoAssurance || '';
         
-//     });
-// }
+        console.log("📂 Carte grise URL:", cartegriseUrl);
+        console.log("📂 Assurance URL:", assuranceUrl);
 
-exports.getBychauff = async (req, res) => {
-    Voiture.find({ chauffeur: req.params.id })
-      .then(data => {
-        if (!data) {
-          res.status(404).send({ message: "Chauffeur introuvable pour id " + chauffeur });
-        } else {
-          // Extract the first element from the array
-          const response = data[0];
-          res.send(response);
+        // Vérifier si la voiture existe déjà
+        const verifVoiture = await Voiture.findOne({ immatriculation });
+        if (verifVoiture) {
+            return res.status(403).json({ message: "❌ Voiture existe déjà !" });
         }
-      })
-      .catch(err => {
-        res.status(500).send({ message: "Erreur récupération Chauffeur avec id=" + chauffeur });
-      });
-  }
-  
+
+        // Création de la nouvelle voiture
+        const nouvelleVoiture = new Voiture({
+            modelle,
+            immatriculation,
+            cartegrise: cartegriseUrl,
+            assurance: assuranceUrl,
+            chauffeur: chauffeurId
+        });
+
+        console.log("🚗 Nouvelle voiture enregistrée:", nouvelleVoiture);
+
+        await nouvelleVoiture.save(); // Assurez-vous d'attendre la sauvegarde
+
+        res.status(201).json({ message: "✅ Véhicule enregistré avec succès !" });
+
+    } catch (error) {
+        console.error("❌ Erreur lors de l'ajout du véhicule:", error);
+        res.status(500).json({ message: "Erreur serveur, impossible d'ajouter la voiture." });
+    }
+};
+
+// Récupérer les voitures par ID du chauffeur
+exports.getBychauff = async (req, res) => {
+    try {
+        const voitures = await Voiture.find({ chauffeur: req.params.id });
+
+        if (!voitures || voitures.length === 0) {
+            return res.status(404).json({ message: "❌ Aucune voiture trouvée pour ce chauffeur !" });
+        }
+
+        res.status(200).json(voitures); // Renvoie toutes les voitures du chauffeur
+
+    } catch (error) {
+        console.error("❌ Erreur lors de la récupération des voitures du chauffeur:", error);
+        res.status(500).json({ message: "Erreur serveur, impossible de récupérer les véhicules." });
+    }
+};
