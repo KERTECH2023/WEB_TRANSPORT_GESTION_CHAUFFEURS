@@ -100,8 +100,7 @@ const register = async (req, res) => {
   
   const verifUtilisateur = await Chauffeur.findOne({ email });
   if (verifUtilisateur) {
-   // res.status(403).send({ message: "Chauffeur existe deja!" });
-   res.status(201).send(verifUtilisateur.id);
+    res.status(403).send({ message: "Chauffeur existe deja!" });
   } else {
     // Create a new user object
     const nouveauUtilisateur = new Chauffeur();
