@@ -5,12 +5,17 @@ exports.addvoiture = async (req, res) => {
     try {
         const { modelle, immatriculation } = req.body;
         const chauffeurId = req.params.id;
-       // const chauffeurexist = await Chauffeur.findOne({ chauffeurId });
-      //  if(chauffeurexist){
+
+        // Vérifier si le chauffeur existe
+        const chauffeurExist = await Chauffeur.findById(chauffeurId);
+        if (!chauffeurExist) {
+            return res.status(200).json({ message: "✅ Chauffeur non trouvé, aucune insertion effectuée." });
+        }
+
         // Vérification de l'existence des fichiers uploadés
         const cartegriseUrl = req.uploadedFiles?.photoCartegrise || '';
         const assuranceUrl = req.uploadedFiles?.photoAssurance || '';
-        
+
         console.log("📂 Carte grise URL:", cartegriseUrl);
         console.log("📂 Assurance URL:", assuranceUrl);
 
@@ -34,7 +39,6 @@ exports.addvoiture = async (req, res) => {
         await nouvelleVoiture.save(); // Assurez-vous d'attendre la sauvegarde
 
         res.status(201).json({ message: "✅ Véhicule enregistré avec succès !" });
-   // }
 
     } catch (error) {
         console.error("❌ Erreur lors de l'ajout du véhicule:", error);
