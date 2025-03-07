@@ -98,7 +98,9 @@ const register = async (req, res) => {
   const AssuranceVoitureUrl = req.uploadedFiles.AssuranceVoiture || "";
   const CarteGriseUrl = req.uploadedFiles.CarteGrise || "";
   
-  const verifUtilisateur = await Chauffeur.findOne({ email });
+  const verifUtilisateur = await Chauffeur.findOne({ 
+    $or: [{ email }, { phone: fullPhoneNumber }, { cnicNo }] 
+  });
   if (verifUtilisateur) {
     res.status(403).send({ message: "Chauffeur existe deja!" });
   } else {
