@@ -6,7 +6,7 @@ const ChauffSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      unique: true,
+
     },
 
     Nom: {
@@ -22,7 +22,6 @@ const ChauffSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, "Please provide your email"],
-      unique: true,
       lowercase: true,
       validate: [validator.isEmail, "Please provide a valid email"],
     },
@@ -30,7 +29,7 @@ const ChauffSchema = new mongoose.Schema(
       type: String,
       // required: [true, 'Please provide your phone'],
 
-      unique: true,
+
     },
     password: {
       type: String,
@@ -73,14 +72,12 @@ const ChauffSchema = new mongoose.Schema(
 
     cnicNo: {
       type: String,
-      required: [true, "Please provide a cnic."],
-      unique: true,
+
     },
 
     address: {
       type: String,
-      trim: true,
-      required: [true, "Please provide an address"],
+
      
     },
 
