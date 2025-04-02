@@ -10,6 +10,7 @@ const Transfert  = require('../Controllers/TransfertContro');
 
 
 router.post('/add',Transfert.createTransfer);
+router.post('/payement',Transfert.createCheckoutSession);
 
 
 
