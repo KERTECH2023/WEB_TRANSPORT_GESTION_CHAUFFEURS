@@ -2,6 +2,35 @@
 
 const Transfer = require('../Models/Transfert'); // Assurez-vous que le chemin est correct
 const nodemailer = require("nodemailer");
+const stripe = require("stripe")("sk_test_51QuAbpQFlhR6CoMtocz2YCH80ULE8hY5412hALJsZxXDDfJ6QovCfivUPH1W9EagiflIa7EHzgDzCn0QVJaJ7K8Z00I37p2IO8");
+
+
+exports.createCheckoutSession = async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: req.body.product,
+            },
+            unit_amount: req.body.amount * 100, // Montant en centimes
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: "https://www.tunisieuber.com/payementtransfertsuccess",
+      cancel_url: "https://www.tunisieuber.com/payementtransfertcancel",
+    });
+
+    res.json({ id: session.id });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 exports.createTransfer = async (req, res) => {
 
