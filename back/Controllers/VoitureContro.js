@@ -19,11 +19,7 @@ exports.addvoiture = async (req, res) => {
         }
 
 
-        // Vérifier si la voiture existe déjà
-        const verifVoiture = await Voiture.findOne({ immatriculation });
-        if (verifVoiture) {
-            return res.status(403).json({ message: "❌ Une voiture avec cette immatriculation existe déjà !" });
-        }
+       
 
         // Création de la nouvelle voiture
         const nouvelleVoiture = new Voiture({
