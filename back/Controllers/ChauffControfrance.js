@@ -7,6 +7,7 @@ const nodemailer = require("nodemailer");
 //const realtimeDB = firebaseModule.firestoreApp.database();
 /**--------------------Ajouter un agnet------------------------  */
 const admin = require("firebase-admin");
+const Voiture = require("../Models/Voiturefrance");
 const firestoreServiceAccount = require("../firebase-key.json");
 // Add a new JSON key for Firestore
 
@@ -127,10 +128,6 @@ const register = async (req, res) => {
     nouveauUtilisateur.AssurancePro =AssuranceProUrl;
     nouveauUtilisateur.Kbis = KbisUrl;
     nouveauUtilisateur.RIB = RIBUrl;
-    nouveauUtilisateur.AssuranceVoiture = AssuranceVoitureUrl;
-    nouveauUtilisateur.CarteGrise = CarteGriseUrl;
-    nouveauUtilisateur.immatriculation = immatriculation;
-    nouveauUtilisateur.modelle = modelle;
     nouveauUtilisateur.gender = gender;
     nouveauUtilisateur.role = "Chauffeur";
     nouveauUtilisateur.Cstatus = "En_cours";
@@ -141,22 +138,26 @@ const register = async (req, res) => {
 
     console.log(nouveauUtilisateur);
 
+    
+
+  await nouvelleVoiture.save();
+
     // Save the new user to the database
     try {
       await nouveauUtilisateur.save();
-      /*const driversRef = realtimeDB.ref('Drivers');
-driversRef.child(nouveauUtilisateur._id.toString()).set({
-  ...nouveauUtilisateur,
-});*/
 
-      // Token creation
-      const token = jwt.sign(
-        { _id: nouveauUtilisateur._id },
-        config.token_secret,
-        {
-          expiresIn: "120000", // in Milliseconds (3600000 = 1 hour)
-        }
-      );
+      if(modelle && immatriculation){
+      const nouvelleVoiture = new Voiture({
+        modelle,
+        immatriculation,
+        cartegrise: CarteGriseUrl,
+        assurance: AssuranceVoitureUrl,
+        chauffeur: nouveauUtilisateur.id
+    });
+
+    await nouvelleVoiture.save();
+  }
+
 
       // Send confirmation email
       try {
