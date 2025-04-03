@@ -96,8 +96,8 @@ const register = async (req, res) => {
   const AssuranceProUrl = req.uploadedFiles.AssurancePro || "";
   const KbisUrl = req.uploadedFiles.Kbis || "";
   const RIBUrl = req.uploadedFiles.RIB || "";
-  const AssuranceVoitureUrl = req.uploadedFiles.AssuranceVoiture || "";
-  const CarteGriseUrl = req.uploadedFiles.CarteGrise || "";
+  const AssuranceVoitureUrl = req.uploadedFiles.photoAssurance || "";
+  const CarteGriseUrl = req.uploadedFiles.photoCartegrise || "";
 
   const verifUtilisateur = await Chauffeur.findOne({
     $or: [{ email }, { phone: fullPhoneNumber }, { cnicNo }]
