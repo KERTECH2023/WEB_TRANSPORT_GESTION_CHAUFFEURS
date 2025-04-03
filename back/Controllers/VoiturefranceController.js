@@ -25,12 +25,7 @@ exports.addvoiture = async (req, res) => {
         console.log("📂 Carte grise URL:", cartegriseUrl || "Non fournie");
         console.log("📂 Assurance URL:", assuranceUrl || "Non fournie");
 
-        // Vérifier si la voiture existe déjà
-        const verifVoiture = await Voiture.findOne({ immatriculation });
-        if (verifVoiture) {
-            return res.status(403).json({ message: "❌ Une voiture avec cette immatriculation existe déjà !" });
-        }
-
+      
         // Création de la nouvelle voiture
         const nouvelleVoiture = new Voiture({
             modelle,
