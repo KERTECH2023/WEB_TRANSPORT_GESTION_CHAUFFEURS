@@ -73,7 +73,7 @@ const checkChauffeur = async (req, res) => {
 
 
 const register = async (req, res) => {
-    
+
   // Extract data from req.body
   const {
     Nom,
@@ -90,7 +90,7 @@ const register = async (req, res) => {
 
   // Extract uploaded file URLs from req.uploadedFiles
   const photoAvatarUrl = req.uploadedFiles.photoAvatar || "";
-  
+
   const photoVtcUrl = req.uploadedFiles.photoVtc || "";
   const photoCinUrl = req.uploadedFiles.photoCin || "";
   const AssuranceProUrl = req.uploadedFiles.AssurancePro || "";
@@ -98,9 +98,9 @@ const register = async (req, res) => {
   const RIBUrl = req.uploadedFiles.RIB || "";
   const AssuranceVoitureUrl = req.uploadedFiles.AssuranceVoiture || "";
   const CarteGriseUrl = req.uploadedFiles.CarteGrise || "";
-  
-  const verifUtilisateur = await Chauffeur.findOne({ 
-    $or: [{ email }, { phone: fullPhoneNumber }, { cnicNo }] 
+
+  const verifUtilisateur = await Chauffeur.findOne({
+    $or: [{ email }, { phone: fullPhoneNumber }, { cnicNo }]
   });
   if (verifUtilisateur) {
     res.status(403).send({ message: "Chauffeur existe deja!" });
@@ -125,7 +125,7 @@ const register = async (req, res) => {
     nouveauUtilisateur.photoAvatar = photoAvatarUrl;
     nouveauUtilisateur.photoCin = photoCinUrl;
     nouveauUtilisateur.photoVtc = photoVtcUrl;
-    nouveauUtilisateur.AssurancePro =AssuranceProUrl;
+    nouveauUtilisateur.AssurancePro = AssuranceProUrl;
     nouveauUtilisateur.Kbis = KbisUrl;
     nouveauUtilisateur.RIB = RIBUrl;
     nouveauUtilisateur.gender = gender;
@@ -138,25 +138,25 @@ const register = async (req, res) => {
 
     console.log(nouveauUtilisateur);
 
-    
 
-  await nouvelleVoiture.save();
+
+
 
     // Save the new user to the database
     try {
       await nouveauUtilisateur.save();
 
-      if(modelle && immatriculation){
-      const nouvelleVoiture = new Voiture({
-        modelle,
-        immatriculation,
-        cartegrise: CarteGriseUrl,
-        assurance: AssuranceVoitureUrl,
-        chauffeur: nouveauUtilisateur.id
-    });
+      if (modelle && immatriculation) {
+        const nouvelleVoiture = new Voiture({
+          modelle,
+          immatriculation,
+          cartegrise: CarteGriseUrl,
+          assurance: AssuranceVoitureUrl,
+          chauffeur: nouveauUtilisateur.id
+        });
 
-    await nouvelleVoiture.save();
-  }
+        await nouvelleVoiture.save();
+      }
 
 
       // Send confirmation email
@@ -347,7 +347,7 @@ async function sendConfirmationEmail(Email, Nom) {
         
         <div class="content">
             <div class="greeting">
-                Cher(e) `+Nom+`,
+                Cher(e) `+ Nom + `,
             </div>
             
             <div class="message">
