@@ -31,8 +31,8 @@ router.post(
     { name: "AssurancePro", maxCount: 1 },
     { name: "Kbis", maxCount: 1 },
     { name: "RIB", maxCount: 1 },
-    { name: "AssuranceVoiture", maxCount: 1 },
-    { name: "CarteGrise", maxCount: 1 },
+    { name: "photoAssurance", maxCount: 1 },
+    { name: "photoCartegrise", maxCount: 1 },
    
   ]),
   UploadImage,
