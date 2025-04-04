@@ -1,6 +1,7 @@
 const Chauffeur = require("../Models/Chauffeur");
 const bcrypt = require("bcryptjs");
 const config = require("../config.json");
+const Voiture = require("../Models/Voiture");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 //const firebaseModule = require("../services/config");
@@ -82,6 +83,8 @@ const register = async (req, res) => {
     cnicNo,
     address,
     typeChauffeur,
+    immatriculation,
+    modelle,
   } = req.body;
 
   // Extract uploaded file URLs from req.uploadedFiles
@@ -126,10 +129,17 @@ const register = async (req, res) => {
     // Save the new user to the database
     try {
       await nouveauUtilisateur.save();
-      /*const driversRef = realtimeDB.ref('Drivers');
-driversRef.child(nouveauUtilisateur._id.toString()).set({
-  ...nouveauUtilisateur,
-});*/
+
+      if (modelle && immatriculation) {
+        const nouvelleVoiture = new Voiture({
+          modelle,
+          immatriculation,
+          chauffeur: nouveauUtilisateur.id
+        });
+
+        await nouvelleVoiture.save();
+      }
+      
 
       // Token creation
       const token = jwt.sign(
