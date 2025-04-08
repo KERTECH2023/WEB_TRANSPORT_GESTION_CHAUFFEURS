@@ -9,7 +9,7 @@ import { CardElement, Elements, useStripe, useElements } from '@stripe/react-str
 
 
 const stripePromise = loadStripe("pk_test_51PMnbnRp5sVG0Ju5s6oeT6oREpCV3ZPkOBc8MCJXf0kFYxz2hhgCgWU3XrwtvrytMTXuIuFEpCqETgkxcRxfYWqE00Sa40NqVa");
-
+const HERE_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
 const PaymentForm = () => {
   const stripe = useStripe();
   const elements = useElements();
@@ -459,7 +459,7 @@ const AIRPORTS = {
   tunis: { name: { fr: "Aéroport de Tunis-Carthage", en: "Tunis-Carthage Airport" }, coords: [36.851111, 10.227222] }
 };
 
-const HERE_KEY = 'ZJkO_2aWL0S7JttmiFEegi0FPZh5DvMvEfvXtnw6L2o';
+
 
 const SimpleForm = () => {
  
@@ -496,7 +496,11 @@ const SimpleForm = () => {
       </button>
     ))}
   </div>
- 
+  <div className="max-w-3xl mx-auto mt-12 p-8 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-xl">
+  <Elements stripe={stripePromise}>
+        <PaymentForm />
+      </Elements>
+</div>
 </div>
   );
 };
