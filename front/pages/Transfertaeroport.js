@@ -257,7 +257,7 @@ const PaymentForm = () => {
           </div>
         ))}
       </div>
-
+  
       <div className="space-y-6">
         <div className="flex flex-col">
           <label className="text-lg font-medium mb-2">{t('datevol')}</label>
@@ -270,7 +270,7 @@ const PaymentForm = () => {
             required
           />
         </div>
-
+  
         <div className="flex flex-col">
           <label className="text-lg font-medium mb-2">{t('heurvol')}</label>
           <input
@@ -282,7 +282,7 @@ const PaymentForm = () => {
             required
           />
         </div>
-
+  
         <div className="flex flex-col">
           <label className="text-lg font-medium mb-2">{t('numvol')}</label>
           <input
@@ -294,7 +294,7 @@ const PaymentForm = () => {
             required
           />
         </div>
-
+  
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {['bagageCabine', 'bagageSoute', 'bagageHorsFormat'].map(field => (
             <div key={field} className="flex flex-col">
@@ -310,7 +310,7 @@ const PaymentForm = () => {
             </div>
           ))}
         </div>
-
+  
         <div className="flex flex-col">
           <label className="text-lg font-medium mb-2">{t('airport')}</label>
           <select
@@ -324,15 +324,14 @@ const PaymentForm = () => {
               <option
                 key={key}
                 value={key}
-                className={`hover:bg-blue-100 ${form.airport === key ? 'bg-blue-100 font-semibold' : ''
-                  }`}
+                className={`hover:bg-blue-100 ${form.airport === key ? 'bg-blue-100 font-semibold' : ''}`}
               >
                 {name[lang]}
               </option>
             ))}
           </select>
         </div>
-
+  
         <div className="relative flex flex-col">
           <label className="text-lg font-medium mb-2">{t('destination')}</label>
           <input
@@ -344,7 +343,7 @@ const PaymentForm = () => {
             required
           />
           {suggestions.length > 0 && (
-            <ul >
+            <ul>
               {suggestions.map((s, i) => (
                 <li
                   key={i}
@@ -357,8 +356,7 @@ const PaymentForm = () => {
             </ul>
           )}
         </div>
-
-
+  
         <div className="flex flex-col">
           <label htmlFor="passengers" className="text-lg font-medium mb-2">{t('passengers')}</label>
           <input
@@ -373,23 +371,18 @@ const PaymentForm = () => {
           />
         </div>
       </div>
-
-      {price !== null && price !== undefined && (
+  
+      {price && (
         <div className="mt-8 bg-green-100 text-green-800 p-6 rounded-xl shadow-xl text-xl font-semibold border border-green-300">
           <strong>{t('price')}</strong>: {Number(price).toFixed(2)} €
         </div>
-
-
-
       )}
-
-      
-
+  
       <div>
         <label className="block text-sm font-semibold">Informations de carte</label>
         <CardElement className="p-2 border rounded" />
       </div>
-
+  
       <button
         type="submit"
         disabled={!stripe || loading}
@@ -397,10 +390,12 @@ const PaymentForm = () => {
       >
         {loading ? "Chargement..." : `Payer ${price ? price + " €" : ""}`}
       </button>
-
+  
       {message && <p className="mt-2 text-red-500">{message}</p>}
     </form>
   );
+  
+  
 };
 
 
