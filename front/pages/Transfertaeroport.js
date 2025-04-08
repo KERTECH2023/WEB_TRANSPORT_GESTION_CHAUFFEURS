@@ -453,6 +453,7 @@ const calculatePrice = (numPassengers, distance) => {
   </form>
 
   <h1>Paiement avec Stripe</h1>
+  <Elements stripe={stripePromise}>
 <form onSubmit={handleSubmitpayement}>
       <label className="block mb-4">
         <span className="text-gray-700">Carte bancaire</span>
@@ -469,6 +470,7 @@ const calculatePrice = (numPassengers, distance) => {
       </button>
       {message && <div className="mt-4 text-green-600">{message}</div>}
     </form>
+    </Elements>
 </div>
 
 
