@@ -4,8 +4,9 @@ import { toast } from "react-toastify";
 
 import { axiosClient } from "../config/axios";
 import { Helmet } from 'react-helmet'; // Import de react-helmet
-
-
+import CheckoutForm from './payement';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 
 const LANGS = {
   fr: {
@@ -425,7 +426,14 @@ const calculatePrice = (numPassengers, distance) => {
       </button>
     </div>
   </form>
+
+  <h1>Paiement avec Stripe</h1>
+<Elements stripe={stripePromise}>
+  <CheckoutForm />
+</Elements>
 </div>
+
+
 
   );
 };
