@@ -496,11 +496,7 @@ const SimpleForm = () => {
       </button>
     ))}
   </div>
-  <div className="max-w-3xl mx-auto mt-12 p-8 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-xl">
-  <Elements stripe={stripePromise}>
-        <PaymentForm />
-      </Elements>
-</div>
+ 
 </div>
   );
 };
