@@ -4,9 +4,10 @@ import { toast } from "react-toastify";
 
 import { axiosClient } from "../config/axios";
 import { Helmet } from 'react-helmet'; // Import de react-helmet
-import CheckoutForm from './payement.js';
+
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 const stripePromise = loadStripe(process.env.stripepublic);
 
 const LANGS = {
@@ -65,8 +66,31 @@ const SimpleForm = () => {
   const [cache, setCache] = useState({}); // Cache pour les résultats de recherche
   const [pricingData, setPricingData] = useState({ prixdepersonne: 0, prixdebase: 0 });
 
-
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
+   const handleSubmitpayement = async (e) => {
+     e.preventDefault();
+     if (!stripe || !elements) return;
  
+     setLoading(true);
+     const card = elements.getElement(CardElement);
+ 
+     const { error, paymentMethod } = await stripe.createPaymentMethod({
+       type: 'card',
+       card,
+     });
+ 
+     if (error) {
+       setMessage(error.message);
+     } else {
+       // Envoie paymentMethod.id à votre serveur pour finaliser le paiement
+       setMessage('Paiement réussi ! ID: ' + paymentMethod.id);
+     }
+ 
+     setLoading(false);
+   };
 
 const calculatePrice = (numPassengers, distance) => {
   
@@ -429,9 +453,22 @@ const calculatePrice = (numPassengers, distance) => {
   </form>
 
   <h1>Paiement avec Stripe</h1>
-<Elements stripe={stripePromise}>
-  <CheckoutForm />
-</Elements>
+<form onSubmit={handleSubmitpayement}>
+      <label className="block mb-4">
+        <span className="text-gray-700">Carte bancaire</span>
+        <div className="p-2 border rounded">
+          <CardElement />
+        </div>
+      </label>
+      <button
+        type="submit"
+        disabled={!stripe || loading}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        {loading ? 'Traitement...' : 'Payer'}
+      </button>
+      {message && <div className="mt-4 text-green-600">{message}</div>}
+    </form>
 </div>
 
 
