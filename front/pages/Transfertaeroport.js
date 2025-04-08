@@ -14,7 +14,7 @@ const PaymentForm = () => {
   const stripe = useStripe();
   const elements = useElements();
 
-  const [amount, setAmount] = useState(""); // <-- Montant à payer
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
