@@ -9,45 +9,7 @@ import { CardElement, Elements, useStripe, useElements } from '@stripe/react-str
 const stripePromise = loadStripe("pk_test_51PMnbnRp5sVG0Ju5s6oeT6oREpCV3ZPkOBc8MCJXf0kFYxz2hhgCgWU3XrwtvrytMTXuIuFEpCqETgkxcRxfYWqE00Sa40NqVa");
 
 const PaymentForm = () => {
-  const stripe = useStripe();
-  const elements = useElements();
-
-  const [amount, setAmount] = useState(""); // <-- Montant à payer
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-
-  const handleSubmitpayement = async (e) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-
-    if (!amount || parseFloat(amount) <= 0) {
-      setMessage("Montant invalide.");
-      return;
-    }
-
-    setLoading(true);
-    const card = elements.getElement(CardElement);
-    const result = await stripe.createToken(card);
-
-    if (result.error) {
-      setMessage(result.error.message);
-    } else {
-      setMessage("Token créé : " + result.token.id);
-
-      // Exemple d'envoi au backend avec montant
-      try {
-        await axiosClient.post("/payment/payment", {
-          token: result.token.id,
-          amount: parseFloat(amount),
-        });
-        toast.success("Paiement réussi !");
-      } catch (error) {
-        toast.error("Erreur de paiement.");
-      }
-    }
-
-    setLoading(false);
-  };
+  
 
   return (
     <form onSubmit={handleSubmitpayement} className="mt-4 space-y-4">
@@ -137,6 +99,15 @@ const SimpleForm = () => {
   const [debounceTimer, setDebounceTimer] = useState(null);
   const [cache, setCache] = useState({}); // Cache pour les résultats de recherche
   const [pricingData, setPricingData] = useState({ prixdepersonne: 0, prixdebase: 0 });
+
+
+  const stripe = useStripe();
+  const elements = useElements();
+
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+
 
 
  
@@ -241,6 +212,8 @@ const calculatePrice = (numPassengers, distance) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    
   
     // Vérifier si tous les champs sont remplis
     if (
@@ -264,33 +237,64 @@ const calculatePrice = (numPassengers, distance) => {
     }
   
     try {
-      await axiosClient.post(
-        "/transfert/add",
-        {
-          firstName: form.firstName,
-          lastName: form.lastName,
-          email: form.email,
-          phone: form.phone,
-          bagageCabine: form.bagageCabine,
-          bagageSoute: form.bagageSoute,
-          bagageHorsFormat: form.bagageHorsFormat,
-          datevol: form.datevol,   
-          heurvol: form.heurvol,   
-          numvol: form.numvol,    
-          airport: form.airport,
-          destination: form.destination,
-          passengers: form.passengers,
-          price: price, // Ajout du prix
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+
+      
+      if (!stripe || !elements) return;
   
-      console.log("Transfert ajouté avec succès");
-      toast.success("Transfert ajouté avec succès");
+      if (!amount || parseFloat(amount) <= 0) {
+        setMessage("Montant invalide.");
+        return;
+      }
+  
+      setLoading(true);
+      const card = elements.getElement(CardElement);
+      const result = await stripe.createToken(card);
+  
+      if (result.error) {
+        setMessage(result.error.message);
+      } else {
+        setMessage("Token créé : " + result.token.id);
+  
+        // Exemple d'envoi au backend avec montant
+        try {
+          await axiosClient.post("/payment/payment", {
+            token: result.token.id,
+            amount: parseFloat(price),
+          });
+          
+          await axiosClient.post(
+            "/transfert/add",
+            {
+              firstName: form.firstName,
+              lastName: form.lastName,
+              email: form.email,
+              phone: form.phone,
+              bagageCabine: form.bagageCabine,
+              bagageSoute: form.bagageSoute,
+              bagageHorsFormat: form.bagageHorsFormat,
+              datevol: form.datevol,   
+              heurvol: form.heurvol,   
+              numvol: form.numvol,    
+              airport: form.airport,
+              destination: form.destination,
+              passengers: form.passengers,
+              price: price, // Ajout du prix
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          toast.success("Paiement réussi vootre demande et enregitré !");
+
+        } catch (error) {
+          toast.error("Erreur de paiement.");
+        }
+      }
+  
+      setLoading(false);
+      
   
       // Réinitialisation du formulaire après soumission réussie
       setForm({
@@ -483,31 +487,32 @@ const calculatePrice = (numPassengers, distance) => {
       </div>
     </div>
 
-    {price !== null && price !== undefined && (
-      <div className="mt-8 bg-green-100 text-green-800 p-6 rounded-xl shadow-xl text-xl font-semibold border border-green-300">
-        <strong>{t('price')}</strong>: {Number(price).toFixed(2)} €
-      </div>
-    
 
-    
-  )}
   <div className="mt-8 flex justify-center">
-      <button
-        type="submit"
-        className="py-3 px-8 bg-green-600 text-white text-lg font-semibold rounded-full hover:bg-green-700 transition-all duration-300 shadow-lg"
-      >
-        {t('submit')}
-      </button>
-    </div>
-  </form>
   <div className="max-w-3xl mx-auto mt-12 p-8 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-xl">
         <Helmet>
           <title>Transfert Aéroport</title>
         </Helmet>
         <Elements stripe={stripePromise}>
-          <PaymentForm />
+          <div>
+                  <label className="block text-sm font-semibold">Informations de carte</label>
+                  <CardElement className="p-2 border rounded" />
+                </div>
+          
+                <button
+                  type="submit"
+                  disabled={!stripe || loading}
+                  className="w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+                >
+                  {loading ? "Chargement..." : `Payer ${price ? price + " €" : ""}`}
+                </button>
+          
+                {message && <p className="mt-2 text-red-500">{message}</p>}
         </Elements>
       </div>
+    </div>
+  </form>
+
 </div>
 
   );
