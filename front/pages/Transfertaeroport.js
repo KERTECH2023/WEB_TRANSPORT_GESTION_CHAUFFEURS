@@ -383,18 +383,7 @@ const PaymentForm = () => {
 
       )}
 
-      <div>
-        <label className="block text-sm font-semibold">Montant à payer (€)</label>
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          className="w-full p-2 border rounded"
-          placeholder="Ex : 49.99"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
-      </div>
+      
 
       <div>
         <label className="block text-sm font-semibold">Informations de carte</label>
@@ -406,7 +395,7 @@ const PaymentForm = () => {
         disabled={!stripe || loading}
         className="w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded"
       >
-        {loading ? "Chargement..." : `Payer ${amount ? amount + " €" : ""}`}
+        {loading ? "Chargement..." : `Payer ${price ? price + " €" : ""}`}
       </button>
 
       {message && <p className="mt-2 text-red-500">{message}</p>}
