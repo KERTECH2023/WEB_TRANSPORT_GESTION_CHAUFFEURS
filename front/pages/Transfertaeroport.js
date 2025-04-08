@@ -1,3 +1,6 @@
+
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { axios } from "../config/axios";
 import { toast } from "react-toastify";
@@ -9,6 +12,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 const stripePromise = loadStripe(process.env.stripepublic);
+
 
 const LANGS = {
   fr: {
