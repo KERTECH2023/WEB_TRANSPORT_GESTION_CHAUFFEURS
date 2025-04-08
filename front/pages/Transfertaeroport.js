@@ -6,7 +6,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { CardElement, Elements, useStripe, useElements } from '@stripe/react-stripe-js';
 
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe("pk_test_51PMnbnRp5sVG0Ju5s6oeT6oREpCV3ZPkOBc8MCJXf0kFYxz2hhgCgWU3XrwtvrytMTXuIuFEpCqETgkxcRxfYWqE00Sa40NqVa");
 
 const PaymentForm = () => {
   const stripe = useStripe();
