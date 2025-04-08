@@ -7,6 +7,7 @@ import { Helmet } from 'react-helmet'; // Import de react-helmet
 import CheckoutForm from './payement.js';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+const stripePromise = loadStripe(process.env.stripepublic);
 
 const LANGS = {
   fr: {
