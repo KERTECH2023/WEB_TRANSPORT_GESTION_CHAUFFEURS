@@ -13,7 +13,6 @@ const PaymentForm = () => {
   const elements = useElements();
 
   const [lang, setLang] = useState('fr');
-  const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   
@@ -133,7 +132,7 @@ const PaymentForm = () => {
       const numPassengers = parseInt(form.passengers) || 1;
       const newPrice = calculatePrice(numPassengers, newDistance);
       setPrice(newPrice);
-      setAmount(newPrice.toFixed(2)); // Définir automatiquement le montant du paiement
+      // Le prix est déjà défini automatiquement
     } catch (err) {
       console.error(err);
     }
@@ -169,8 +168,8 @@ const PaymentForm = () => {
       return;
     }
 
-    if (!amount || parseFloat(amount) <= 0) {
-      toast.error("Montant invalide.");
+    if (!price || price <= 0) {
+      toast.error("Prix invalide.");
       return;
     }
 
@@ -188,7 +187,7 @@ const PaymentForm = () => {
       // Envoi du paiement
       await axiosClient.post("/payment/payment", {
         token: result.token.id,
-        amount: parseFloat(amount),
+        amount: price,
       });
       
       // Si le paiement réussit, enregistrer le transfert
@@ -236,7 +235,6 @@ const PaymentForm = () => {
         passengers: '',
       });
       setPrice(null);
-      setAmount("");
       setMessage("");
       
       // Réinitialiser l'élément de carte
@@ -395,20 +393,6 @@ const PaymentForm = () => {
   
       <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
         <h3 className="text-xl font-bold mb-4 text-blue-800">{t('paymentInfo')}</h3>
-        
-        <div>
-          <label className="block text-sm font-semibold mb-2">{t('amountToPay')} (€)</label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-            placeholder="Ex : 49.99"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            required
-          />
-        </div>
 
         <div className="mt-4">
           <label className="block text-sm font-semibold mb-2">{t('cardInfo')}</label>
@@ -438,7 +422,7 @@ const PaymentForm = () => {
         disabled={!stripe || loading}
         className="w-full mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all duration-300 disabled:opacity-50"
       >
-        {loading ? t('loading') : `${t('pay')} ${amount ? amount + " €" : ""}`}
+        {loading ? t('loading') : `${t('pay')} ${price ? price.toFixed(2) + " €" : ""}`}
       </button>
 
       {message && <p className="mt-2 text-red-500">{message}</p>}
