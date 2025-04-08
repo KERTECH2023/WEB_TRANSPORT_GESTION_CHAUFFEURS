@@ -8,12 +8,16 @@ const CheckoutForm = () => {
   const [disabled, setDisabled] = useState(true);
   const [clientSecret, setClientSecret] = useState('');
   
-  const stripe = useStripe();
-  const elements = useElements();
+  // Utilisation sécurisée des hooks Stripe
+  const stripe = typeof window !== 'undefined' ? useStripe() : null;
+  const elements = typeof window !== 'undefined' ? useElements() : null;
 
   useEffect(() => {
+    // Cette partie ne s'exécute que côté client
+    if (typeof window === 'undefined') return;
+    
     // Créer une intention de paiement dès que le composant est monté
-    fetch('http://localhost:4000/create-payment-intent', {
+    fetch('/api/create-payment-intent', { // Modifié pour utiliser une API route
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -23,7 +27,8 @@ const CheckoutForm = () => {
       .then(res => res.json())
       .then(data => {
         setClientSecret(data.clientSecret);
-      });
+      })
+      .catch(err => console.error('Erreur lors de la création du payment intent:', err));
   }, []);
 
   const handleChange = (event) => {
@@ -39,23 +44,29 @@ const CheckoutForm = () => {
 
     if (!stripe || !elements) {
       // Stripe.js n'a pas encore été chargé.
-      // Assurez-vous de désactiver le formulaire jusqu'à ce que Stripe.js soit chargé.
+      setProcessing(false);
       return;
     }
 
-    const payload = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-      },
-    });
+    try {
+      const payload = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+        },
+      });
 
-    if (payload.error) {
-      setError(`Le paiement a échoué: ${payload.error.message}`);
+      if (payload.error) {
+        setError(`Le paiement a échoué: ${payload.error.message}`);
+        setProcessing(false);
+      } else {
+        setError(null);
+        setProcessing(false);
+        setSucceeded(true);
+      }
+    } catch (err) {
+      console.error('Erreur lors de la confirmation du paiement:', err);
+      setError('Une erreur est survenue lors du traitement du paiement. Veuillez réessayer.');
       setProcessing(false);
-    } else {
-      setError(null);
-      setProcessing(false);
-      setSucceeded(true);
     }
   };
 
@@ -63,14 +74,14 @@ const CheckoutForm = () => {
     <form onSubmit={handleSubmit}>
       <CardElement onChange={handleChange} />
       <button
-        disabled={processing || disabled || succeeded}
+        disabled={processing || disabled || succeeded || !stripe}
         type="submit"
       >
         {processing ? 'Traitement en cours...' : 'Payer maintenant'}
       </button>
       {/* Afficher les erreurs ou le succès */}
-      {error && <div>{error}</div>}
-      {succeeded && <div>Paiement réussi!</div>}
+      {error && <div className="error-message">{error}</div>}
+      {succeeded && <div className="success-message">Paiement réussi!</div>}
     </form>
   );
 };
