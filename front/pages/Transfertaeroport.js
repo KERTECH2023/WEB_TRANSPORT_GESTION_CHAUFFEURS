@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 import { axiosClient } from "../config/axios";
 import { Helmet } from 'react-helmet'; // Import de react-helmet
-import CheckoutForm from './payement';
+import CheckoutForm from './payement.js';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
