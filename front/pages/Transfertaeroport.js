@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet';
 import { loadStripe } from '@stripe/stripe-js';
 import { CardElement, Elements, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const stripePromise = loadStripe("pk_test_51QwQjNQ8obTEqrkWf67svmq3hUsbXmjOnQDF7FxfJYJRYbG4FYnAF7EoNDK1Wa8dtJGCOPZglhd1f3iyeuZQM8X100CxqsPfYC");
+const stripePromise = loadStripe("");
 
 const LANGS = {
   fr: {
