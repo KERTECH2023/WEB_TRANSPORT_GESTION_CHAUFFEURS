@@ -1,17 +1,39 @@
-
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { axios } from "../config/axios";
 import { toast } from "react-toastify";
 
 import { axiosClient } from "../config/axios";
 import { Helmet } from 'react-helmet'; // Import de react-helmet
-
-import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-const stripePromise = loadStripe(process.env.stripepublic);
+
+// Clé publique Stripe
+const stripePromise = loadStripe("pk_test_51QwQjNQ8obTEqrkWf67svmq3hUsbXmjOnQDF7FxfJYJRYbG4FYnAF7EoNDK1Wa8dtJGCOPZglhd1f3iyeuZQM8X100CxqsPfYC");
+
+
+const stripe = useStripe();
+const elements = useElements();
+const [loading, setLoading] = useState(false);
+const [message, setMessage] = useState("");
+
+const handleSubmitpayement = async (e) => {
+  e.preventDefault();
+  if (!stripe || !elements) return;
+
+  setLoading(true);
+
+  const card = elements.getElement(CardElement);
+  const result = await stripe.createToken(card);
+
+  if (result.error) {
+    setMessage(result.error.message);
+  } else {
+    setMessage("Token créé : " + result.token.id);
+    // Envoie du token au backend pour traiter le paiement
+  }
+
+  setLoading(false);
+};
 
 
 const LANGS = {
@@ -70,31 +92,8 @@ const SimpleForm = () => {
   const [cache, setCache] = useState({}); // Cache pour les résultats de recherche
   const [pricingData, setPricingData] = useState({ prixdepersonne: 0, prixdebase: 0 });
 
-  const stripe = useStripe();
-  const elements = useElements();
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
-   const handleSubmitpayement = async (e) => {
-     e.preventDefault();
-     if (!stripe || !elements) return;
+
  
-     setLoading(true);
-     const card = elements.getElement(CardElement);
- 
-     const { error, paymentMethod } = await stripe.createPaymentMethod({
-       type: 'card',
-       card,
-     });
- 
-     if (error) {
-       setMessage(error.message);
-     } else {
-       // Envoie paymentMethod.id à votre serveur pour finaliser le paiement
-       setMessage('Paiement réussi ! ID: ' + paymentMethod.id);
-     }
- 
-     setLoading(false);
-   };
 
 const calculatePrice = (numPassengers, distance) => {
   
@@ -455,29 +454,21 @@ const calculatePrice = (numPassengers, distance) => {
       </button>
     </div>
   </form>
-
-  <h1>Paiement avec Stripe</h1>
-  <Elements stripe={stripePromise}>
-<form onSubmit={handleSubmitpayement}>
-      <label className="block mb-4">
-        <span className="text-gray-700">Carte bancaire</span>
-        <div className="p-2 border rounded">
-          <CardElement />
-        </div>
-      </label>
-      <button
-        type="submit"
-        disabled={!stripe || loading}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        {loading ? 'Traitement...' : 'Payer'}
-      </button>
-      {message && <div className="mt-4 text-green-600">{message}</div>}
-    </form>
-    </Elements>
+  <div style={{ maxWidth: 500, margin: "0 auto", padding: 20 }}>
+      <h2>Formulaire de Paiement</h2>
+      <Elements stripe={stripePromise}>
+        <form onSubmit={handleSubmitpayement}>
+          <div style={{ marginBottom: 20 }}>
+            <CardElement />
+          </div>
+          <button type="submit" disabled={!stripe || loading} style={{ width: "100%", padding: 10, fontSize: 16 }}>
+            {loading ? "Chargement..." : "Payer"}
+          </button>
+        </form>
+        {message && <div style={{ marginTop: 20, fontSize: 16, color: 'red' }}>{message}</div>}
+      </Elements>
+    </div>
 </div>
-
-
 
   );
 };
