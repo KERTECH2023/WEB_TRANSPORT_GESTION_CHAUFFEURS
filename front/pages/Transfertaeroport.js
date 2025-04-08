@@ -207,7 +207,7 @@ const calculatePrice = (numPassengers, distance) => {
       
       if (!stripe || !elements) return;
   
-      if (!amount || parseFloat(amount) <= 0) {
+      if (!price || parseFloat(price) <= 0) {
         setMessage("Montant invalide.");
         return;
       }
